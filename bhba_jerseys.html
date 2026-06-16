@@ -2,6 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+  /* ── BHBA AUTH GUARD ── poka-yoke: no unauthenticated access ── */
+  (function(){
+    try{
+      var s=JSON.parse(localStorage.getItem('bhba_session')||'null');
+      if(!s||!s.userId){
+        sessionStorage.setItem('bhba_redirect',window.location.href);
+        window.location.replace('bhba_auth.html');
+      }
+    }catch(e){ window.location.replace('bhba_auth.html'); }
+  })();
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>BHBA Jersey Management — Registration & Colour Clash Detection</title>
 <!-- CLASSIFICATION: INTERNAL USE | v1.0.0 | 2026-06-12
