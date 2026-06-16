@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BHBA — Fees, Fines &amp; Penalties 2026</title>
+<!-- CLASSIFICATION: PUBLIC | v1.0.0 | 2026-06-13
+     BHBA Official Fees, Fines & Penalties Schedule — 2026 Season
+     Source: BHBA OFFENCES & PENALTIES 2026 (official document)
+     Updated annually. Effective from first day of season registration approval. -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);--border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);--white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;--red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--teal:#1ABC9C;--purple:#9B59B6}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.06) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.03) 0%,transparent 55%);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh}
+@media print{body{background:#fff}.no-print{display:none!important}.page-break{page-break-before:always}}
+
+/* HEADER */
+.doc-header{background:linear-gradient(135deg,#04040c 0%,#0c0b18 60%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);color:var(--white);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;box-shadow:0 2px 24px rgba(0,0,0,0.6)}
+.doc-logo{display:flex;align-items:center;gap:16px}
+.logo-mark{width:60px;height:60px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#000;box-shadow:0 0 24px rgba(245,166,35,0.35)}
+.doc-title{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:1px;text-shadow:0 0 30px rgba(245,166,35,0.3)}
+.doc-subtitle{font-size:12px;color:var(--muted);margin-top:3px}
+.doc-meta{text-align:right;font-size:11px;color:var(--muted)}
+.doc-meta strong{color:var(--gold)}
+
+/* GOLD RULE */
+.gold-rule{height:4px;background:linear-gradient(90deg,var(--gold),#a07010,var(--gold));margin:0}
+
+/* CONTENT */
+.doc-content{max-width:860px;margin:0 auto;padding:28px 20px}
+
+/* CLASSIFICATION BANNER */
+.class-banner{background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.4);border-radius:12px;padding:10px 16px;text-align:center;margin-bottom:24px;font-size:12px;font-weight:800;color:var(--gold);letter-spacing:1px;text-transform:uppercase}
+
+/* EFFECTIVE DATE */
+.eff-date{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;font-size:12px;flex-wrap:wrap;gap:8px}
+.eff-date strong{color:var(--gold)}
+
+/* SECTION */
+.section{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:16px;overflow:hidden;transition:border-color .2s}.section:hover{border-color:var(--border-h)}
+.section-hdr{background:rgba(0,0,0,0.4);color:var(--white);padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.section-num{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0}
+.section-title-text{font-size:14px;font-weight:700;color:var(--text)}
+.section-body{padding:16px}
+
+/* OFFENCE TABLE */
+.off-table{width:100%;border-collapse:collapse;font-size:13px}
+.off-table th{background:rgba(245,166,35,0.08);color:var(--gold);padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(245,166,35,0.3);font-weight:800}
+.off-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5;color:var(--text)}
+.off-table tr:last-child td{border-bottom:none}
+.off-table tr:hover td{background:rgba(245,166,35,0.04)}
+.penalty-player{color:var(--text);font-weight:700}
+.penalty-coach{color:var(--red);font-style:italic}
+.fine-amount{font-weight:900;color:var(--red)}
+.susp-badge{display:inline-block;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);color:var(--red);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.note-text{font-size:11px;color:var(--muted);font-style:italic;margin-top:4px}
+.escalate{font-size:11px;color:var(--warn);background:rgba(230,126,34,0.08);border:1px solid rgba(230,126,34,0.25);border-radius:6px;padding:4px 8px;margin-top:4px;display:inline-block}
+
+/* FEES TABLE */
+.fees-table{width:100%;border-collapse:collapse;font-size:13px}
+.fees-table th{background:rgba(245,166,35,0.08);color:var(--gold);padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(245,166,35,0.3);font-weight:800}
+.fees-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.fees-table tr:last-child td{border-bottom:none}
+.fees-table tr:hover td{background:rgba(245,166,35,0.04)}
+.fee-total{font-weight:900;font-size:14px;color:var(--gold)}
+.fee-required{font-size:10px;font-weight:700;color:var(--red);background:rgba(231,76,60,0.1);padding:2px 6px;border-radius:6px;margin-left:6px;border:1px solid rgba(231,76,60,0.25)}
+
+/* PAYMENT RULES */
+.payment-rules{padding:0}
+.pr-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.pr-item:last-child{border-bottom:none}
+.pr-num{background:var(--gold);color:var(--black);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px}
+.pr-text{font-size:13px;line-height:1.5}
+
+/* DISCLAIMER */
+.disclaimer{background:rgba(245,166,35,0.04);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:12px;color:var(--muted);line-height:1.6}
+.disclaimer strong{color:var(--text)}
+
+/* PRINT BUTTON */
+.print-btn{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;border:none;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .15s,transform .1s}.print-btn:hover{opacity:.9;transform:translateY(-1px)}
+.back-btn{background:rgba(245,166,35,0.08);color:var(--gold);border:1px solid rgba(245,166,35,0.4);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;transition:background .15s}.back-btn:hover{background:rgba(245,166,35,0.15)}
+
+/* FOOTER */
+footer{background:rgba(0,0,0,0.5);color:var(--muted);padding:16px;text-align:center;font-size:11px;margin-top:30px;backdrop-filter:blur(12px);border-top:1px solid var(--border)}
+footer strong{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="doc-logo">
+    <div class="logo-mark">🏀</div>
+    <div>
+      <div class="doc-title">BHBA FEES, FINES &amp; PENALTIES</div>
+      <div class="doc-subtitle">Business House Basketball Association — Official Schedule</div>
+    </div>
+  </div>
+  <div class="doc-meta">
+    <div><strong>Season:</strong> 2026</div>
+    <div><strong>Version:</strong> 1.0.0</div>
+    <div><strong>Effective:</strong> On registration approval</div>
+    <div style="margin-top:6px" class="no-print">
+      <button class="print-btn" onclick="window.print()">🖨 Print / Download PDF</button>
+    </div>
+  </div>
+</div>
+<div class="gold-rule"></div>
+
+<div class="doc-content">
+
+  <div class="class-banner">
+    📋 PUBLIC DOCUMENT — This schedule is effective for the 2026 BHBA season. All participants (players, coaches, team officials) are bound by these rules from the date of team registration approval.
+  </div>
+
+  <div class="eff-date">
+    <div>📅 <strong>Effective Date:</strong> From date of team registration confirmation — 2026 Season</div>
+    <div>⚡ <strong>Updated Annually</strong> — Next review: January 2027</div>
+    <div class="no-print"><a href="https://sharable.link/v8a8rasx" class="back-btn">← Back to Portal</a></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION A: REGISTRATION FEES
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">A</div>
+      <div class="section-title-text">Registration Fees — 2026 Season (All amounts in JMD)</div>
+    </div>
+    <div class="section-body">
+      <table class="fees-table">
+        <thead><tr><th>Fee Item</th><th>Amount (JMD)</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Team Registration Fee</td><td class="fee-total">$50,000.00 <span class="fee-required">REQUIRED</span></td><td>Payable per team per season. Non-refundable.</td></tr>
+          <tr><td>Player Registration Fee</td><td><strong>$5,000.00</strong> per player</td><td>Per eligible player registered to the season roster.</td></tr>
+          <tr><td>Jersey Registration Fee</td><td><strong>$10,000.00</strong> per team</td><td>Covers jersey set verification and BHBA registration.</td></tr>
+          <tr><td>Medical Levy</td><td><strong>$2,000.00</strong> per player</td><td>Mandatory health &amp; safety contribution per registered player.</td></tr>
+          <tr><td>Late Registration Change (LRC)</td><td><strong>$5,000.00</strong> per filing</td><td>Non-refundable. Required for any post-confirmation roster/detail changes.</td></tr>
+          <tr style="background:#faf7f0"><td colspan="3"><strong>Estimated Total (15-player roster):</strong> $50,000 + (15 × $7,000 jersey &amp; medical) + $10,000 = <strong class="fee-total">$165,000.00</strong></td></tr>
+        </tbody>
+      </table>
+      <div class="note-text" style="margin-top:10px">⚠ All registration fees must be paid by verified wire transfer or manager's cheque delivered to the BHBA Administration Office. Teams are not permitted to participate until payment is confirmed — <strong>No Pay, No Play</strong>.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 1: EJECTION
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">1</div>
+      <div class="section-title-text">Ejection</div>
+    </div>
+    <div class="section-body">
+      <p style="font-size:12px;color:var(--lgrey);margin-bottom:12px">Applies where a player/coach/team official is ejected for: repeatedly contesting referees' decisions, leaving the court in protest, showing dissent, failing to obey officials, or repeated unsportsmanlike conduct.</p>
+      <table class="off-table">
+        <thead><tr><th style="width:30%">Offence</th><th>Player Penalty</th><th>Coach / Team Official Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>1st Ejection</strong></td>
+            <td><span class="susp-badge">1 Game Suspended</span><br><span class="fine-amount">$10,000.00</span><div class="note-text">Payable by the player's team before the team's next game.</div></td>
+            <td><span class="susp-badge">1 Game Suspended</span><br><span class="fine-amount">$15,000.00</span></td>
+          </tr>
+          <tr>
+            <td><strong>2nd Ejection</strong></td>
+            <td><span class="susp-badge">2 Games Suspended</span><br><span class="fine-amount">$15,000.00</span></td>
+            <td><span class="susp-badge">2 Games Suspended</span><br><span class="fine-amount">$20,000.00</span></td>
+          </tr>
+          <tr>
+            <td><strong>3rd Ejection</strong></td>
+            <td><span class="susp-badge">6 Games Suspended</span><br><span class="fine-amount">$20,000.00</span></td>
+            <td><span class="susp-badge">6 Games Suspended</span><br><span class="fine-amount">$25,000.00</span></td>
+          </tr>
+          <tr>
+            <td><strong>Access During Suspension</strong><div class="note-text">Player/Coach/Team Official attending BHBA games during active suspension.</div></td>
+            <td colspan="2"><span class="fine-amount">$15,000.00 team fine</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 2: UNSPORTSMANLIKE CONDUCT
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">2</div>
+      <div class="section-title-text">Unsportsmanlike Conduct</div>
+    </div>
+    <div class="section-body">
+      <p style="font-size:12px;color:var(--lgrey);margin-bottom:12px">Includes but not limited to: insulting players or spectators, unruly or disrespectful behaviour, offensive gestures and profanity, kicking away the match ball, walking off court and removing vest.</p>
+      <table class="off-table">
+        <thead><tr><th>Subject</th><th>First Offence</th><th>Repeat Offence</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Player</strong></td>
+            <td><span class="susp-badge">2 Games Suspended</span><br><span class="fine-amount">$5,000.00</span></td>
+            <td><div class="escalate">⬆ Double the previous penalty on each repeat</div></td>
+          </tr>
+          <tr>
+            <td><strong>Coach / Team Official</strong></td>
+            <td><span class="susp-badge">4 Games Suspended</span><br><span class="fine-amount">$10,000.00</span></td>
+            <td><div class="escalate">⬆ Double the previous penalty on each repeat</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 3: VIOLENCE
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">3</div>
+      <div class="section-title-text">Violence / Physical Assault</div>
+    </div>
+    <div class="section-body">
+      <p style="font-size:12px;color:var(--lgrey);margin-bottom:12px">A player/coach/team official who deliberately assaults a person physically or causes damage to one's health (e.g. blow to the face).</p>
+      <table class="off-table">
+        <thead><tr><th>Subject</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Player</strong></td><td><span class="susp-badge">5 Games Suspended</span> &nbsp; <span class="fine-amount">$20,000.00</span></td></tr>
+          <tr><td><strong>Coach / Team Official</strong></td><td><span class="susp-badge">5 Games Suspended</span> &nbsp; <span class="fine-amount">$30,000.00</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 4: COACHES & TEAM OFFICIALS CONDUCT
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">4</div>
+      <div class="section-title-text">Coaches &amp; Team Officials Conduct</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th style="width:40%">Offence</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Insulting referees or table officials</strong><div class="note-text">Disqualified and expelled from the game for insulting match officials.</div></td>
+            <td>
+              <span class="susp-badge">3 Games Suspended</span><br>
+              <div class="escalate">Subsequent occurrence: Suspended for remainder of season + <span class="fine-amount">$20,000.00</span></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Provoking / aggression against officials or opposing players</strong><div class="note-text">Initiates incident or commits aggression against referee, table official, or any opposing player.</div></td>
+            <td><span class="susp-badge">Remainder of Season</span><br><span class="fine-amount">$20,000.00</span></td>
+          </tr>
+          <tr>
+            <td><strong>Continuous protests to referees / table officials</strong><div class="note-text">Coach expelled for persistent protest behaviour.</div></td>
+            <td><span class="fine-amount">$10,000.00</span><div class="escalate">Each subsequent occurrence: fine doubles</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 5: INELIGIBLE PLAYERS
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">5</div>
+      <div class="section-title-text">Ineligible Players</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th>Offence</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Use of an ineligible player during a game</strong><div class="note-text">Includes players who do not meet employment eligibility, registration, or Pro-Rule requirements.</div></td>
+            <td>
+              <strong>Game Forfeited (Loss)</strong><br>
+              <span class="fine-amount">$10,000.00 team fine</span><br>
+              <div class="note-text">Fine must be paid before the team can continue in competition.</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 6: INTIMIDATION
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">6</div>
+      <div class="section-title-text">Intimidation of Match Officials</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th>Offence</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Intimidating a match official with serious threats</strong></td>
+            <td><span class="fine-amount">Up to $20,000.00</span><div class="escalate">Repeat offender: Fine + Suspended for remainder of season</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 7: TEAM / SPECTATOR OFFENCES
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">7</div>
+      <div class="section-title-text">Offences by Teams and Their Spectators</div>
+    </div>
+    <div class="section-body">
+      <p style="font-size:12px;color:var(--lgrey);margin-bottom:12px">Includes but not limited to: abusive language, use of illegal substances in stands, disruptive behaviour, court invasion, throwing of missiles, fighting.</p>
+      <table class="off-table">
+        <thead><tr><th>Offence Category</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Any of the above spectator/team offences</strong></td>
+            <td><span class="susp-badge">1-Year Suspension from Competition</span><br><span class="fine-amount">Up to $30,000.00</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 8: PERFORMANCE ENHANCING SUBSTANCES
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">8</div>
+      <div class="section-title-text">Use of Performance Enhancing Substances</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th>Offence</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Use of any banned performance enhancing substance</strong></td>
+            <td>Penalties as stipulated by the <strong>Jamaica Anti-Doping Commission (JADCO)</strong> / <strong>World Anti-Doping Agency (WADA)</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 9: ALCOHOL
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">9</div>
+      <div class="section-title-text">Use of Alcoholic Beverages Before or During Game</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th>Offence</th><th>Player Penalty</th><th>Coach / Team Official Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Under the influence whilst participating/officiating</strong></td>
+            <td>Player barred from game<br><span class="fine-amount">$10,000.00</span></td>
+            <td><span class="fine-amount">$20,000.00</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bringing alcoholic beverages to bench/court during game</strong></td>
+            <td>Player barred from game<br><span class="fine-amount">$10,000.00</span></td>
+            <td><span class="fine-amount">$20,000.00</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 10: DESTRUCTION OF EQUIPMENT
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">10</div>
+      <div class="section-title-text">Destruction of BHBA Equipment</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th>Offence</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Destruction or damage to BHBA equipment by any affiliate</strong></td>
+            <td>Full replacement cost charged to offender<br><span class="susp-badge">1 Match Suspended</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 11: FORFEITURE
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">11</div>
+      <div class="section-title-text">Forfeiture of a Game</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th>Game Type</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Preliminary Round / League Game</strong></td>
+            <td>
+              <span class="fine-amount">$15,000.00</span> — to be paid before team's next game<br>
+              <div class="escalate">Repeat offence: $15,000.00 + Expelled from league + Relegated to lower division</div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Play-off Game</strong></td>
+            <td>
+              <span class="fine-amount">$25,000.00</span><br>
+              Relegated to lower division<br>
+              <span class="susp-badge">1-Year Ban from Promotion to Upper Division</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 12: BHBA RALLY / OPENING CEREMONY
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">12</div>
+      <div class="section-title-text">BHBA Rally, Dress Parade &amp; Opening Ceremony</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th>Offence</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Failure to participate without BHBA consent</strong></td>
+            <td><span class="fine-amount">$20,000.00</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 13: MEDIA INTERVIEW
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">13</div>
+      <div class="section-title-text">Failure to Make Player or Coach Available for Media Interview</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th>Offence</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Failure to make player or coach available for post-game media interview</strong></td>
+            <td><span class="fine-amount">Up to $5,000.00</span> — payable by the offending team</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 14: VERBAL / PHYSICAL ABUSE OF OFFICIAL
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num">14</div>
+      <div class="section-title-text">Acts of Verbal Abuse, Threat or Violence Against a Match Official / BHBA Official</div>
+    </div>
+    <div class="section-body">
+      <table class="off-table">
+        <thead><tr><th>Offence</th><th>Penalty</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Any act of verbal abuse, threat, or physical violence against a match official or BHBA official</strong></td>
+            <td><span class="fine-amount">$30,000.00</span> &nbsp; <span class="susp-badge">6 Matches Suspended</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PAYMENT RULES
+  ══════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-num" style="background:var(--red)">!</div>
+      <div class="section-title-text">PAYMENT OF FINES — Mandatory Rules</div>
+    </div>
+    <div class="section-body">
+      <div class="payment-rules">
+        <div class="pr-item">
+          <div class="pr-num">1</div>
+          <div class="pr-text"><strong>ALL FINES MUST BE PAID PRIOR TO AN OFFENDING PLAYER / TEAM / OFFICIAL'S NEXT GAME.</strong></div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-num">2</div>
+          <div class="pr-text"><strong>THE TEAM / PLAYER / COACH / TEAM OFFICIAL WILL NOT BE ALLOWED TO PARTICIPATE IN ANY GAME UNTIL ALL OUTSTANDING FINES ARE PAID.</strong> — No Pay, No Play policy is absolute.</div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-num">3</div>
+          <div class="pr-text">Payment must be made by <strong>verified wire transfer</strong> or <strong>manager's cheque</strong> delivered to the BHBA Administration Office. Cash payments are not accepted.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       DISCLAIMER
+  ══════════════════════════════════════ -->
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> The contents of this document are not exhaustive. Any other offence(s) or penalty(ies) not stated herein which are deemed as bringing the operations of the BHBA into disrepute will be dealt with at the discretion of the BHBA. All monetary amounts are in Jamaican Dollars (JMD). This schedule is reviewed and updated annually by the BHBA Executive Committee.
+  </div>
+
+  <div style="margin-top:20px;text-align:center;font-size:11px;color:var(--lgrey)">
+    Document Reference: BHBA-FFS-2026-v1.0.0 &nbsp;|&nbsp; Effective: 2026 Season &nbsp;|&nbsp; Next Review: January 2027
+  </div>
+
+</div>
+
+<footer>
+  <div><strong>Business House Basketball Association</strong> &copy; 2026 — All Rights Reserved</div>
+  <div style="margin-top:4px">This document is the official BHBA fees and penalties schedule. It supersedes all previous versions.</div>
+  <div style="margin-top:8px"><a href="https://sharable.link/v8a8rasx" style="color:var(--gold);text-decoration:none">← Back to BHBA Portal</a></div>
+</footer>
+
+<script>
+// Seed NBL teams to localStorage (same seed as portal, idempotent)
+const NBL_TEAMS_SEED=[
+  'Urban Knights','Tivoli Wizards','St. George\'s Slayers','Majesty Gardens Legends',
+  'Upper Room Eagles','Running Rebels','Portmore Flames','Pembroke Hall Warriors',
+  'Rae Town Raptors','Spanish Town Spartans','Port Royal Bulls','Arnett Gardens Rockers',
+  'Jamaica Defence Force (JDF)','Blazing Panthers','Harbour View Bulls','Denham Town Wizards',
+  'Catherine Hall All-Stars','Granville Jaguars','Montego Bay Hoopers','Lucea Flames',
+  'Falmouth Flames','Falmouth Knighthawks','Sav-Elite Warriors','Holland Saints',
+  'Inner City Avalanche','Central Bulls','Swift Sons','Waterhouse Blazers',
+  'UTech Knights','Mico University College','G.C. Foster College Strikers','EXED Heaters',
+  'Real Lions','Delacree Park Hotsteppers','Portmore Vipers','Portmore Blazers',
+  'Spanish Town Meadows','Mega Mart Magics','Aqua Youths','North Street Heats',
+  'Norman Gardens Dragons','Braves Chiefs','Pure Playaz','Muschett Falcons',
+  'Montego Bay Boys\'s Club Warriors','Cornwall Courts Chargers','Cricket Club Knights',
+  'Portmore Raiders','Selassie Gardens','St. Thomas Giants','Clarendon Cougars',
+  'Manchester Bashers','Rocky Point Ballers','Boys Town','Bridgeport Vipers',
+  'Trelawny Tornadoes','St. James Sharpes','St. Ann Giants','Celtics'
+];
+if(!localStorage.getItem('bhba_nbl_teams')){
+  localStorage.setItem('bhba_nbl_teams',JSON.stringify(NBL_TEAMS_SEED));
+}
+
+// Stamp effective date from registration approval if available
+const teams=JSON.parse(localStorage.getItem('bhba_teams_reg')||'[]');
+const confirmed=teams.filter(t=>t.status==='confirmed'&&t.season==='2026');
+if(confirmed.length){
+  // Show earliest confirmation date as effective date
+  const earliest=confirmed.sort((a,b)=>new Date(a.confirmedAt)-new Date(b.confirmedAt))[0];
+  if(earliest?.confirmedAt){
+    const d=new Date(earliest.confirmedAt);
+    document.querySelectorAll('.eff-date strong').forEach((el,i)=>{
+      if(i===0)el.nextSibling&&(el.parentNode.innerHTML=`📅 <strong>Effective Date:</strong> ${d.toLocaleDateString('en-JM',{year:'numeric',month:'long',day:'numeric'})} (First team confirmed)`);
+    });
+  }
+}
+</script>
+</body>
+</html>
