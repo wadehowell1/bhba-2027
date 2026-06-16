@@ -411,7 +411,7 @@ function renderMatchList(){
       </div>
       <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
         ${st.code==='open'||st.code==='closed'||st.code==='official'
-          ?`<a href="https://sharable.link/wqrpfy94?match=${m.id}&tab=form" style="background:var(--blue);color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">📋 Open Match Form →</a>`:''}
+          ?`<a href="bhba_matchform.html?match=${m.id}&tab=form" style="background:var(--blue);color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">📋 Open Match Form →</a>`:''}
         <button class="btn btn-sm btn-red" onclick="deleteMatch('${m.id}')">Delete</button>
       </div>
     </div>`;
