@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BHBA Officials Management</title>
+<!-- CLASSIFICATION: INTERNAL USE | v2.1.0 | 2026-06-13
+     Bayesian Weighted Ratings (WS = (C×m + Σscores)/(C+n), C=5)
+     Exec-only rating visibility gate | One-submission-per-team hard block
+     Role tracking: Captain / Coach / Manager
+     Referee: 1 primary + 1 alternate · Table Officials: 2 primary + 1 backup
+     Confirmation workflow | Punctuality log | Profile modal -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);--border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);--white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;--red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--teal:#1ABC9C;--purple:#9B59B6;--pending:#9B59B6}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.05) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.03) 0%,transparent 55%);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh}
+#hdr{background:linear-gradient(135deg,#04040c 0%,#0c0b18 60%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 24px rgba(0,0,0,0.6)}
+.brand{color:var(--gold);font-size:18px;font-weight:900}
+.mode-bar{background:#111;border-bottom:2px solid var(--border);padding:8px 12px;display:flex;gap:8px}
+.mode-btn{flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;background:#1a1a1a;color:var(--lgrey);font-size:12px;font-weight:700;cursor:pointer;text-align:center}
+.mode-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(212,160,23,.08)}
+.nav-tabs{display:flex;gap:6px;padding:10px 14px;overflow-x:auto;background:rgba(0,0,0,0.5);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.nav-tab{background:rgba(12,12,22,0.8);border:1px solid var(--border);color:var(--lgrey);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s,color .15s}
+.nav-tab:hover{border-color:var(--border-h);color:var(--gold)}
+.nav-tab.active{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%);color:#000;border-color:var(--gold);box-shadow:0 2px 14px rgba(245,166,35,0.3)}
+.page{display:none;padding:12px;max-width:720px;margin:0 auto}
+.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s}.card:hover{border-color:var(--border-h);box-shadow:0 4px 20px rgba(245,166,35,0.06)}
+.card-title{color:var(--gold);font-size:14px;font-weight:700;margin-bottom:12px}
+.fg{margin-bottom:10px}
+.fg label{display:block;color:var(--lgrey);font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;background:#1a1a1a;border:1px solid var(--border);color:var(--white);padding:9px;border-radius:6px;font-size:13px}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--gold)}
+.fg-row{display:flex;gap:8px}
+.fg-row .fg{flex:1}
+.btn{border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;transition:opacity .15s}
+.btn:active{opacity:.8}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;font-weight:800;width:100%;transition:opacity .15s,transform .1s}.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-warn{background:var(--warn);color:#fff}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--lgrey)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.off-card{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.off-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0}
+.off-info{flex:1}
+.off-name{font-size:14px;font-weight:700}
+.off-sub{font-size:11px;color:var(--lgrey)}
+.off-rating{font-size:13px;color:var(--gold);font-weight:700}
+.ref-badge{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:700;display:inline-block}
+.badge-active{background:var(--green);color:#fff}
+.badge-inactive{background:#333;color:var(--lgrey)}
+.alloc-item{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+.alloc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:4px}
+.alloc-teams{font-size:14px;font-weight:700}
+.alloc-meta{font-size:11px;color:var(--lgrey);margin-top:2px}
+.conf-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;display:inline-block}
+.cs-unassigned{background:#333;color:var(--lgrey)}
+.cs-pending{background:rgba(230,126,34,.2);color:var(--warn)}
+.cs-confirmed{background:rgba(39,174,96,.2);color:var(--green)}
+.cs-alternate{background:rgba(142,68,173,.2);color:var(--purple)}
+.cs-unconfirmed{background:rgba(192,57,43,.2);color:var(--red)}
+.conf-row{display:flex;align-items:center;gap:10px;padding:10px;background:#1a1a1a;border-radius:8px;margin-bottom:8px;border:1px solid var(--border);flex-wrap:wrap}
+.conf-row .cr-ref{flex:1;min-width:120px}
+.conf-row .cr-name{font-size:13px;font-weight:700}
+.conf-row .cr-type{font-size:11px;color:var(--lgrey)}
+.matchday-item{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+.punct-btns{display:flex;gap:8px;margin-top:8px}
+.punct-btns .btn{flex:1;font-size:12px;padding:10px 6px}
+.punct-result{font-size:13px;font-weight:700;padding:8px 12px;border-radius:6px;text-align:center;margin-top:8px}
+.punct-ontime{background:rgba(39,174,96,.15);color:var(--green);border:1px solid var(--green)}
+.punct-late{background:rgba(192,57,43,.15);color:var(--red);border:1px solid var(--red)}
+.star-rating{display:flex;gap:6px;justify-content:center;margin:12px 0}
+.star{font-size:36px;cursor:pointer;color:#555;transition:color .1s,transform .1s}
+.star:hover,.star.active{color:var(--gold)}
+.star:hover{transform:scale(1.2)}
+.rating-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--lgrey);margin-bottom:8px}
+.stats-table{width:100%;border-collapse:collapse;font-size:12px}
+.stats-table th{background:#111;color:var(--gold);padding:7px 10px;text-align:left;font-size:11px;text-transform:uppercase}
+.stats-table td{padding:7px 10px;border-bottom:1px solid var(--border)}
+.stats-table tr:last-child td{border-bottom:none}
+.alert{padding:10px 12px;border-radius:6px;font-size:12px;margin-bottom:10px;line-height:1.5}
+.alert-warn{background:rgba(230,126,34,.15);border:1px solid var(--warn);color:var(--warn)}
+.alert-info{background:rgba(41,128,185,.15);border:1px solid var(--blue);color:var(--blue)}
+.alert-success{background:rgba(39,174,96,.15);border:1px solid var(--green);color:var(--green)}
+.alert-red{background:rgba(192,57,43,.15);border:1px solid var(--red);color:var(--red)}
+.divider{border-top:1px dashed var(--border);margin:12px 0}
+/* Exec gate */
+.exec-gate-locked{background:rgba(0,0,0,.4);border:2px dashed var(--gold);border-radius:10px;padding:22px 16px;text-align:center;margin-bottom:12px}
+.exec-verified-bar{background:rgba(39,174,96,.1);border:1px solid var(--green);border-radius:8px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+/* Bayesian badge */
+.bayes-tag{background:rgba(212,160,23,.15);border:1px solid rgba(212,160,23,.4);color:var(--gold);font-size:10px;padding:2px 7px;border-radius:5px;font-weight:700;letter-spacing:.3px}
+/* Profile modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:20px 12px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--gold);border-radius:12px;width:100%;max-width:600px;padding:16px}
+.modal-box h3{color:var(--gold);font-size:15px;margin-bottom:12px}
+.perf-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.perf-row:last-child{border-bottom:none}
+.rating-dist{display:flex;gap:4px;margin:10px 0}
+.dist-bar{flex:1;background:#333;border-radius:4px;position:relative;height:28px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.dist-fill{position:absolute;left:0;top:0;bottom:0;background:var(--gold);opacity:.35}
+/* Role pills */
+.role-pill{font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;text-transform:uppercase;display:inline-block}
+.role-captain{background:rgba(212,160,23,.2);color:var(--gold)}
+.role-coach{background:rgba(41,128,185,.2);color:var(--blue)}
+.role-manager{background:rgba(39,174,96,.2);color:var(--green)}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92vw;color:#fff}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div><div class="brand">BHBA</div><div style="font-size:11px;color:var(--lgrey)">Officials Management · v2.1.0</div></div>
+  <div style="font-size:11px;color:var(--lgrey);text-align:right">2026 Season<br><span style="color:var(--gold)">Art.6 — Match Officials</span></div>
+</div>
+
+<div class="mode-bar">
+  <div class="mode-btn active" id="mode-ref" onclick="setMode('ref')">🦺 REFEREES<br><span style="font-size:9px;font-weight:400">1 Primary + 1 Alternate</span></div>
+  <div class="mode-btn" id="mode-to" onclick="setMode('to')">📋 TABLE OFFICIALS<br><span style="font-size:9px;font-weight:400">2 Primary + 1 Backup</span></div>
+</div>
+
+<div class="nav-tabs" id="nav-tabs">
+  <div class="nav-tab active" onclick="goPage('registry')">📋 Registry</div>
+  <div class="nav-tab" onclick="goPage('allocation')">🗓 Allocation</div>
+  <div class="nav-tab" onclick="goPage('confirmation')">✅ Confirmation</div>
+  <div class="nav-tab" onclick="goPage('matchday')">⏱ Match Day</div>
+  <div class="nav-tab" onclick="goPage('ratings')">⭐ Ratings</div>
+</div>
+
+<!-- ══════════ REGISTRY ══════════ -->
+<div class="page active" id="page-registry">
+  <div class="card">
+    <div class="card-title" id="reg-title">🦺 Register Official</div>
+    <div class="alert alert-info" id="reg-alert">All referees must be registered before they can be allocated to a match.</div>
+    <div class="fg-row">
+      <div class="fg"><label>Full Name</label><input type="text" id="reg-name" placeholder="Official's full name"></div>
+      <div class="fg" style="max-width:110px"><label>Badge #</label><input type="text" id="reg-badge" placeholder="REF-01"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Phone</label><input type="text" id="reg-phone" placeholder="+1 876 ..."></div>
+      <div class="fg"><label>Email</label><input type="email" id="reg-email" placeholder="official@email.com"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Certification / Level</label><select id="reg-cert"></select></div>
+      <div class="fg"><label>Status</label>
+        <select id="reg-status"><option value="active">Active</option><option value="inactive">Inactive</option></select>
+      </div>
+    </div>
+    <button class="btn btn-gold" onclick="registerOfficial()">➕ Register Official</button>
+  </div>
+  <div class="card">
+    <div class="card-title">👥 Registered Officials (<span id="off-count">0</span>)</div>
+    <div id="off-list"><div style="color:var(--lgrey);font-size:12px">No officials registered yet.</div></div>
+  </div>
+</div>
+
+<!-- ══════════ ALLOCATION ══════════ -->
+<div class="page" id="page-allocation">
+  <div class="card">
+    <div class="card-title" id="alloc-title">📋 Assign Officials to Match</div>
+    <div class="fg"><label>Select Match</label>
+      <select id="al-match" onchange="prefillAllocation()"><option value="">— Select match —</option></select>
+    </div>
+    <div id="alloc-ref-fields">
+      <div class="fg-row">
+        <div class="fg"><label>Primary Referee</label><select id="al-primary" onchange="filterOfficialSelects()"><option value="">— Select —</option></select></div>
+        <div class="fg"><label>Alternate Referee</label><select id="al-alternate" onchange="filterOfficialSelects()"><option value="">— None (optional) —</option></select></div>
+      </div>
+    </div>
+    <div id="alloc-to-fields" style="display:none">
+      <div class="fg-row">
+        <div class="fg"><label>Table Official 1</label><select id="al-to1" onchange="filterOfficialSelects()"><option value="">— Select —</option></select></div>
+        <div class="fg"><label>Table Official 2</label><select id="al-to2" onchange="filterOfficialSelects()"><option value="">— Select —</option></select></div>
+      </div>
+      <div class="fg" style="max-width:300px"><label>Backup Table Official</label><select id="al-to-backup" onchange="filterOfficialSelects()"><option value="">— None (optional) —</option></select></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Match Commissioner</label><input type="text" id="al-commissioner" placeholder="Name"></div>
+      <div class="fg"><label>TC Chair</label><input type="text" id="al-tcchair" placeholder="Name"></div>
+    </div>
+    <button class="btn btn-gold" onclick="saveAllocation()">💾 Save Allocation</button>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 Current Allocations</div>
+    <div id="alloc-list"><div style="color:var(--lgrey);font-size:12px">No allocations yet.</div></div>
+  </div>
+</div>
+
+<!-- ══════════ CONFIRMATION ══════════ -->
+<div class="page" id="page-confirmation">
+  <div class="card">
+    <div class="card-title">✅ Attendance Confirmation</div>
+    <div class="alert alert-info" id="conf-alert">The Technical Committee Chair or Match Commissioner must confirm official attendance for each match.</div>
+    <div class="fg"><label>Your Name (TC Chair / Match Commissioner)</label>
+      <input type="text" id="conf-confirmer" placeholder="Your name">
+    </div>
+    <div class="fg"><label>Filter by Match</label>
+      <select id="conf-match-filter" onchange="renderConfirmationPanel()">
+        <option value="">— All matches —</option>
+      </select>
+    </div>
+  </div>
+  <div id="conf-panel"></div>
+</div>
+
+<!-- ══════════ MATCH DAY ══════════ -->
+<div class="page" id="page-matchday">
+  <div class="card">
+    <div class="card-title">⏱ Match Day — Punctuality Log</div>
+    <div class="alert alert-info" id="md-alert">Record whether the officiating team arrived <strong style="color:var(--green)">On Time</strong> or <strong style="color:var(--red)">Late</strong>. One entry per match — cannot be changed once recorded.</div>
+    <div class="fg"><label>Recorded By (TC Chair / Officials Rep)</label>
+      <input type="text" id="md-recorder" placeholder="Your name">
+    </div>
+  </div>
+  <div id="matchday-list"></div>
+</div>
+
+<!-- ══════════ RATINGS ══════════ -->
+<div class="page" id="page-ratings">
+  <div class="card">
+    <div class="card-title">⭐ Post-Match Rating</div>
+    <div class="alert alert-info">Team management has a <strong style="color:var(--gold)">24-hour window</strong> after match completion to rate officials (1–5 Likert). <strong>One submission per team per match</strong> — whichever role submits first locks the form permanently.</div>
+    <div class="fg-row">
+      <div class="fg"><label>Select Match</label>
+        <select id="rt-match" onchange="loadRatingPanel()"><option value="">— Select match —</option></select>
+      </div>
+      <div class="fg"><label>Your Team</label>
+        <select id="rt-team" onchange="loadRatingPanel()"><option value="">— Select team —</option></select>
+      </div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Your Name</label>
+        <input type="text" id="rt-submitter" placeholder="Full name">
+      </div>
+      <div class="fg"><label>Your Role</label>
+        <select id="rt-role">
+          <option value="">— Select role —</option>
+          <option value="captain">Captain</option>
+          <option value="coach">Coach</option>
+          <option value="manager">Manager</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="rating-panel"></div>
+  <div class="card" style="margin-top:8px">
+    <div class="card-title">📊 Performance Summary <span class="bayes-tag">Bayesian Weighted</span></div>
+    <div id="rating-summary"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ══════════ PROFILE MODAL ══════════ -->
+<div class="modal-overlay" id="profile-modal" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 id="modal-title">Official Profile</h3>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('profile-modal').classList.remove('open')">✕ Close</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+// CONFIG & CONSTANTS
+// ════════════════════════════════════════════════════
+const BAYES_C = 5; // Confidence threshold: effectively adds 5 "average" ratings
+const EXEC_ROLES = ['bhba_president','bhba_vp','match_commissioner','bhba_executive','exec_senior','exec'];
+const LIKERT_LABELS = ['','Unacceptable — Major errors affecting play','Poor — Inconsistent, unreliable decisions','Adequate — Acceptable but improvement needed','Good — Solid professional performance','Excellent — Outstanding officiating'];
+
+let MODE = 'ref';
+
+const CFG = {
+  ref:{
+    icon:'🦺',label:'Referee',plural:'Referees',
+    storeKey:'bhba_refs',allocKey:'bhba_allocs',confKey:'bhba_ref_confs',
+    punctKey:'bhba_ref_punct',ratingKey:'bhba_ref_ratings',emailKey:'bhba_ref_emails',
+    idPrefix:'REF',idStore:'bhba_ref_id',
+    regAlert:'All referees must be registered before allocation to a match.',
+    allocNote:'1 primary referee + 1 alternate per match.',
+    mdAlert:'Record whether the assigned referee arrived On Time or Late.',
+    avatarBg:'var(--purple)',
+    certOptions:[
+      {v:'local',l:'Local — BHBA Certified'},{v:'national',l:'National — BBA Certified'},{v:'fiba',l:'FIBA Certified'}
+    ]
+  },
+  to:{
+    icon:'📋',label:'Table Official',plural:'Table Officials',
+    storeKey:'bhba_tos',allocKey:'bhba_to_allocs',confKey:'bhba_to_confs',
+    punctKey:'bhba_to_punct',ratingKey:'bhba_to_ratings',emailKey:'bhba_to_emails',
+    idPrefix:'TO',idStore:'bhba_to_id',
+    regAlert:'All table officials must be registered before allocation to a match.',
+    allocNote:'2 primary table officials + 1 backup per match.',
+    mdAlert:'Record whether the table officials arrived On Time or Late.',
+    avatarBg:'var(--teal)',
+    certOptions:[
+      {v:'local',l:'Local — BHBA Trained'},{v:'national',l:'National — BBA Certified'},{v:'fiba',l:'FIBA Certified'}
+    ]
+  }
+};
+
+// ════════════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════════════
+const S = {
+  get officials(){return JSON.parse(localStorage.getItem(CFG[MODE].storeKey)||'[]');},
+  saveOfficials(r){localStorage.setItem(CFG[MODE].storeKey,JSON.stringify(r));},
+  matches(){return JSON.parse(localStorage.getItem('bhba_matches')||'[]');},
+  get allocs(){return JSON.parse(localStorage.getItem(CFG[MODE].allocKey)||'[]');},
+  saveAllocs(a){localStorage.setItem(CFG[MODE].allocKey,JSON.stringify(a));},
+  get confs(){return JSON.parse(localStorage.getItem(CFG[MODE].confKey)||'[]');},
+  saveConfs(c){localStorage.setItem(CFG[MODE].confKey,JSON.stringify(c));},
+  get punct(){return JSON.parse(localStorage.getItem(CFG[MODE].punctKey)||'[]');},
+  savePunct(p){localStorage.setItem(CFG[MODE].punctKey,JSON.stringify(p));},
+  get ratings(){return JSON.parse(localStorage.getItem(CFG[MODE].ratingKey)||'[]');},
+  saveRatings(r){localStorage.setItem(CFG[MODE].ratingKey,JSON.stringify(r));},
+  get emails(){return JSON.parse(localStorage.getItem(CFG[MODE].emailKey)||'[]');},
+  saveEmails(e){localStorage.setItem(CFG[MODE].emailKey,JSON.stringify(e));},
+  nextId(){
+    const k=CFG[MODE].idStore,p=CFG[MODE].idPrefix;
+    const n=parseInt(localStorage.getItem(k)||'100');
+    localStorage.setItem(k,n+1);
+    return p+'-'+(n+1);
+  }
+};
+
+// ════════════════════════════════════════════════════
+// EXEC AUTH GATE
+// ════════════════════════════════════════════════════
+function isExecUser(){
+  try{
+    const sess=JSON.parse(localStorage.getItem('bhba_session')||'null');
+    if(!sess)return false;
+    const users=JSON.parse(localStorage.getItem('bhba_users')||'[]');
+    if(!users.length)return false; // no user registry — deny by default
+    const u=users.find(x=>x.email===sess.email||(sess.name&&x.name===sess.name));
+    if(!u)return false;
+    return Array.isArray(u.roles)&&u.roles.some(r=>EXEC_ROLES.includes(r.role)&&r.status==='approved');
+  }catch(e){return false;}
+}
+
+function getExecName(){
+  try{
+    const sess=JSON.parse(localStorage.getItem('bhba_session')||'null');
+    if(sess&&sess.name)return sess.name;
+    if(sess&&sess.email)return sess.email;
+  }catch(e){}
+  return null;
+}
+
+// ════════════════════════════════════════════════════
+// BAYESIAN WEIGHTED SCORE
+// Formula: WS = (C × m + Σscores) / (C + n)
+// C = 5 (confidence threshold)
+// m = global prior mean across all officials in current mode (default 3.0)
+// ════════════════════════════════════════════════════
+function globalMean(){
+  const all=S.ratings;
+  if(!all.length)return 3.0;
+  return all.reduce((s,x)=>s+x.score,0)/all.length;
+}
+
+function bayesScore(offId){
+  const rts=S.ratings.filter(x=>x.offId===offId);
+  if(!rts.length)return null;
+  const n=rts.length;
+  const sum=rts.reduce((s,x)=>s+x.score,0);
+  const m=globalMean();
+  const ws=(BAYES_C*m+sum)/(BAYES_C+n);
+  const raw=sum/n;
+  return{ws:ws.toFixed(2),n,raw:raw.toFixed(1),sum,m:m.toFixed(2),rts};
+}
+
+// ════════════════════════════════════════════════════
+// MODE SWITCH
+// ════════════════════════════════════════════════════
+function setMode(m){
+  MODE=m;
+  document.getElementById('mode-ref').classList.toggle('active',m==='ref');
+  document.getElementById('mode-to').classList.toggle('active',m==='to');
+  document.getElementById('alloc-ref-fields').style.display=m==='ref'?'':'none';
+  document.getElementById('alloc-to-fields').style.display=m==='to'?'':'none';
+  const c=CFG[m];
+  document.getElementById('reg-title').textContent=`${c.icon} Register ${c.label}`;
+  document.getElementById('reg-alert').textContent=c.regAlert;
+  document.getElementById('alloc-title').textContent=`📋 Assign ${c.plural} to Match`;
+  document.getElementById('conf-alert').textContent=`The TC Chair or Match Commissioner must confirm ${c.label.toLowerCase()} attendance. ${c.allocNote}`;
+  document.getElementById('md-alert').innerHTML=c.mdAlert+' One entry per match — cannot be changed once recorded.';
+  const certSel=document.getElementById('reg-cert');
+  certSel.innerHTML=c.certOptions.map(o=>`<option value="${o.v}">${o.l}</option>`).join('');
+  const active=document.querySelector('.page.active');
+  if(active){const p=active.id.replace('page-','');refreshPage(p);}
+}
+
+function refreshPage(p){
+  if(p==='registry')renderRegistry();
+  if(p==='allocation'){populateAllocSelects();renderAllocList();}
+  if(p==='confirmation'){populateConfFilters();renderConfirmationPanel();}
+  if(p==='matchday')renderMatchDayList();
+  if(p==='ratings'){populateRatingSelects();renderRatingSummary();}
+}
+
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`page-${p}`).classList.add('active');
+  const pages=['registry','allocation','confirmation','matchday','ratings'];
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',pages[i]===p));
+  refreshPage(p);
+}
+
+// ════════════════════════════════════════════════════
+// REGISTRY
+// ════════════════════════════════════════════════════
+function registerOfficial(){
+  const name=document.getElementById('reg-name').value.trim();
+  const badge=document.getElementById('reg-badge').value.trim();
+  const phone=document.getElementById('reg-phone').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const cert=document.getElementById('reg-cert').value;
+  const status=document.getElementById('reg-status').value;
+  if(!name){toast(`${CFG[MODE].label} name is required`,'r');return;}
+  const offs=S.officials;
+  if(email&&offs.some(r=>r.email===email)){toast('An official with this email is already registered','r');return;}
+  const id=S.nextId();
+  S.saveOfficials([...offs,{id,name,badge:badge||id,phone,email,cert,status,registeredAt:new Date().toISOString()}]);
+  ['reg-name','reg-badge','reg-phone','reg-email'].forEach(x=>document.getElementById(x).value='');
+  toast(`${CFG[MODE].label} ${name} registered ✓`,'g');
+  renderRegistry();populateAllocSelects();
+}
+
+function renderRegistry(){
+  const offs=S.officials;
+  document.getElementById('off-count').textContent=offs.length;
+  const el=document.getElementById('off-list');
+  if(!offs.length){el.innerHTML=`<div style="color:var(--lgrey);font-size:12px">No ${CFG[MODE].plural.toLowerCase()} registered yet.</div>`;return;}
+  const certLabel={local:'Local',national:'National',fiba:'FIBA'};
+  el.innerHTML=offs.map(r=>{
+    const bs=bayesScore(r.id);
+    const allocated=S.allocs.filter(a=>
+      a.primaryRef===r.id||a.alternateRef===r.id||
+      a.to1===r.id||a.to2===r.id||a.toBackup===r.id
+    ).length;
+    return `<div class="off-card">
+      <div class="off-avatar" style="background:${CFG[MODE].avatarBg}">${r.name.split(' ').map(w=>w[0]).join('').substring(0,2)}</div>
+      <div class="off-info">
+        <div class="off-name">${r.name} <span class="ref-badge ${r.status==='active'?'badge-active':'badge-inactive'}">${r.status}</span></div>
+        <div class="off-sub">${r.badge} · ${certLabel[r.cert]||r.cert} · ${r.email||r.phone||'—'}</div>
+        <div class="off-sub" style="margin-top:2px">Allocated: ${allocated} match(es)</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        ${bs
+          ?`<div class="off-rating">⭐ ${bs.ws} <span class="bayes-tag">BW</span></div><div style="font-size:10px;color:var(--lgrey)">${bs.n} rating(s) · raw ${bs.raw}</div>`
+          :'<div style="font-size:10px;color:var(--lgrey)">No ratings yet</div>'}
+        <button class="btn btn-sm btn-blue" style="margin-top:6px;display:block;width:100%" onclick="openOfficialProfile('${r.id}')">👤 Profile</button>
+        <button class="btn btn-sm btn-outline" style="margin-top:4px;display:block;width:100%" onclick="toggleStatus('${r.id}')">${r.status==='active'?'Deactivate':'Activate'}</button>
+        <button class="btn btn-sm btn-red" style="margin-top:4px;width:100%" onclick="deleteOfficial('${r.id}')">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleStatus(id){
+  const offs=S.officials;const r=offs.find(x=>x.id===id);if(!r)return;
+  r.status=r.status==='active'?'inactive':'active';S.saveOfficials(offs);renderRegistry();
+}
+function deleteOfficial(id){
+  if(!confirm('Remove this official from the registry?'))return;
+  S.saveOfficials(S.officials.filter(r=>r.id!==id));renderRegistry();populateAllocSelects();
+}
+
+// ════════════════════════════════════════════════════
+// OFFICIAL PROFILE MODAL
+// ════════════════════════════════════════════════════
+function openOfficialProfile(offId){
+  const off=S.officials.find(x=>x.id===offId);
+  if(!off)return;
+  const isExec=isExecUser();
+  const bs=bayesScore(offId);
+  const rts=bs?bs.rts:[];
+  const allocs=S.allocs.filter(a=>
+    a.primaryRef===offId||a.alternateRef===offId||
+    a.to1===offId||a.to2===offId||a.toBackup===offId
+  );
+  const punct=S.punct.filter(p=>{
+    const alloc=S.allocs.find(a=>a.matchId===p.matchId);if(!alloc)return false;
+    const conf=S.confs.find(c=>c.matchId===p.matchId);
+    let ids=MODE==='ref'
+      ?[conf?.status==='confirmed_alternate'?alloc.alternateRef:alloc.primaryRef]
+      :conf?.status==='confirmed_backup'?[alloc.toBackup]:conf?.status==='confirmed_to'?[alloc.to1,alloc.to2]:[alloc.to1,alloc.to2];
+    return ids.filter(Boolean).includes(offId);
+  });
+  const onTime=punct.filter(p=>p.status==='on_time').length;
+  const late=punct.filter(p=>p.status==='late').length;
+  const certLabel={local:'Local — BHBA Certified',national:'National — BBA Certified',fiba:'FIBA Certified'};
+
+  // Ratings section: exec-gated
+  let ratingsHtml='';
+  if(!isExec){
+    ratingsHtml=`<div class="exec-gate-locked">
+      <div style="font-size:24px;margin-bottom:8px">🔒</div>
+      <div style="color:var(--gold);font-weight:700;margin-bottom:4px">Performance Ratings — Restricted</div>
+      <div style="font-size:12px;color:var(--lgrey)">Ratings data is visible to BHBA Executives only. Log in with an approved exec account to view.</div>
+    </div>`;
+  } else {
+    const execName=getExecName()||'BHBA Executive';
+    const dist=[1,2,3,4,5].map(star=>rts.filter(r=>r.score===star).length);
+    const maxDist=Math.max(...dist,1);
+    ratingsHtml=`
+      <div class="exec-verified-bar">
+        <span style="font-size:12px;color:var(--green)">🔓 Exec Verified: ${execName}</span>
+        <span class="bayes-tag">BAYESIAN WEIGHTED</span>
+      </div>
+      ${bs?`
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;text-align:center">
+        <div style="background:#1a1a1a;border-radius:6px;padding:8px">
+          <div style="font-size:20px;font-weight:900;color:var(--gold)">${bs.ws}</div>
+          <div style="font-size:10px;color:var(--lgrey)">Bayesian Score</div>
+        </div>
+        <div style="background:#1a1a1a;border-radius:6px;padding:8px">
+          <div style="font-size:20px;font-weight:900;color:var(--white)">${bs.raw}</div>
+          <div style="font-size:10px;color:var(--lgrey)">Raw Average</div>
+        </div>
+        <div style="background:#1a1a1a;border-radius:6px;padding:8px">
+          <div style="font-size:20px;font-weight:900;color:var(--blue)">${bs.n}</div>
+          <div style="font-size:10px;color:var(--lgrey)">Ratings</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--lgrey);background:#1a1a1a;padding:8px;border-radius:6px;margin-bottom:10px">
+        <strong style="color:var(--gold)">Formula:</strong> WS = (C×m + Σscores) / (C+n) &nbsp;=&nbsp; (${BAYES_C}×${bs.m} + ${bs.sum}) / (${BAYES_C}+${bs.n}) &nbsp;=&nbsp; <strong>${bs.ws}</strong><br>
+        <span style="color:var(--lgrey)">Global prior mean (m): ${bs.m} · Confidence threshold (C): ${BAYES_C}</span>
+      </div>
+      <div style="font-size:11px;color:var(--gold);margin-bottom:4px;font-weight:700">Rating Distribution</div>
+      <div class="rating-dist">
+        ${dist.map((cnt,i)=>`<div class="dist-bar">
+          <div class="dist-fill" style="width:${cnt?Math.round(cnt/maxDist*100):0}%"></div>
+          <span style="position:relative">★${i+1}<br>${cnt}</span>
+        </div>`).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--gold);margin-bottom:4px;font-weight:700;margin-top:10px">Per-Match Breakdown</div>
+      ${rts.length?rts.map(rt=>{
+        const m=S.matches().find(x=>x.id===rt.matchId);
+        const rolePill=`<span class="role-pill role-${rt.submitterRole||'captain'}">${rt.submitterRole||'captain'}</span>`;
+        return`<div class="perf-row">
+          <div><div style="font-weight:700">${m?`${m.homeTeam} vs ${m.awayTeam}`:'Match'}</div><div style="font-size:10px;color:var(--lgrey)">${m?m.gid:rt.matchId} · ${rt.teamName} · ${rolePill} ${rt.submitterName||''}</div>${rt.comment?`<div style="font-size:10px;color:var(--lgrey);margin-top:2px;font-style:italic">"${rt.comment}"</div>`:''}</div>
+          <div style="text-align:right;flex-shrink:0"><strong style="color:var(--gold);font-size:16px">⭐ ${rt.score}</strong><div style="font-size:10px;color:var(--lgrey)">${new Date(rt.submittedAt).toLocaleDateString()}</div></div>
+        </div>`;
+      }).join(''):'<div style="color:var(--lgrey);font-size:12px">No individual ratings recorded.</div>'}
+      `:'<div style="color:var(--lgrey);font-size:12px">No ratings yet for this official.</div>'}
+    `;
+  }
+
+  document.getElementById('modal-title').textContent=`${off.name} — ${CFG[MODE].label} Profile`;
+  document.getElementById('modal-body').innerHTML=`
+    <div style="background:#1a1a1a;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="off-avatar" style="background:${CFG[MODE].avatarBg};width:52px;height:52px;font-size:18px">${off.name.split(' ').map(w=>w[0]).join('').substring(0,2)}</div>
+        <div>
+          <div style="font-size:15px;font-weight:700">${off.name} <span class="ref-badge ${off.status==='active'?'badge-active':'badge-inactive'}">${off.status}</span></div>
+          <div style="font-size:12px;color:var(--lgrey)">${off.badge} · ${certLabel[off.cert]||off.cert}</div>
+          <div style="font-size:12px;color:var(--lgrey)">${off.email||''} ${off.phone?'· '+off.phone:''}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;text-align:center">
+        <div style="background:var(--card);border-radius:6px;padding:6px"><div style="font-size:16px;font-weight:700">${allocs.length}</div><div style="font-size:10px;color:var(--lgrey)">Matches</div></div>
+        <div style="background:var(--card);border-radius:6px;padding:6px"><div style="font-size:16px;font-weight:700;color:var(--green)">${onTime}</div><div style="font-size:10px;color:var(--lgrey)">On Time</div></div>
+        <div style="background:var(--card);border-radius:6px;padding:6px"><div style="font-size:16px;font-weight:700;color:var(--red)">${late}</div><div style="font-size:10px;color:var(--lgrey)">Late</div></div>
+      </div>
+    </div>
+    ${ratingsHtml}
+  `;
+  document.getElementById('profile-modal').classList.add('open');
+}
+
+function closeModal(e){
+  if(e.target.id==='profile-modal')document.getElementById('profile-modal').classList.remove('open');
+}
+
+// ════════════════════════════════════════════════════
+// ALLOCATION
+// ════════════════════════════════════════════════════
+function populateAllocSelects(){
+  const matches=S.matches();
+  const mSel=document.getElementById('al-match');
+  const cur=mSel.value;
+  mSel.innerHTML='<option value="">— Select match —</option>';
+  [...matches].sort((a,b)=>new Date(a.matchDate)-new Date(b.matchDate)).forEach(m=>{
+    const dt=new Date(m.matchDate);
+    const o=document.createElement('option');
+    o.value=m.id;
+    o.textContent=`${m.gid} · ${m.homeTeam} vs ${m.awayTeam} · ${dt.toLocaleDateString()} ${dt.toLocaleTimeString()}`;
+    mSel.appendChild(o);
+  });
+  if(cur)mSel.value=cur;
+  rebuildSelect('al-primary',[],true);
+  rebuildSelect('al-alternate',[],false);
+  rebuildSelect('al-to1',[],true);
+  rebuildSelect('al-to2',[],true);
+  rebuildSelect('al-to-backup',[],false);
+}
+
+function rebuildSelect(id,excludeIds=[],required=false){
+  const s=document.getElementById(id);if(!s)return;
+  const cur=s.value;
+  const exclude=Array.isArray(excludeIds)?excludeIds:[excludeIds].filter(Boolean);
+  const offs=S.officials.filter(r=>r.status==='active'&&!exclude.includes(r.id));
+  s.innerHTML=`<option value="">${required?'— Select —':'— None (optional) —'}</option>`;
+  offs.forEach(r=>{const o=new Option(`${r.name} (${r.badge})`,r.id);s.appendChild(o);});
+  if(cur&&!exclude.includes(cur))s.value=cur;
+}
+
+function filterOfficialSelects(){
+  if(MODE==='ref'){
+    const pVal=document.getElementById('al-primary').value;
+    const aVal=document.getElementById('al-alternate').value;
+    rebuildSelect('al-primary',[aVal].filter(Boolean),true);
+    rebuildSelect('al-alternate',[pVal].filter(Boolean),false);
+    if(pVal)document.getElementById('al-primary').value=pVal;
+    if(aVal)document.getElementById('al-alternate').value=aVal;
+  }else{
+    const v1=document.getElementById('al-to1').value;
+    const v2=document.getElementById('al-to2').value;
+    const vb=document.getElementById('al-to-backup').value;
+    rebuildSelect('al-to1',[v2,vb].filter(Boolean),true);
+    rebuildSelect('al-to2',[v1,vb].filter(Boolean),true);
+    rebuildSelect('al-to-backup',[v1,v2].filter(Boolean),false);
+    if(v1)document.getElementById('al-to1').value=v1;
+    if(v2)document.getElementById('al-to2').value=v2;
+    if(vb)document.getElementById('al-to-backup').value=vb;
+  }
+}
+
+function checkTimeConflict(offId,matchId){
+  if(!offId)return null;
+  const match=S.matches().find(m=>m.id===matchId);if(!match)return null;
+  const matchTime=new Date(match.matchDate).getTime();
+  const BUFFER=3*3600000;
+  for(const a of S.allocs.filter(a=>a.matchId!==matchId)){
+    const otherMatch=S.matches().find(m=>m.id===a.matchId);if(!otherMatch)continue;
+    const diff=Math.abs(matchTime-new Date(otherMatch.matchDate).getTime());
+    if(diff>BUFFER)continue;
+    const inAlloc=MODE==='ref'?(a.primaryRef===offId||a.alternateRef===offId):(a.to1===offId||a.to2===offId||a.toBackup===offId);
+    if(inAlloc)return otherMatch;
+  }
+  return null;
+}
+
+function prefillAllocation(){
+  const matchId=document.getElementById('al-match').value;
+  if(!matchId)return;
+  const m=S.matches().find(x=>x.id===matchId);
+  if(m)document.getElementById('al-commissioner').value=m.commissioner||'';
+  const existing=S.allocs.find(a=>a.matchId===matchId);
+  if(!existing)return;
+  document.getElementById('al-tcchair').value=existing.tcChair||'';
+  if(MODE==='ref'){
+    document.getElementById('al-primary').value=existing.primaryRef||'';
+    document.getElementById('al-alternate').value=existing.alternateRef||'';
+  }else{
+    document.getElementById('al-to1').value=existing.to1||'';
+    document.getElementById('al-to2').value=existing.to2||'';
+    document.getElementById('al-to-backup').value=existing.toBackup||'';
+  }
+}
+
+function saveAllocation(){
+  const matchId=document.getElementById('al-match').value;
+  const commissioner=document.getElementById('al-commissioner').value.trim();
+  const tcChair=document.getElementById('al-tcchair').value.trim();
+  if(!matchId){toast('Select a match','r');return;}
+  let entry={matchId,commissioner,tcChair,allocatedAt:new Date().toISOString()};
+  const offs=S.officials;
+  if(MODE==='ref'){
+    const p=document.getElementById('al-primary').value;
+    const alt=document.getElementById('al-alternate').value;
+    if(!p){toast('Assign a primary referee','r');return;}
+    if(p===alt){toast('Primary and alternate referee cannot be the same person','r');return;}
+    const pConflict=checkTimeConflict(p,matchId);
+    if(pConflict){const ref=offs.find(r=>r.id===p);toast(`⚠ ${ref?.name||'Primary'} already allocated to ${pConflict.gid} within 3 hours`,'r');return;}
+    if(alt){const aConflict=checkTimeConflict(alt,matchId);if(aConflict){const ref=offs.find(r=>r.id===alt);toast(`⚠ ${ref?.name||'Alternate'} already allocated to ${aConflict.gid} within 3 hours`,'r');return;}}
+    const pr=offs.find(r=>r.id===p);
+    if(pr&&pr.status==='inactive'){toast(`${pr.name} is inactive and cannot be assigned`,'r');return;}
+    entry={...entry,primaryRef:p,alternateRef:alt||null};
+  }else{
+    const to1=document.getElementById('al-to1').value;
+    const to2=document.getElementById('al-to2').value;
+    const bk=document.getElementById('al-to-backup').value;
+    if(!to1||!to2){toast('Both primary table officials are required','r');return;}
+    const roles={TO1:to1,TO2:to2};if(bk)roles.Backup=bk;
+    const vals=Object.values(roles);
+    if(new Set(vals).size!==vals.length){toast('Each table official slot must be a different person','r');return;}
+    for(const[role,id]of Object.entries(roles)){
+      if(!id)continue;
+      const conflict=checkTimeConflict(id,matchId);
+      if(conflict){const off=offs.find(r=>r.id===id);toast(`⚠ ${off?.name||role} already allocated to ${conflict.gid} within 3 hours`,'r');return;}
+    }
+    entry={...entry,to1,to2,toBackup:bk||null};
+  }
+  S.saveAllocs([...S.allocs.filter(a=>a.matchId!==matchId),entry]);
+  toast('Allocation saved ✓','g');
+  renderAllocList();populateConfFilters();renderMatchDayList();
+}
+
+function renderAllocList(){
+  const el=document.getElementById('alloc-list');
+  const allocs=S.allocs;
+  if(!allocs.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No allocations yet.</div>';return;}
+  const offs=S.officials;
+  const matches=S.matches();
+  el.innerHTML=allocs.map(a=>{
+    const m=matches.find(x=>x.id===a.matchId);
+    const conf=S.confs.find(c=>c.matchId===a.matchId);
+    const confStatus=conf?conf.status:'pending';
+    const statusCls={pending:'cs-pending',confirmed_primary:'cs-confirmed',confirmed_alternate:'cs-alternate',confirmed_to:'cs-confirmed',unconfirmed:'cs-unconfirmed'}[confStatus]||'cs-pending';
+    const statusLabel={pending:'Awaiting Confirmation',confirmed_primary:'Primary Confirmed',confirmed_alternate:'Alternate Confirmed',confirmed_to:'Table Officials Confirmed',unconfirmed:'⚠ Unconfirmed — Alert Sent'}[confStatus]||'Pending';
+    const assignedText=MODE==='ref'
+      ?`<div style="font-size:12px;margin-bottom:2px">🦺 Primary: <strong>${offs.find(r=>r.id===a.primaryRef)?.name||'—'}</strong></div>
+         <div style="font-size:12px">🔄 Alternate: <strong>${offs.find(r=>r.id===a.alternateRef)?.name||'—'}</strong></div>`
+      :`<div style="font-size:12px;margin-bottom:2px">📋 TO1: <strong>${offs.find(r=>r.id===a.to1)?.name||'—'}</strong></div>
+        <div style="font-size:12px;margin-bottom:2px">📋 TO2: <strong>${offs.find(r=>r.id===a.to2)?.name||'—'}</strong></div>
+        <div style="font-size:12px">🔄 Backup: <strong>${offs.find(r=>r.id===a.toBackup)?.name||'—'}</strong></div>`;
+    return`<div class="alloc-item">
+      <div class="alloc-header">
+        <div>
+          <div class="alloc-teams">${m?`${m.homeTeam} vs ${m.awayTeam}`:a.matchId}</div>
+          <div class="alloc-meta">${m?`${m.gid} · ${new Date(m.matchDate).toLocaleString()}`:''}</div>
+        </div>
+        <span class="conf-status ${statusCls}">${statusLabel}</span>
+      </div>
+      ${assignedText}
+      <div style="font-size:11px;color:var(--lgrey);margin-top:4px">Commissioner: ${a.commissioner||'—'} · TC Chair: ${a.tcChair||'—'}</div>
+      <button class="btn btn-sm btn-red" style="margin-top:8px" onclick="deleteAlloc('${a.matchId}')">Remove Allocation</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteAlloc(matchId){if(!confirm('Remove this allocation?'))return;S.saveAllocs(S.allocs.filter(a=>a.matchId!==matchId));renderAllocList();}
+
+// ════════════════════════════════════════════════════
+// CONFIRMATION
+// ════════════════════════════════════════════════════
+function populateConfFilters(){
+  const sel=document.getElementById('conf-match-filter');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— All matches —</option>';
+  S.allocs.forEach(a=>{
+    const m=S.matches().find(x=>x.id===a.matchId);if(!m)return;
+    const o=document.createElement('option');
+    o.value=a.matchId;
+    o.textContent=`${m.gid} · ${m.homeTeam} vs ${m.awayTeam} · ${new Date(m.matchDate).toLocaleDateString()}`;
+    sel.appendChild(o);
+  });
+  if(cur)sel.value=cur;
+}
+
+function renderConfirmationPanel(){
+  const el=document.getElementById('conf-panel');
+  const filter=document.getElementById('conf-match-filter').value;
+  const allocs=S.allocs.filter(a=>!filter||a.matchId===filter);
+  if(!allocs.length){el.innerHTML='<div class="alert alert-warn">No matches with official allocations found.</div>';return;}
+  const offs=S.officials;const matches=S.matches();
+  el.innerHTML=allocs.map(a=>{
+    const m=matches.find(x=>x.id===a.matchId);
+    const conf=S.confs.find(c=>c.matchId===a.matchId)||{status:'pending'};
+    const locked=conf.status!=='pending'&&conf.status!=='primary_declined'&&conf.status!=='to1_declined';
+    const statusColorMap={pending:'var(--warn)',confirmed_primary:'var(--green)',confirmed_alternate:'var(--purple)',confirmed_to:'var(--teal)',unconfirmed:'var(--red)'};
+    const statusLabelMap={pending:'⏳ Awaiting confirmation',confirmed_primary:'✅ Primary confirmed',confirmed_alternate:'🔄 Alternate confirmed',confirmed_to:'✅ Table Officials confirmed',unconfirmed:'🚨 Unconfirmed — Alert issued'};
+    const sc=statusColorMap[conf.status]||'var(--lgrey)';
+    const sl=statusLabelMap[conf.status]||'Pending';
+    let rowsHtml='';
+    if(MODE==='ref'){
+      const pr=offs.find(r=>r.id===a.primaryRef);
+      const ar=offs.find(r=>r.id===a.alternateRef);
+      const primaryDone=conf.status==='confirmed_primary';const altDone=conf.status==='confirmed_alternate';const declined=conf.status==='primary_declined';
+      rowsHtml=`<div class="conf-row">
+        <div>${CFG[MODE].icon}</div>
+        <div class="cr-ref"><div class="cr-name">${pr?pr.name:'No primary assigned'}</div><div class="cr-type">Primary Referee · ${pr?pr.badge:''}</div></div>
+        ${!locked&&pr?`<button class="btn btn-sm btn-green" onclick="confirmOff('${a.matchId}','primary')">✓ Confirm</button><button class="btn btn-sm btn-red" onclick="confirmOff('${a.matchId}','primary_declined')">✗ Unavailable</button>`
+        :`<span style="font-size:11px;color:var(--lgrey)">${primaryDone?'✅ Confirmed':altDone||declined?'✗ Unavailable':''}</span>`}
+      </div>
+      ${ar?`<div class="conf-row">
+        <div>🔄</div>
+        <div class="cr-ref"><div class="cr-name">${ar.name}</div><div class="cr-type">Alternate · ${ar.badge}</div></div>
+        ${(declined||conf.status==='pending')&&!locked?`<button class="btn btn-sm btn-purple" onclick="confirmOff('${a.matchId}','alternate')">✓ Confirm</button><button class="btn btn-sm btn-red" onclick="confirmOff('${a.matchId}','alternate_declined')">✗ Unavailable</button>`:`<span style="font-size:11px;color:var(--lgrey)">${altDone?'🔄 Confirmed':''}</span>`}
+      </div>`:'<div style="font-size:11px;color:var(--lgrey);padding:6px 0">No alternate assigned.</div>'}`;
+    }else{
+      const to1=offs.find(r=>r.id===a.to1);const to2=offs.find(r=>r.id===a.to2);const bk=offs.find(r=>r.id===a.toBackup);
+      const done=conf.status==='confirmed_to';const bkDone=conf.status==='confirmed_backup';
+      rowsHtml=`<div class="conf-row">
+        <div>📋</div><div class="cr-ref"><div class="cr-name">${to1?to1.name:'Not assigned'}</div><div class="cr-type">Table Official 1 · ${to1?to1.badge:''}</div></div>
+        ${!locked?`<button class="btn btn-sm btn-green" onclick="confirmOff('${a.matchId}','to_both')">✓ Confirm Both TOs</button>`:`<span style="font-size:11px;color:var(--green)">${done||bkDone?'✅':''}</span>`}
+      </div>
+      <div class="conf-row">
+        <div>📋</div><div class="cr-ref"><div class="cr-name">${to2?to2.name:'Not assigned'}</div><div class="cr-type">Table Official 2 · ${to2?to2.badge:''}</div></div>
+        ${!locked?`<button class="btn btn-sm btn-red" onclick="confirmOff('${a.matchId}','to_declined')">✗ TOs Unavailable</button>`:''}
+      </div>
+      ${bk?`<div class="conf-row">
+        <div>🔄</div><div class="cr-ref"><div class="cr-name">${bk.name}</div><div class="cr-type">Backup · ${bk.badge}</div></div>
+        ${conf.status==='to_declined'&&!locked?`<button class="btn btn-sm btn-purple" onclick="confirmOff('${a.matchId}','backup')">✓ Confirm</button><button class="btn btn-sm btn-red" onclick="confirmOff('${a.matchId}','backup_declined')">✗ Unavailable</button>`:`<span style="font-size:11px;color:var(--lgrey)">${bkDone?'🔄 Confirmed':''}</span>`}
+      </div>`:'<div style="font-size:11px;color:var(--lgrey);padding:6px 0">No backup assigned.</div>'}`;
+    }
+    return`<div class="card">
+      <div class="card-title" style="margin-bottom:4px">${m?`${m.homeTeam} vs ${m.awayTeam}`:a.matchId}</div>
+      <div style="font-size:11px;color:var(--lgrey);margin-bottom:8px">${m?`${m.gid} · ${new Date(m.matchDate).toLocaleString()}`:''}</div>
+      <div style="font-size:12px;font-weight:700;color:${sc};margin-bottom:8px">${sl}</div>
+      ${conf.confirmedAt?`<div style="font-size:11px;color:var(--lgrey);margin-bottom:8px">By: ${conf.confirmedBy||'—'} at ${new Date(conf.confirmedAt).toLocaleString()}</div>`:''}
+      ${rowsHtml}
+      ${conf.status==='unconfirmed'?'<div class="alert alert-red" style="margin-top:8px">🚨 Alert email generated — BHBA Executives notified.</div>':''}
+      ${locked?`<button class="btn btn-sm btn-outline" style="margin-top:8px" onclick="resetConf('${a.matchId}')">↩ Reset Confirmation</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function confirmOff(matchId,action){
+  const confirmer=document.getElementById('conf-confirmer').value.trim();
+  if(!confirmer){toast('Enter your name before confirming','r');return;}
+  const confs=S.confs.filter(c=>c.matchId!==matchId);
+  let status,emailLog=null;
+  const alloc=S.allocs.find(a=>a.matchId===matchId);
+  if(action==='primary')status='confirmed_primary';
+  else if(action==='primary_declined'){status=alloc?.alternateRef?'primary_declined':'unconfirmed';if(status==='unconfirmed'){emailLog=new Date().toISOString();generateAlert(matchId,confirmer);}}
+  else if(action==='alternate')status='confirmed_alternate';
+  else if(action==='alternate_declined'){status='unconfirmed';emailLog=new Date().toISOString();generateAlert(matchId,confirmer);}
+  else if(action==='to_both')status='confirmed_to';
+  else if(action==='to_declined'){status=alloc?.toBackup?'to_declined':'unconfirmed';if(status==='unconfirmed'){emailLog=new Date().toISOString();generateAlert(matchId,confirmer);}}
+  else if(action==='backup')status='confirmed_backup';
+  else if(action==='backup_declined'){status='unconfirmed';emailLog=new Date().toISOString();generateAlert(matchId,confirmer);}
+  confs.push({matchId,status,confirmedBy:confirmer,confirmedAt:new Date().toISOString(),emailLog});
+  S.saveConfs(confs);
+  toast(status==='unconfirmed'?'⚠ Alert generated — BHBA Exec notified':'Confirmation recorded ✓',status==='unconfirmed'?'r':'g');
+  renderConfirmationPanel();renderAllocList();
+}
+
+function resetConf(matchId){if(!confirm('Reset this confirmation?'))return;S.saveConfs(S.confs.filter(c=>c.matchId!==matchId));renderConfirmationPanel();renderAllocList();}
+
+function generateAlert(matchId,confirmer){
+  const m=S.matches().find(x=>x.id===matchId);
+  const emails=S.emails;
+  emails.push({id:'EMAIL-'+Date.now(),type:'unconfirmed_alert',matchId,to:'BHBA Executive Team',
+    subject:`⚠ ALERT: ${CFG[MODE].plural} Unconfirmed — ${m?m.gid:matchId}`,
+    body:`Match: ${m?`${m.homeTeam} vs ${m.awayTeam}`:matchId}\nDate: ${m?new Date(m.matchDate).toLocaleString():'N/A'}\nVenue: ${m?m.venue||'TBC':'N/A'}\n\n${CFG[MODE].plural} have not confirmed attendance. Immediate action required.\n\nRecorded by: ${confirmer}\nTimestamp: ${new Date().toLocaleString()}`,
+    sentAt:new Date().toISOString()});
+  S.saveEmails(emails);
+}
+
+// ════════════════════════════════════════════════════
+// MATCH DAY — PUNCTUALITY
+// ════════════════════════════════════════════════════
+function renderMatchDayList(){
+  const el=document.getElementById('matchday-list');
+  const allocs=S.allocs;
+  if(!allocs.length){el.innerHTML='<div class="alert alert-warn">No matches with official allocations yet.</div>';return;}
+  const offs=S.officials;const matches=S.matches();const punct=S.punct;
+  el.innerHTML=allocs.map(a=>{
+    const m=matches.find(x=>x.id===a.matchId);
+    const conf=S.confs.find(c=>c.matchId===a.matchId);
+    let activeNames=[];
+    if(MODE==='ref'){
+      const activeId=conf?.status==='confirmed_alternate'?a.alternateRef:a.primaryRef;
+      const r=offs.find(x=>x.id===activeId);
+      if(r)activeNames=[r.name+(conf?.status==='confirmed_alternate'?' (Alt)':'')];
+    }else{
+      const activeIds=conf?.status==='confirmed_backup'?[a.toBackup]:conf?.status==='confirmed_to'?[a.to1,a.to2]:[a.to1,a.to2];
+      activeNames=activeIds.filter(Boolean).map(id=>{const r=offs.find(x=>x.id===id);return r?r.name:'—';});
+    }
+    const p=punct.find(x=>x.matchId===a.matchId);
+    const isPast=m&&new Date(m.matchDate)<new Date();
+    return`<div class="matchday-item">
+      <div style="font-size:14px;font-weight:700">${m?`${m.homeTeam} vs ${m.awayTeam}`:a.matchId}</div>
+      <div style="font-size:11px;color:var(--lgrey);margin-bottom:4px">${m?`${m.gid} · ${new Date(m.matchDate).toLocaleString()}`:''}</div>
+      <div style="font-size:12px;margin-bottom:4px">${CFG[MODE].icon} Officiating: <strong>${activeNames.join(', ')||'Not confirmed'}</strong></div>
+      ${p?`<div class="punct-result ${p.status==='on_time'?'punct-ontime':'punct-late'}">${p.status==='on_time'?'✅ Arrived On Time':'⏰ Late Arrival'}${p.note?' — '+p.note:''}<br><span style="font-size:10px">Recorded by ${p.recordedBy} at ${new Date(p.recordedAt).toLocaleTimeString()}</span></div>`
+        :isPast?`<div>
+          <div style="font-size:11px;color:var(--lgrey);margin-bottom:6px">Record punctuality for this match:</div>
+          <div class="fg" style="margin-bottom:6px"><input type="text" id="pn-${a.matchId}" placeholder="Note (optional)" style="background:#111;border:1px solid var(--border);color:#fff;padding:7px;border-radius:6px;width:100%;font-size:12px"></div>
+          <div class="punct-btns">
+            <button class="btn btn-green" onclick="recordPunct('${a.matchId}','on_time')">✅ On Time</button>
+            <button class="btn btn-red" onclick="recordPunct('${a.matchId}','late')">⏰ Late</button>
+          </div>
+        </div>`:'<div style="font-size:11px;color:var(--lgrey)">Punctuality recorded on match day.</div>'}
+    </div>`;
+  }).join('');
+}
+
+function recordPunct(matchId,status){
+  const recorder=document.getElementById('md-recorder').value.trim();
+  if(!recorder){toast('Enter your name before recording','r');return;}
+  const note=document.getElementById(`pn-${matchId}`)?.value||'';
+  S.savePunct([...S.punct.filter(p=>p.matchId!==matchId),{matchId,status,note,recordedBy:recorder,recordedAt:new Date().toISOString()}]);
+  toast(status==='on_time'?'On Time recorded ✓':'Late arrival recorded','g');
+  renderMatchDayList();renderRatingSummary();
+}
+
+// ════════════════════════════════════════════════════
+// RATINGS — ONE SUBMISSION PER TEAM, HARD BLOCK
+// ════════════════════════════════════════════════════
+let selectedStars={};
+
+function hasTeamSubmitted(matchId,teamName){
+  return S.ratings.some(r=>r.matchId===matchId&&r.teamName===teamName);
+}
+
+function populateRatingSelects(){
+  const matches=S.matches();
+  const mSel=document.getElementById('rt-match');const cur=mSel.value;
+  mSel.innerHTML='<option value="">— Select match —</option>';
+  matches.forEach(m=>{
+    const dt=new Date(m.matchDate);
+    const hoursAgo=(new Date()-dt)/3600000;
+    const inWindow=hoursAgo>=0&&hoursAgo<=24;
+    const o=document.createElement('option');o.value=m.id;
+    o.textContent=`${m.gid} · ${m.homeTeam} vs ${m.awayTeam} · ${dt.toLocaleDateString()}${!inWindow?' [DEMO]':''}`;
+    mSel.appendChild(o);
+  });
+  if(cur)mSel.value=cur;
+  const allTeams=[...new Set(matches.flatMap(m=>[m.homeTeam,m.awayTeam]))];
+  const tSel=document.getElementById('rt-team');const curT=tSel.value;
+  tSel.innerHTML='<option value="">— Select your team —</option>';
+  allTeams.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;tSel.appendChild(o);});
+  if(curT)tSel.value=curT;
+}
+
+function loadRatingPanel(){
+  const matchId=document.getElementById('rt-match').value;
+  const teamName=document.getElementById('rt-team').value;
+  const el=document.getElementById('rating-panel');
+  if(!matchId||!teamName){el.innerHTML='';return;}
+  const m=S.matches().find(x=>x.id===matchId);
+  if(!m||(teamName!==m.homeTeam&&teamName!==m.awayTeam)){
+    el.innerHTML='<div class="alert alert-warn">Your team is not registered for this match.</div>';return;
+  }
+
+  // ── HARD BLOCK: One submission per team per match ──
+  const submitted=S.ratings.find(r=>r.matchId===matchId&&r.teamName===teamName);
+  if(submitted){
+    const rolePill=`<span class="role-pill role-${submitted.submitterRole||'captain'}">${submitted.submitterRole||'captain'}</span>`;
+    el.innerHTML=`<div class="card">
+      <div style="text-align:center;padding:12px">
+        <div style="font-size:28px;margin-bottom:8px">🔒</div>
+        <div style="font-weight:700;color:var(--warn);margin-bottom:4px">Rating Already Submitted</div>
+        <div style="font-size:12px;color:var(--lgrey);margin-bottom:8px">${teamName} has already submitted a rating for this match.</div>
+        <div style="background:#1a1a1a;border-radius:8px;padding:10px;text-align:left;font-size:12px">
+          <div class="perf-row"><span style="color:var(--lgrey)">Submitted by</span><span>${submitted.submitterName||'—'} ${rolePill}</span></div>
+          <div class="perf-row"><span style="color:var(--lgrey)">Score</span><span style="color:var(--gold);font-weight:700">⭐ ${submitted.score}/5</span></div>
+          <div class="perf-row"><span style="color:var(--lgrey)">Submitted at</span><span>${new Date(submitted.submittedAt).toLocaleString()}</span></div>
+          ${submitted.comment?`<div class="perf-row"><span style="color:var(--lgrey)">Comments</span><span style="font-style:italic">"${submitted.comment}"</span></div>`:''}
+        </div>
+        <div class="alert alert-warn" style="margin-top:10px;text-align:left">One submission per team per match is allowed. Contact a BHBA Executive to dispute a rating.</div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  // ── RATING FORM ──
+  const alloc=S.allocs.find(a=>a.matchId===matchId);
+  const conf=S.confs.find(c=>c.matchId===alloc?.matchId);
+  const offs=S.officials;
+  let activeNames=[],activeIds=[];
+  if(alloc){
+    if(MODE==='ref'){
+      const id=conf?.status==='confirmed_alternate'?alloc.alternateRef:alloc.primaryRef;
+      const r=offs.find(x=>x.id===id);if(r){activeNames=[r.name];activeIds=[r.id];}
+    }else{
+      const ids=conf?.status==='confirmed_backup'?[alloc.toBackup]:conf?.status==='confirmed_to'?[alloc.to1,alloc.to2]:[alloc.to1,alloc.to2];
+      ids.filter(Boolean).forEach(id=>{const r=offs.find(x=>x.id===id);if(r){activeNames.push(r.name);activeIds.push(r.id);}});
+    }
+  }
+  const primaryId=activeIds[0]||null;
+  const key=`${MODE}_${matchId}_${teamName}`;
+  if(!selectedStars[key])selectedStars[key]=0;
+  const dt=new Date(m.matchDate);
+  const windowClose=new Date(dt.getTime()+24*3600000).toLocaleString();
+
+  el.innerHTML=`<div class="card">
+    <div class="card-title">Rate ${MODE==='ref'?'Referee':'Table Officials'} — ${teamName}</div>
+    <div style="font-size:11px;color:var(--lgrey);margin-bottom:6px">${m.gid} · ${m.homeTeam} vs ${m.awayTeam} · ${dt.toLocaleString()}</div>
+    ${activeNames.length?`<div style="font-size:13px;margin-bottom:8px">${CFG[MODE].icon} Officiating: <strong>${activeNames.join(' & ')}</strong></div>`:'<div class="alert alert-warn">No confirmed officials on record for this match.</div>'}
+    <div style="font-size:11px;color:var(--warn);margin-bottom:10px">⏰ Rating window closes: ${windowClose}</div>
+    <div class="alert alert-info" style="margin-bottom:10px">⚠ Once submitted, this rating is <strong>permanent</strong>. No updates are permitted after submission.</div>
+    <div style="font-size:11px;color:var(--lgrey);margin-bottom:4px;text-align:center">Select your rating:</div>
+    <div class="rating-labels"><span>1 — Unacceptable</span><span style="text-align:center">3 — Adequate</span><span style="text-align:right">5 — Excellent</span></div>
+    <div class="star-rating" id="stars-${key}">
+      ${[1,2,3,4,5].map(n=>`<span class="star ${selectedStars[key]>=n?'active':''}" onclick="setStar('${key}',${n})" title="${LIKERT_LABELS[n]}">★</span>`).join('')}
+    </div>
+    <div id="star-lbl-${key}" style="text-align:center;font-size:12px;color:var(--gold);min-height:18px;margin-bottom:10px">${selectedStars[key]?LIKERT_LABELS[selectedStars[key]]:''}</div>
+    <div class="fg"><label>Comments (optional)</label>
+      <textarea id="rt-comment" rows="2" placeholder="Brief comments on officiating quality…"></textarea>
+    </div>
+    <button class="btn btn-gold" onclick="submitRating('${matchId}','${teamName}','${primaryId||''}')">⭐ Submit Rating</button>
+  </div>`;
+}
+
+function setStar(key,n){
+  selectedStars[key]=n;
+  document.getElementById(`stars-${key}`)?.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('active',i<n));
+  const lbl=document.getElementById(`star-lbl-${key}`);
+  if(lbl)lbl.textContent=LIKERT_LABELS[n]||'';
+}
+
+function submitRating(matchId,teamName,offId){
+  const submitter=document.getElementById('rt-submitter').value.trim();
+  const role=document.getElementById('rt-role').value;
+  if(!submitter){toast('Enter your name','r');return;}
+  if(!role){toast('Select your role (Captain/Coach/Manager)','r');return;}
+  const key=`${MODE}_${matchId}_${teamName}`;
+  const score=selectedStars[key]||0;
+  if(!score){toast('Select a rating (1–5)','r');return;}
+
+  // Final hard-block check (defensive — form should already be blocked if submitted)
+  if(hasTeamSubmitted(matchId,teamName)){
+    toast('Your team has already submitted a rating for this match','r');
+    loadRatingPanel();return;
+  }
+
+  const comment=document.getElementById('rt-comment')?.value.trim()||'';
+  S.saveRatings([...S.ratings,{
+    id:'RT-'+Date.now(),matchId,teamName,offId,
+    submitterName:submitter,submitterRole:role,
+    score,comment,submittedAt:new Date().toISOString()
+  }]);
+  toast(`Rating of ${score}/5 submitted ✓ — locked permanently`,'g');
+  renderRegistry();renderRatingSummary();loadRatingPanel();
+}
+
+// ════════════════════════════════════════════════════
+// RATINGS SUMMARY — EXEC GATE
+// ════════════════════════════════════════════════════
+function renderRatingSummary(){
+  const el=document.getElementById('rating-summary');
+  const offs=S.officials;
+  if(!offs.length){el.innerHTML=`<div style="color:var(--lgrey);font-size:12px">No ${CFG[MODE].plural.toLowerCase()} registered yet.</div>`;return;}
+  const isExec=isExecUser();
+  if(!isExec){
+    el.innerHTML=`<div class="exec-gate-locked">
+      <div style="font-size:28px;margin-bottom:8px">🔒</div>
+      <div style="color:var(--gold);font-weight:700;font-size:14px;margin-bottom:6px">Performance Ratings — BHBA Executive Access Only</div>
+      <div style="font-size:12px;color:var(--lgrey);margin-bottom:10px">Rating data, Bayesian scores, and submission history are restricted to approved BHBA Executives. Log in with an approved executive account to view this data.</div>
+      <div style="font-size:11px;color:var(--lgrey)">Ratings are submitted via the form above and stored securely. Contact your BHBA President or VP for access.</div>
+    </div>`;
+    return;
+  }
+  const allRatings=S.ratings;
+  const allPunct=S.punct;
+  const certLabel={local:'Local',national:'National',fiba:'FIBA'};
+  const execName=getExecName()||'BHBA Executive';
+  el.innerHTML=`<div class="exec-verified-bar"><span style="font-size:12px;color:var(--green)">🔓 Exec Access: ${execName}</span><span class="bayes-tag">BAYESIAN WEIGHTED</span></div>
+  <table class="stats-table">
+    <thead><tr><th>Official</th><th>Level</th><th>BW Score</th><th>Raw</th><th># Ratings</th><th>Punct.</th><th>Matches</th><th></th></tr></thead>
+    <tbody>
+    ${offs.map(r=>{
+      const bs=bayesScore(r.id);
+      const allocs=S.allocs.filter(a=>a.primaryRef===r.id||a.alternateRef===r.id||a.to1===r.id||a.to2===r.id||a.toBackup===r.id);
+      const pRecs=allPunct.filter(p=>{
+        const alloc=S.allocs.find(a=>a.matchId===p.matchId);if(!alloc)return false;
+        const conf=S.confs.find(c=>c.matchId===p.matchId);
+        let activeIds=MODE==='ref'
+          ?[conf?.status==='confirmed_alternate'?alloc.alternateRef:alloc.primaryRef]
+          :conf?.status==='confirmed_backup'?[alloc.toBackup]:conf?.status==='confirmed_to'?[alloc.to1,alloc.to2]:[alloc.to1,alloc.to2];
+        return activeIds.filter(Boolean).includes(r.id);
+      });
+      return`<tr>
+        <td><strong>${r.name}</strong> <span style="font-size:10px;color:var(--lgrey)">${r.badge}</span></td>
+        <td>${certLabel[r.cert]||r.cert}</td>
+        <td style="color:var(--gold)">${bs?`⭐ ${bs.ws}`:'—'}</td>
+        <td style="color:var(--lgrey)">${bs?bs.raw:'—'}</td>
+        <td>${bs?bs.n:0}</td>
+        <td>${pRecs.length?`<span style="color:var(--green)">${pRecs.filter(p=>p.status==='on_time').length}✓</span> <span style="color:var(--red)">${pRecs.filter(p=>p.status==='late').length}⏰</span>`:'—'}</td>
+        <td>${allocs.length}</td>
+        <td><button class="btn btn-sm btn-blue" onclick="openOfficialProfile('${r.id}')">View</button></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>
+  <div style="font-size:10px;color:var(--lgrey);margin-top:8px;padding:8px;background:#1a1a1a;border-radius:6px">
+    <strong style="color:var(--gold)">Bayesian Weighted (BW) Formula:</strong> WS = (C×m + Σscores) / (C+n) — C=${BAYES_C}, m=global mean (${globalMean().toFixed(2)}). Protects against small-sample bias.
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════
+// TOAST & INIT
+// ════════════════════════════════════════════════════
+function toast(msg,t='g'){
+  const el=document.getElementById('toast');
+  el.style.background={g:'var(--green)',r:'var(--red)',w:'var(--warn)'}[t]||'#333';
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(window._tTimer);window._tTimer=setTimeout(()=>el.style.opacity='0',4000);
+}
+
+// Demo seed
+(function(){
+  const refKey='bhba_refs',toKey='bhba_tos';
+  if(!localStorage.getItem(refKey)){
+    const ts=new Date().toISOString();
+    localStorage.setItem(refKey,JSON.stringify([
+      {id:'REF-101',name:'Anthony Clarke',   badge:'REF-101',phone:'+1 876 455-7890',email:'aclarke@bhba.jm',   cert:'fiba',    status:'active',registeredAt:ts},
+      {id:'REF-102',name:'Sandra Morrison',  badge:'REF-102',phone:'+1 876 555-1234',email:'smorrison@bhba.jm', cert:'national',status:'active',registeredAt:ts},
+      {id:'REF-103',name:'Devon Campbell',   badge:'REF-103',phone:'+1 876 445-9900',email:'dcampbell@bhba.jm', cert:'local',   status:'active',registeredAt:ts},
+      {id:'REF-104',name:'Robert Reid',      badge:'REF-104',phone:'+1 876 432-1122',email:'rreid@bhba.jm',     cert:'national',status:'active',registeredAt:ts},
+      {id:'REF-105',name:'Patricia Brown',   badge:'REF-105',phone:'+1 876 876-3344',email:'pbrown@bhba.jm',    cert:'local',   status:'active',registeredAt:ts},
+      {id:'REF-106',name:'Carlton Bailey',   badge:'REF-106',phone:'+1 876 543-5566',email:'cbailey@bhba.jm',   cert:'fiba',    status:'active',registeredAt:ts},
+      {id:'REF-107',name:'Yvonne Stewart',   badge:'REF-107',phone:'+1 876 234-7788',email:'ystewart@bhba.jm',  cert:'national',status:'active',registeredAt:ts},
+      {id:'REF-108',name:'Michael Thompson', badge:'REF-108',phone:'+1 876 765-9900',email:'mthompson@bhba.jm', cert:'local',   status:'active',registeredAt:ts},
+      {id:'REF-109',name:'Stephanie Morgan', badge:'REF-109',phone:'+1 876 321-1122',email:'smorgan@bhba.jm',   cert:'national',status:'active',registeredAt:ts},
+      {id:'REF-110',name:'James Patterson',  badge:'REF-110',phone:'+1 876 654-3344',email:'jpatterson@bhba.jm',cert:'fiba',    status:'active',registeredAt:ts},
+    ]));localStorage.setItem('bhba_ref_id','110');
+  }
+  if(!localStorage.getItem(toKey)){
+    const ts=new Date().toISOString();
+    localStorage.setItem(toKey,JSON.stringify([
+      {id:'TO-101',name:'Marcia Thomas',    badge:'TO-101',phone:'+1 876 700-1111',email:'mthomas@bhba.jm',    cert:'local',   status:'active',registeredAt:ts},
+      {id:'TO-102',name:'Kevin Brown',      badge:'TO-102',phone:'+1 876 700-2222',email:'kbrown@bhba.jm',     cert:'local',   status:'active',registeredAt:ts},
+      {id:'TO-103',name:'Natasha Reid',     badge:'TO-103',phone:'+1 876 700-3333',email:'nreid@bhba.jm',      cert:'national',status:'active',registeredAt:ts},
+      {id:'TO-104',name:'Sharon Williams',  badge:'TO-104',phone:'+1 876 700-4444',email:'swilliams@bhba.jm',  cert:'local',   status:'active',registeredAt:ts},
+      {id:'TO-105',name:'Paul Anderson',    badge:'TO-105',phone:'+1 876 700-5555',email:'panderson@bhba.jm',  cert:'national',status:'active',registeredAt:ts},
+      {id:'TO-106',name:'Tracey Hamilton',  badge:'TO-106',phone:'+1 876 700-6666',email:'thamilton@bhba.jm',  cert:'local',   status:'active',registeredAt:ts},
+      {id:'TO-107',name:'David McKenzie',   badge:'TO-107',phone:'+1 876 700-7777',email:'dmckenzie@bhba.jm',  cert:'national',status:'active',registeredAt:ts},
+      {id:'TO-108',name:'Christine Gordon', badge:'TO-108',phone:'+1 876 700-8888',email:'cgordon@bhba.jm',    cert:'local',   status:'active',registeredAt:ts},
+      {id:'TO-109',name:'Winston Clarke',   badge:'TO-109',phone:'+1 876 700-9999',email:'wclarke@bhba.jm',    cert:'national',status:'active',registeredAt:ts},
+      {id:'TO-110',name:'Denise Campbell',  badge:'TO-110',phone:'+1 876 700-0000',email:'dcampbell2@bhba.jm', cert:'local',   status:'active',registeredAt:ts},
+    ]));localStorage.setItem('bhba_to_id','110');
+  }
+  // Init cert options for default mode
+  const certSel=document.getElementById('reg-cert');
+  certSel.innerHTML=CFG[MODE].certOptions.map(o=>`<option value="${o.v}">${o.l}</option>`).join('');
+  renderRegistry();
+})();
+</script>
+</body>
+</html>
