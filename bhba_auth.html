@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BHBA Member Portal — Registration & Access</title>
+<!-- CLASSIFICATION: INTERNAL USE | v1.0.0 | 2026-06-12
+     Auth: email-unique registration, multi-position profiles, role approval workflow
+     Credentials stored in localStorage (demo only — production: JWT/bcrypt/server-side) -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);--border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);--white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;--red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--pending:#9B59B6;--purple:#9B59B6;--teal:#1ABC9C}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.05) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.03) 0%,transparent 55%);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh}
+/* ── NAV ── */
+#nav{background:linear-gradient(135deg,#04040c 0%,#0c0b18 60%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 24px rgba(0,0,0,0.6)}
+#nav .brand{color:var(--gold);font-size:18px;font-weight:900;letter-spacing:1px}
+#nav .user-info{font-size:12px;color:var(--lgrey);text-align:right}
+#nav .user-info strong{color:var(--white)}
+#nav .btn-logout{background:none;border:1px solid var(--border);color:var(--lgrey);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:8px}
+/* ── SCREENS ── */
+.screen{display:none;padding:20px;max-width:540px;margin:0 auto}
+.screen.active{display:block}
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px;transition:border-color .2s,box-shadow .2s}.card:hover{border-color:var(--border-h);box-shadow:0 4px 20px rgba(245,166,35,0.06)}
+.card-title{color:var(--gold);font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+/* ── FORM ── */
+.fg{margin-bottom:12px}
+.fg label{display:block;color:var(--lgrey);font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select{width:100%;background:#1a1a1a;border:1px solid var(--border);color:var(--white);padding:10px;border-radius:6px;font-size:14px}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--gold)}
+.fg select option{background:var(--card)}
+/* ── BUTTONS ── */
+.btn{border:none;padding:11px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:700;width:100%;margin-bottom:8px}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;font-weight:800;transition:opacity .15s,transform .1s}.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--lgrey)}
+.btn-sm{padding:5px 12px;font-size:12px;width:auto;margin:0}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-red{background:var(--red);color:var(--white)}
+.btn-blue{background:var(--blue);color:var(--white)}
+.btn-warn{background:var(--warn);color:var(--white)}
+/* ── ROLE TYPES ── */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.role-card{background:#1a1a1a;border:2px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;text-align:center;transition:border-color .2s}
+.role-card:hover{border-color:var(--gold)}
+.role-card.selected{border-color:var(--gold);background:rgba(212,160,23,.08)}
+.role-card .ri{font-size:24px;margin-bottom:4px}
+.role-card .rn{font-size:12px;font-weight:700;color:var(--white)}
+.role-card .rd{font-size:10px;color:var(--lgrey);margin-top:2px}
+/* ── BADGES ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;margin:2px}
+.badge-approved{background:var(--green);color:var(--white)}
+.badge-pending{background:var(--pending);color:var(--white)}
+.badge-rejected{background:var(--red);color:var(--white)}
+.badge-exec{background:var(--gold);color:var(--black)}
+.badge-team{background:var(--blue);color:var(--white)}
+/* ── PROFILE SECTION ── */
+.profile-hdr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.avatar{width:48px;height:48px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--black);flex-shrink:0}
+.profile-hdr h2{font-size:16px;color:var(--white)}
+.profile-hdr p{font-size:11px;color:var(--lgrey)}
+/* ── ROLE ITEM ── */
+.role-item{display:flex;align-items:center;justify-content:space-between;padding:8px;background:#1a1a1a;border-radius:6px;margin-bottom:6px;border:1px solid var(--border)}
+.role-item .ri-left{display:flex;flex-direction:column;gap:2px}
+.role-item .ri-name{font-size:13px;font-weight:700}
+.role-item .ri-det{font-size:10px;color:var(--lgrey)}
+/* ── APPROVAL QUEUE ── */
+.approval-item{background:#1a1a1a;border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:8px}
+.approval-item .ai-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.approval-item .ai-name{font-size:13px;font-weight:700}
+.approval-item .ai-role{font-size:11px;color:var(--gold)}
+.approval-item .ai-actions{display:flex;gap:6px}
+/* ── MEMBER LIST ── */
+.member-item{display:flex;align-items:center;gap:10px;padding:8px;background:#1a1a1a;border-radius:6px;margin-bottom:6px;border:1px solid var(--border)}
+.member-item .m-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.member-item .m-info{flex:1}
+.member-item .m-name{font-size:13px;font-weight:700}
+.member-item .m-email{font-size:10px;color:var(--lgrey)}
+/* ── NAV TABS ── */
+.nav-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.nav-tab{background:rgba(12,12,22,0.8);border:1px solid var(--border);color:var(--lgrey);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s,color .15s}
+.nav-tab:hover{border-color:var(--border-h);color:var(--gold)}
+.nav-tab.active{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%);color:#000;border-color:var(--gold);box-shadow:0 2px 14px rgba(245,166,35,0.3)}
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:90vw}
+/* ── ALERTS ── */
+.alert{padding:10px 12px;border-radius:6px;font-size:13px;margin-bottom:12px}
+.alert-warn{background:rgba(230,126,34,.15);border:1px solid var(--warn);color:var(--warn)}
+.alert-info{background:rgba(41,128,185,.15);border:1px solid var(--blue);color:var(--blue)}
+</style>
+</head>
+<body>
+
+<div id="nav">
+  <div class="brand">BHBA</div>
+  <div style="display:flex;align-items:center">
+    <div class="user-info" id="nav-user" style="display:none">
+      <div>Logged in as <strong id="nav-name">—</strong></div>
+      <div id="nav-role" style="font-size:10px"></div>
+    </div>
+    <button class="btn-logout" id="btn-logout" style="display:none" onclick="logout()">Sign Out</button>
+  </div>
+</div>
+
+<!-- ══════════ LANDING ══════════ -->
+<div class="screen active" id="screen-landing" style="text-align:center;padding-top:40px">
+  <div style="font-size:60px;margin-bottom:8px">🏀</div>
+  <div style="color:var(--gold);font-size:28px;font-weight:900;margin-bottom:4px">BHBA</div>
+  <div style="color:var(--white);font-size:16px;font-weight:700;margin-bottom:4px">Member Portal</div>
+  <div style="color:var(--lgrey);font-size:12px;margin-bottom:32px">Business House Basketball Association 2026</div>
+  <button class="btn btn-gold" onclick="show('screen-login')" style="max-width:320px;margin:0 auto 8px">Sign In</button>
+  <button class="btn btn-outline" onclick="show('screen-register')" style="max-width:320px;margin:0 auto">Create Account</button>
+  <div style="color:var(--lgrey);font-size:11px;margin-top:20px">Demo: <em>admin@bhba.jm / Admin1234!</em></div>
+</div>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div class="screen" id="screen-login">
+  <div class="card">
+    <div class="card-title">🔐 Sign In</div>
+    <div class="fg"><label>Email Address</label><input type="email" id="l-email" placeholder="your@email.com"></div>
+    <div class="fg"><label>Password</label><input type="password" id="l-pass" placeholder="Password"></div>
+    <div id="l-err" style="color:var(--red);font-size:12px;margin-bottom:10px;display:none"></div>
+    <button class="btn btn-gold" onclick="doLogin()">Sign In</button>
+    <button class="btn btn-outline" onclick="show('screen-landing')">← Back</button>
+    <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--lgrey)">No account? <a href="#" onclick="show('screen-register')" style="color:var(--gold)">Register here</a></div>
+  </div>
+</div>
+
+<!-- ══════════ REGISTER ══════════ -->
+<div class="screen" id="screen-register">
+  <div class="card">
+    <div class="card-title">📋 Create Account</div>
+    <div class="alert alert-info">Registration creates your BHBA member profile. You can request additional role attachments after your account is active.</div>
+    <div class="fg"><label>Full Name</label><input type="text" id="r-name" placeholder="Full legal name"></div>
+    <div class="fg"><label>Email Address</label><input type="email" id="r-email" placeholder="your@email.com"><div style="font-size:10px;color:var(--lgrey);margin-top:3px">This is your unique login ID — cannot be changed</div></div>
+    <div class="fg"><label>Password</label><input type="password" id="r-pass" placeholder="Min 8 chars, 1 uppercase, 1 number"></div>
+    <div class="fg"><label>Phone</label><input type="tel" id="r-phone" placeholder="+1 876 XXX XXXX"></div>
+    <div class="fg"><label>Company / Organisation</label><input type="text" id="r-org" placeholder="Employer or organisation"></div>
+    <div class="card-title" style="margin-top:4px">Select Primary Role</div>
+    <div class="role-grid" id="role-grid"></div>
+    <div id="r-team-field" style="display:none">
+      <div class="fg"><label>Team Name</label><input type="text" id="r-team" placeholder="Team you represent"></div>
+    </div>
+    <div id="r-err" style="color:var(--red);font-size:12px;margin-bottom:10px;display:none"></div>
+    <button class="btn btn-gold" onclick="doRegister()">Create Account</button>
+    <button class="btn btn-outline" onclick="show('screen-landing')">← Back</button>
+  </div>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div class="screen" id="screen-dashboard">
+  <div class="profile-hdr" style="padding:4px 0 12px">
+    <div class="avatar" id="dash-avatar">?</div>
+    <div>
+      <h2 id="dash-name">Member Name</h2>
+      <p id="dash-email">email@bhba.jm</p>
+      <div id="dash-badges" style="margin-top:4px"></div>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="dashTab('my-roles')">My Roles</div>
+    <div class="nav-tab" onclick="dashTab('request-role')">Request Role</div>
+    <div class="nav-tab" id="tab-approvals" style="display:none" onclick="dashTab('approvals')">Approvals <span id="appr-count" style="background:var(--red);border-radius:8px;padding:1px 5px;font-size:10px">0</span></div>
+    <div class="nav-tab" id="tab-members" style="display:none" onclick="dashTab('members')">Members</div>
+  </div>
+
+  <!-- MY ROLES -->
+  <div id="dt-my-roles">
+    <div class="card">
+      <div class="card-title">👤 My Active Roles</div>
+      <div id="my-roles-list"></div>
+    </div>
+  </div>
+
+  <!-- REQUEST ROLE -->
+  <div id="dt-request-role" style="display:none">
+    <div class="card">
+      <div class="card-title">➕ Request Additional Role</div>
+      <div class="alert alert-warn" id="req-warn" style="display:none"></div>
+      <div class="fg"><label>Role to Request</label>
+        <select id="req-role">
+          <option value="">— Select role —</option>
+        </select>
+      </div>
+      <div class="fg" id="req-team-fg" style="display:none"><label>Team (if applicable)</label><input type="text" id="req-team" placeholder="Team name"></div>
+      <div class="fg"><label>Reason / Justification</label><input type="text" id="req-reason" placeholder="Why do you need this role?"></div>
+      <div id="req-approval-note" style="font-size:11px;color:var(--lgrey);margin-bottom:10px;padding:8px;background:#1a1a1a;border-radius:4px;display:none"></div>
+      <button class="btn btn-gold" onclick="submitRoleRequest()">Submit Request</button>
+    </div>
+    <div class="card">
+      <div class="card-title">⏳ Pending Requests</div>
+      <div id="pending-requests"></div>
+    </div>
+  </div>
+
+  <!-- APPROVALS (exec only) -->
+  <div id="dt-approvals" style="display:none">
+    <div class="card">
+      <div class="card-title">✅ Role Approval Queue</div>
+      <div id="approval-queue"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗑 Remove Role from Member</div>
+      <div class="fg"><label>Member Email</label><input type="email" id="rm-email" placeholder="member@email.com"></div>
+      <div class="fg"><label>Role to Remove</label><select id="rm-role"><option value="">— Select —</option></select></div>
+      <button class="btn btn-warn btn-sm" style="width:100%" onclick="removeRoleFromMember()">Remove Role</button>
+    </div>
+  </div>
+
+  <!-- MEMBERS (exec only) -->
+  <div id="dt-members" style="display:none">
+    <div class="card">
+      <div class="card-title">👥 All Registered Members</div>
+      <div class="fg"><input type="text" id="member-search" placeholder="Search by name or email…" oninput="renderMembers()"></div>
+      <div id="member-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// ROLE DEFINITIONS
+// ═══════════════════════════════════════════════════
+const ROLES = {
+  bhba_president:   {label:'BHBA President',    icon:'👑', tier:'exec_senior', desc:'Highest authority', approvedBy:null},
+  bhba_vp:          {label:'BHBA Vice President',icon:'⭐', tier:'exec_senior', desc:'VP / Match Commissioner', approvedBy:['bhba_president']},
+  match_commissioner:{label:'Match Commissioner',icon:'🏛', tier:'exec_senior', desc:'Official match authority', approvedBy:['bhba_president','bhba_vp']},
+  bhba_executive:   {label:'BHBA Executive',    icon:'🏢', tier:'exec',        desc:'BHBA board member', approvedBy:['bhba_president','bhba_vp','match_commissioner']},
+  bhba_employee:    {label:'BHBA Employee',     icon:'🪪', tier:'staff',       desc:'Association staff', approvedBy:['bhba_president','bhba_vp','match_commissioner']},
+  referee:          {label:'Referee',            icon:'🦺', tier:'official',   desc:'Licensed game official', approvedBy:['bhba_president','bhba_vp','match_commissioner']},
+  table_official:   {label:'Table Official',    icon:'📋', tier:'official',   desc:'Scorer / timekeeper', approvedBy:['bhba_president','bhba_vp','match_commissioner']},
+  team_manager:     {label:'Team Manager',       icon:'📊', tier:'team',       desc:'Team coach/manager', approvedBy:['bhba_president','bhba_vp','match_commissioner','bhba_executive']},
+  team_captain:     {label:'Team Captain',       icon:'🏅', tier:'team',       desc:'On-court team leader', approvedBy:['bhba_president','bhba_vp','match_commissioner','bhba_executive']},
+  player:           {label:'Player',             icon:'🏀', tier:'team',       desc:'Registered team player', approvedBy:['bhba_president','bhba_vp','match_commissioner','bhba_executive']},
+};
+
+// Roles a user can self-register as their PRIMARY role at signup
+const SELF_REGISTER_ROLES = ['player','team_manager','team_captain','referee','table_official'];
+
+// Roles that players/team members CANNOT self-request
+const RESTRICTED_ROLES = ['bhba_president','bhba_vp','match_commissioner','bhba_executive','bhba_employee'];
+
+// Exec tiers that can approve role requests
+const EXEC_APPROVER_TIERS = ['exec_senior','exec'];
+const SENIOR_EXEC_TIERS = ['exec_senior'];
+
+// ═══════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════
+function getUsers(){return JSON.parse(localStorage.getItem('bhba_users')||'{}');}
+function saveUsers(u){localStorage.setItem('bhba_users',JSON.stringify(u));}
+function getRequests(){return JSON.parse(localStorage.getItem('bhba_role_requests')||'[]');}
+function saveRequests(r){localStorage.setItem('bhba_role_requests',JSON.stringify(r));}
+function getSession(){return JSON.parse(localStorage.getItem('bhba_session')||'null');}
+function saveSession(s){localStorage.setItem('bhba_session',JSON.stringify(s));}
+
+// Seed admin account on first load
+(function(){
+  const u=getUsers();
+  if(!u['admin@bhba.jm']){
+    u['admin@bhba.jm']={
+      name:'BHBA Administrator',email:'admin@bhba.jm',phone:'',org:'BHBA',
+      passHash:simpleHash('Admin1234!'),
+      roles:[{role:'bhba_president',status:'approved',team:'',approvedBy:'system',approvedAt:new Date().toISOString()}],
+      createdAt:new Date().toISOString()
+    };
+    saveUsers(u);
+  }
+})();
+
+function simpleHash(s){let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0;}return h.toString(36);}
+
+// ═══════════════════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════════════════
+let currentScreen='screen-landing';
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  currentScreen=id;
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════════
+// ROLE GRID (register screen)
+// ═══════════════════════════════════════════════════
+let selectedPrimaryRole='';
+(function(){
+  const grid=document.getElementById('role-grid');
+  SELF_REGISTER_ROLES.forEach(rk=>{
+    const rd=ROLES[rk];
+    const d=document.createElement('div');
+    d.className='role-card';d.id=`rc-${rk}`;
+    d.innerHTML=`<div class="ri">${rd.icon}</div><div class="rn">${rd.label}</div><div class="rd">${rd.desc}</div>`;
+    d.onclick=()=>selectRole(rk);
+    grid.appendChild(d);
+  });
+})();
+
+function selectRole(rk){
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById(`rc-${rk}`).classList.add('selected');
+  selectedPrimaryRole=rk;
+  const teamRoles=['player','team_manager','team_captain'];
+  document.getElementById('r-team-field').style.display=teamRoles.includes(rk)?'block':'none';
+}
+
+// ═══════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════
+function doLogin(){
+  const email=document.getElementById('l-email').value.trim().toLowerCase();
+  const pass=document.getElementById('l-pass').value;
+  const users=getUsers();
+  const u=users[email];
+  const errEl=document.getElementById('l-err');
+  if(!u||u.passHash!==simpleHash(pass)){
+    errEl.textContent='Invalid email or password.';errEl.style.display='block';return;
+  }
+  errEl.style.display='none';
+  saveSession({email,name:u.name});
+  loadDashboard();
+}
+
+function doRegister(){
+  const name=document.getElementById('r-name').value.trim();
+  const email=document.getElementById('r-email').value.trim().toLowerCase();
+  const pass=document.getElementById('r-pass').value;
+  const phone=document.getElementById('r-phone').value.trim();
+  const org=document.getElementById('r-org').value.trim();
+  const team=document.getElementById('r-team').value.trim();
+  const errEl=document.getElementById('r-err');
+
+  if(!name){errEl.textContent='Full name is required.';errEl.style.display='block';return;}
+  if(!email||!email.includes('@')){errEl.textContent='Valid email is required.';errEl.style.display='block';return;}
+  if(pass.length<8){errEl.textContent='Password must be at least 8 characters.';errEl.style.display='block';return;}
+  if(!/[A-Z]/.test(pass)||!/[0-9]/.test(pass)){errEl.textContent='Password needs 1 uppercase letter and 1 number.';errEl.style.display='block';return;}
+  if(!selectedPrimaryRole){errEl.textContent='Please select a primary role.';errEl.style.display='block';return;}
+
+  const users=getUsers();
+  if(users[email]){errEl.textContent='This email is already registered.';errEl.style.display='block';return;}
+
+  // Roles requiring approval — new user starts with pending
+  const needsApproval=RESTRICTED_ROLES.includes(selectedPrimaryRole);
+  const roleStatus = needsApproval ? 'pending' : 'approved';
+
+  users[email]={
+    name,email,phone,org,passHash:simpleHash(pass),
+    roles:[{role:selectedPrimaryRole,status:roleStatus,team:team||'',approvedBy:roleStatus==='approved'?'self':'',approvedAt:roleStatus==='approved'?new Date().toISOString():''}],
+    createdAt:new Date().toISOString()
+  };
+  saveUsers(users);
+  saveSession({email,name});
+  toast('Account created! Welcome to BHBA.','g');
+  loadDashboard();
+}
+
+function logout(){
+  localStorage.removeItem('bhba_session');
+  document.getElementById('nav-user').style.display='none';
+  document.getElementById('btn-logout').style.display='none';
+  show('screen-landing');
+}
+
+// ═══════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════
+function loadDashboard(){
+  const sess=getSession();if(!sess)return;
+  const users=getUsers();
+  const u=users[sess.email];
+  if(!u){logout();return;}
+
+  document.getElementById('nav-user').style.display='block';
+  document.getElementById('btn-logout').style.display='block';
+  document.getElementById('nav-name').textContent=u.name;
+
+  const approvedRoles=u.roles.filter(r=>r.status==='approved');
+  document.getElementById('nav-role').textContent=approvedRoles.map(r=>ROLES[r.role]?.label||r.role).join(', ');
+
+  // Profile header
+  document.getElementById('dash-avatar').textContent=u.name.charAt(0).toUpperCase();
+  document.getElementById('dash-name').textContent=u.name;
+  document.getElementById('dash-email').textContent=u.email;
+
+  // Badges
+  const badgeEl=document.getElementById('dash-badges');
+  badgeEl.innerHTML=u.roles.map(r=>{
+    const rd=ROLES[r.role];
+    const tierClass=rd?({'exec_senior':'badge-exec','exec':'badge-exec','staff':'badge-exec','official':'badge-team','team':'badge-team'}[rd.tier]||'badge-team'):'badge-team';
+    return `<span class="badge ${r.status==='approved'?tierClass:'badge-pending'}">${rd?rd.icon+' ':''} ${ROLES[r.role]?.label||r.role} ${r.status==='pending'?'⏳':''}</span>`;
+  }).join('');
+
+  // Show exec tabs if applicable
+  const isExec=isApprovedExec(u);
+  document.getElementById('tab-approvals').style.display=isExec?'flex':'none';
+  document.getElementById('tab-members').style.display=isExec?'flex':'none';
+  updateApprovalCount();
+
+  // Populate request role dropdown
+  populateRequestRoles(u);
+  renderMyRoles(u);
+  renderPendingRequests(sess.email);
+
+  if(isExec){renderApprovalQueue();renderMembers();}
+  show('screen-dashboard');
+  dashTab('my-roles');
+}
+
+function isApprovedExec(u){
+  return u.roles.some(r=>r.status==='approved'&&['exec_senior','exec'].includes(ROLES[r.role]?.tier));
+}
+
+function isSeniorExec(u){
+  return u.roles.some(r=>r.status==='approved'&&SENIOR_EXEC_TIERS.includes(ROLES[r.role]?.tier));
+}
+
+function getUserApprovedRoleTiers(u){
+  return u.roles.filter(r=>r.status==='approved').map(r=>ROLES[r.role]?.tier);
+}
+
+function dashTab(tab){
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>{
+    const ids=['my-roles','request-role','approvals','members'];
+    t.classList.toggle('active',ids[i]===tab);
+  });
+  ['my-roles','request-role','approvals','members'].forEach(id=>{
+    const el=document.getElementById(`dt-${id}`);if(el)el.style.display=id===tab?'block':'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// MY ROLES
+// ═══════════════════════════════════════════════════
+function renderMyRoles(u){
+  const el=document.getElementById('my-roles-list');
+  if(!u.roles.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No roles assigned.</div>';return;}
+  el.innerHTML=u.roles.map(r=>{
+    const rd=ROLES[r.role]||{label:r.role,icon:'?'};
+    const statusBadge=r.status==='approved'?'<span class="badge badge-approved">✓ Active</span>':r.status==='pending'?'<span class="badge badge-pending">⏳ Awaiting Approval</span>':'<span class="badge badge-rejected">✗ Rejected</span>';
+    const team=r.team?`<span style="color:var(--lgrey)"> · ${r.team}</span>`:'';
+    return `<div class="role-item">
+      <div class="ri-left">
+        <div class="ri-name">${rd.icon} ${rd.label}${team}</div>
+        <div class="ri-det">${r.status==='approved'?`Approved ${new Date(r.approvedAt).toLocaleDateString()}`:rd.desc}</div>
+      </div>
+      <div>${statusBadge}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// REQUEST ROLES
+// ═══════════════════════════════════════════════════
+function populateRequestRoles(u){
+  const existingRoles=u.roles.map(r=>r.role);
+  const approvedTiers=getUserApprovedRoleTiers(u);
+  const isExec=approvedTiers.some(t=>EXEC_APPROVER_TIERS.includes(t));
+  const sel=document.getElementById('req-role');
+  sel.innerHTML='<option value="">— Select role —</option>';
+
+  Object.entries(ROLES).forEach(([rk,rd])=>{
+    if(existingRoles.includes(rk))return; // already has role
+    // Players/team members cannot request restricted (exec/staff) roles
+    if(!isExec&&RESTRICTED_ROLES.includes(rk))return;
+    // Cannot request senior exec roles (President/VP) unless already senior exec
+    if(['bhba_president','bhba_vp'].includes(rk)&&!approvedTiers.includes('exec_senior'))return;
+    const opt=document.createElement('option');
+    opt.value=rk;opt.textContent=`${rd.icon} ${rd.label}`;
+    sel.appendChild(opt);
+  });
+
+  sel.onchange=()=>{
+    const rk=sel.value;
+    const teamRoles=['player','team_manager','team_captain'];
+    document.getElementById('req-team-fg').style.display=teamRoles.includes(rk)?'block':'none';
+    const note=document.getElementById('req-approval-note');
+    const warn=document.getElementById('req-warn');
+    if(rk&&ROLES[rk]){
+      const rd=ROLES[rk];
+      if(rd.approvedBy&&rd.approvedBy.length){
+        const approvers=rd.approvedBy.map(a=>ROLES[a]?.label||a).join(', ');
+        note.textContent=`Requires approval from: ${approvers}`;note.style.display='block';
+        warn.style.display='none';
+      } else {note.style.display='none';}
+    } else {note.style.display='none';}
+  };
+}
+
+function submitRoleRequest(){
+  const sess=getSession();if(!sess)return;
+  const rk=document.getElementById('req-role').value;
+  const reason=document.getElementById('req-reason').value.trim();
+  const team=document.getElementById('req-team').value.trim();
+
+  if(!rk){toast('Select a role to request','w');return;}
+  if(!reason){toast('Provide a justification for this request','w');return;}
+
+  const requests=getRequests();
+  // Check no duplicate pending request
+  if(requests.some(r=>r.email===sess.email&&r.role===rk&&r.status==='pending')){
+    toast('You already have a pending request for this role','w');return;
+  }
+
+  requests.push({id:Date.now().toString(),email:sess.email,name:sess.name,role:rk,team,reason,status:'pending',requestedAt:new Date().toISOString(),reviewedBy:null,reviewedAt:null});
+  saveRequests(requests);
+  toast('Role request submitted — awaiting approval','g');
+  renderPendingRequests(sess.email);
+  updateApprovalCount();
+}
+
+function renderPendingRequests(email){
+  const el=document.getElementById('pending-requests');
+  const reqs=getRequests().filter(r=>r.email===email);
+  if(!reqs.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No pending requests.</div>';return;}
+  el.innerHTML=reqs.map(r=>{
+    const rd=ROLES[r.role];
+    const status=r.status==='pending'?'<span class="badge badge-pending">⏳ Pending</span>':r.status==='approved'?'<span class="badge badge-approved">✓ Approved</span>':'<span class="badge badge-rejected">✗ Rejected</span>';
+    return `<div class="approval-item">
+      <div class="ai-hdr"><div><div class="ai-name">${rd?rd.icon+' ':''} ${rd?.label||r.role}</div><div class="ai-role">${r.team?r.team+' · ':''}${r.reason}</div></div>${status}</div>
+      <div style="font-size:10px;color:var(--lgrey)">${new Date(r.requestedAt).toLocaleDateString()}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// APPROVALS (exec only)
+// ═══════════════════════════════════════════════════
+function updateApprovalCount(){
+  const sess=getSession();if(!sess)return;
+  const users=getUsers();const u=users[sess.email];if(!u)return;
+  const canApprove=getApprovableTiers(u);
+  const pending=getRequests().filter(r=>{
+    if(r.status!=='pending')return false;
+    const rd=ROLES[r.role];
+    if(!rd||!rd.approvedBy)return false;
+    return rd.approvedBy.some(a=>canApprove.includes(a));
+  });
+  document.getElementById('appr-count').textContent=pending.length;
+}
+
+function getApprovableTiers(u){
+  // Returns the role keys the user can approve for
+  const approvedRoles=u.roles.filter(r=>r.status==='approved').map(r=>r.role);
+  const approvable=[];
+  Object.entries(ROLES).forEach(([rk,rd])=>{
+    if(rd.approvedBy&&rd.approvedBy.some(a=>approvedRoles.includes(a)))approvable.push(rk);
+  });
+  return approvedRoles; // exec can approve any role where they appear in approvedBy
+}
+
+function renderApprovalQueue(){
+  const sess=getSession();if(!sess)return;
+  const users=getUsers();const u=users[sess.email];if(!u)return;
+  const myRoles=u.roles.filter(r=>r.status==='approved').map(r=>r.role);
+  const el=document.getElementById('approval-queue');
+  const requests=getRequests();
+  const pending=requests.filter(r=>{
+    if(r.status!=='pending')return false;
+    const rd=ROLES[r.role];
+    if(!rd||!rd.approvedBy)return false;
+    return rd.approvedBy.some(a=>myRoles.includes(a));
+  });
+  if(!pending.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No pending approvals.</div>';return;}
+  el.innerHTML=pending.map(r=>{
+    const rd=ROLES[r.role];
+    return `<div class="approval-item">
+      <div class="ai-hdr">
+        <div><div class="ai-name">${r.name}</div><div style="font-size:10px;color:var(--lgrey)">${r.email}</div>
+          <div class="ai-role">${rd?rd.icon+' ':''} ${rd?.label||r.role}${r.team?' — '+r.team:''}</div>
+          <div style="font-size:11px;color:var(--lgrey);margin-top:2px">"${r.reason}"</div>
+        </div>
+      </div>
+      <div class="ai-actions">
+        <button class="btn btn-sm btn-green" onclick="approveRequest('${r.id}')">✓ Approve</button>
+        <button class="btn btn-sm btn-red" onclick="rejectRequest('${r.id}')">✗ Reject</button>
+      </div>
+      <div style="font-size:10px;color:var(--lgrey);margin-top:4px">Requested ${new Date(r.requestedAt).toLocaleDateString()}</div>
+    </div>`;
+  }).join('');
+
+  // Populate remove role selects
+  const rmSel=document.getElementById('rm-role');
+  rmSel.innerHTML='<option value="">— Select —</option>';
+  Object.entries(ROLES).forEach(([rk,rd])=>{
+    const opt=document.createElement('option');opt.value=rk;opt.textContent=`${rd.icon} ${rd.label}`;rmSel.appendChild(opt);
+  });
+}
+
+function approveRequest(id){
+  const sess=getSession();if(!sess)return;
+  const requests=getRequests();
+  const req=requests.find(r=>r.id===id);if(!req)return;
+  req.status='approved';req.reviewedBy=sess.email;req.reviewedAt=new Date().toISOString();
+  saveRequests(requests);
+
+  // Add role to user
+  const users=getUsers();const u=users[req.email];
+  if(u){
+    const existing=u.roles.find(r=>r.role===req.role);
+    if(existing){existing.status='approved';existing.approvedBy=sess.email;existing.approvedAt=new Date().toISOString();}
+    else{u.roles.push({role:req.role,status:'approved',team:req.team||'',approvedBy:sess.email,approvedAt:new Date().toISOString()});}
+    saveUsers(users);
+  }
+  toast(`✓ ${req.name}'s ${ROLES[req.role]?.label} request APPROVED`,'g');
+  renderApprovalQueue();updateApprovalCount();
+}
+
+function rejectRequest(id){
+  const sess=getSession();if(!sess)return;
+  const requests=getRequests();
+  const req=requests.find(r=>r.id===id);if(!req)return;
+  req.status='rejected';req.reviewedBy=sess.email;req.reviewedAt=new Date().toISOString();
+  saveRequests(requests);
+  toast(`✗ ${req.name}'s ${ROLES[req.role]?.label} request REJECTED`,'r');
+  renderApprovalQueue();updateApprovalCount();
+}
+
+function removeRoleFromMember(){
+  const sess=getSession();if(!sess)return;
+  const targetEmail=document.getElementById('rm-email').value.trim().toLowerCase();
+  const roleKey=document.getElementById('rm-role').value;
+  if(!targetEmail||!roleKey){toast('Enter member email and select role','w');return;}
+
+  const users=getUsers();const u=users[targetEmail];
+  if(!u){toast('Member not found','r');return;}
+  // Cannot remove your own role or remove exec roles (only president can)
+  const sessUser=users[sess.email];
+  if(!isApprovedExec(sessUser)){toast('Insufficient permissions','r');return;}
+  if(targetEmail===sess.email){toast('Cannot remove your own roles via this panel','w');return;}
+
+  const idx=u.roles.findIndex(r=>r.role===roleKey&&r.status==='approved');
+  if(idx===-1){toast('Role not found on this member','w');return;}
+  u.roles.splice(idx,1);saveUsers(users);
+  toast(`Role removed from ${u.name}`,'g');
+  renderMembers();
+}
+
+// ═══════════════════════════════════════════════════
+// MEMBERS LIST
+// ═══════════════════════════════════════════════════
+function renderMembers(){
+  const el=document.getElementById('member-list');
+  const users=getUsers();
+  const q=(document.getElementById('member-search')?.value||'').toLowerCase();
+  const list=Object.values(users).filter(u=>!q||u.name.toLowerCase().includes(q)||u.email.includes(q));
+  if(!list.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No members found.</div>';return;}
+  el.innerHTML=list.map(u=>{
+    const initial=u.name.charAt(0).toUpperCase();
+    const badges=u.roles.map(r=>{
+      const rd=ROLES[r.role];
+      return `<span class="badge ${r.status==='approved'?'badge-approved':'badge-pending'}">${rd?rd.icon:''} ${rd?.label||r.role}</span>`;
+    }).join('');
+    return `<div class="member-item">
+      <div class="m-avatar">${initial}</div>
+      <div class="m-info">
+        <div class="m-name">${u.name}</div>
+        <div class="m-email">${u.email} ${u.org?'· '+u.org:''}</div>
+        <div style="margin-top:3px">${badges}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+let tTimer;
+function toast(msg,t='g'){
+  const el=document.getElementById('toast');
+  const c={g:'var(--green)',r:'var(--red)',w:'var(--warn)'};
+  el.style.background=c[t]||'#333';el.style.color='#fff';
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(tTimer);tTimer=setTimeout(()=>el.style.opacity='0',3800);
+}
+
+// ═══════════════════════════════════════════════════
+// AUTO-RESUME SESSION
+// ═══════════════════════════════════════════════════
+(function(){const s=getSession();if(s){loadDashboard();}})();
+</script>
+</body>
+</html>
