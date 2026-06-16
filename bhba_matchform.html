@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BHBA Match Day Form</title>
+<!-- CLASSIFICATION: INTERNAL USE | v2.1.0 | 2026-06-13
+     Integration: pulls teams/players from bhba_rosters, officials from bhba_tos & bhba_refs,
+     commissioners from bhba_users. Shares bhba_matches with officials module.
+     Art.3: 8-player game-day cap · Art.4.1c: max 2 NBL on court simultaneously -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);--border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);--white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;--red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--teal:#1ABC9C;--purple:#9B59B6;--pending:#9B59B6}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.05) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.03) 0%,transparent 55%);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh}
+#hdr{background:linear-gradient(135deg,#04040c 0%,#0c0b18 60%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 24px rgba(0,0,0,0.6)}
+.brand{color:var(--gold);font-size:18px;font-weight:900}
+.nav-tabs{display:flex;gap:6px;padding:10px 14px;overflow-x:auto;background:rgba(0,0,0,0.5);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.nav-tab{background:rgba(12,12,22,0.8);border:1px solid var(--border);color:var(--lgrey);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s,color .15s}
+.nav-tab:hover{border-color:var(--border-h);color:var(--gold)}
+.nav-tab.active{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%);color:#000;border-color:var(--gold);box-shadow:0 2px 14px rgba(245,166,35,0.3)}
+.page{display:none;padding:12px;max-width:700px;margin:0 auto}
+.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s}.card:hover{border-color:var(--border-h);box-shadow:0 4px 20px rgba(245,166,35,0.06)}
+.card-title{color:var(--gold);font-size:14px;font-weight:700;margin-bottom:12px}
+.fg{margin-bottom:10px}
+.fg label{display:block;color:var(--lgrey);font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;background:#1a1a1a;border:1px solid var(--border);color:var(--white);padding:9px;border-radius:6px;font-size:13px}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--gold)}
+.fg-row{display:flex;gap:8px}
+.fg-row .fg{flex:1}
+.btn{border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;transition:opacity .15s}
+.btn:active{opacity:.8}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;font-weight:800;width:100%;transition:opacity .15s,transform .1s}.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--lgrey)}
+/* Match list */
+.match-item{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
+.mi-teams{font-size:15px;font-weight:700;margin-bottom:4px}
+.mi-meta{font-size:11px;color:var(--lgrey)}
+.mi-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;display:inline-block;margin-top:4px}
+.status-scheduled{background:#333;color:var(--lgrey)}
+.status-open{background:var(--green);color:#fff}
+.status-closed{background:var(--red);color:#fff}
+.status-official{background:var(--purple);color:#fff}
+/* Countdown */
+.countdown{background:var(--black);border:1px solid var(--gold);border-radius:8px;padding:10px;text-align:center;margin-bottom:12px}
+.ct-label{font-size:10px;color:var(--lgrey);text-transform:uppercase}
+.ct-val{font-size:22px;font-weight:900;color:var(--gold);font-family:monospace}
+.countdown.urgent .ct-val{color:var(--red)}
+.countdown.closed .ct-val{color:var(--lgrey)}
+/* Player grid */
+.player-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:10px}
+.player-card{background:#1a1a1a;border:2px solid var(--border);border-radius:10px;padding:8px;cursor:pointer;text-align:center;position:relative;transition:border-color .15s,background .15s;user-select:none}
+.player-card.selected{border-color:var(--gold);background:rgba(212,160,23,.08)}
+.player-card.starter{border-color:var(--green);background:rgba(39,174,96,.08)}
+.player-card.confirmed{border-color:var(--teal);background:rgba(26,188,156,.12)}
+.player-card.locked{opacity:.5;cursor:not-allowed}
+.pc-photo{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin:0 auto 6px;display:block;background:#333}
+.pc-photo-placeholder{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;margin:0 auto 6px;border:2px solid var(--border)}
+.pc-jersey{position:absolute;top:4px;left:6px;background:var(--gold);color:var(--black);font-size:9px;font-weight:900;padding:1px 5px;border-radius:6px}
+.pc-nbl{position:absolute;top:4px;right:6px;background:var(--red);color:#fff;font-size:8px;font-weight:700;padding:1px 4px;border-radius:4px}
+.pc-name{font-size:10px;font-weight:700;line-height:1.2;margin-bottom:2px}
+.pc-role{font-size:9px;color:var(--lgrey)}
+.pc-check{position:absolute;bottom:4px;right:4px;font-size:14px}
+.player-card.selected .pc-check::after{content:'✓';color:var(--gold)}
+.player-card.starter .pc-check::after{content:'⬤';color:var(--green)}
+.player-card.confirmed .pc-check::after{content:'✓';color:var(--teal)}
+/* Selection counters */
+.sel-counter{display:flex;gap:8px;margin-bottom:10px}
+.sc-box{flex:1;background:#1a1a1a;border-radius:6px;padding:8px;text-align:center}
+.sc-val{font-size:22px;font-weight:900}
+.sc-lbl{font-size:10px;color:var(--lgrey);text-transform:uppercase}
+/* Lineup rows */
+.lineup-section{margin-bottom:12px}
+.lineup-section h4{color:var(--gold);font-size:11px;text-transform:uppercase;margin-bottom:6px;font-weight:700}
+.lineup-row{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#1a1a1a;border-radius:6px;margin-bottom:4px;border:1px solid var(--border)}
+.lr-num{width:20px;text-align:center;font-size:11px;color:var(--lgrey)}
+.lr-photo{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#333}
+.lr-name{flex:1;font-size:12px;font-weight:700}
+.lr-jersey{font-size:11px;color:var(--gold);font-weight:700}
+.lr-nbl{font-size:9px;background:var(--red);color:#fff;padding:1px 5px;border-radius:4px}
+/* Roster form */
+.roster-player{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px}
+.rp-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.rp-photo-area{position:relative;width:52px;height:52px;flex-shrink:0}
+.rp-photo{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--border);background:#333;display:block;cursor:pointer}
+.rp-photo-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s}
+.rp-photo-area:hover .rp-photo-overlay{opacity:1}
+.rp-info{flex:1}
+.rp-name{font-size:14px;font-weight:700}
+.rp-sub{font-size:11px;color:var(--lgrey)}
+/* Official confirmation */
+.official-card{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+.oc-title{color:var(--teal);font-size:13px;font-weight:700;margin-bottom:8px}
+/* Alerts */
+.alert{padding:10px 12px;border-radius:6px;font-size:12px;margin-bottom:10px;line-height:1.5}
+.alert-warn{background:rgba(230,126,34,.15);border:1px solid var(--warn);color:var(--warn)}
+.alert-info{background:rgba(41,128,185,.15);border:1px solid var(--blue);color:var(--blue)}
+.alert-success{background:rgba(39,174,96,.15);border:1px solid var(--green);color:var(--green)}
+.alert-locked{background:rgba(192,57,43,.15);border:1px solid var(--red);color:var(--red)}
+.divider{border-top:1px dashed var(--border);margin:12px 0;padding-top:12px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92vw;color:#fff}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div><div class="brand">BHBA</div><div style="font-size:11px;color:var(--lgrey)">Match Day Form · v2.0.0</div></div>
+  <div style="font-size:11px;color:var(--lgrey);text-align:right">2026 Season<br><span style="color:var(--gold)">Art.3 · 8-player cap</span></div>
+</div>
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="goPage('matches')">📅 Matches</div>
+  <div class="nav-tab" onclick="goPage('roster')">👥 Rosters</div>
+  <div class="nav-tab" onclick="goPage('form')">📋 Match Form</div>
+  <div class="nav-tab" onclick="goPage('official')">✅ Official Panel</div>
+</div>
+
+<!-- ══════════ MATCHES ══════════ -->
+<div class="page active" id="page-matches">
+  <div class="card">
+    <div class="card-title">📅 Schedule a Match</div>
+    <div class="alert alert-info">Form opens 5 days before match · Closes 30 min before · Official panel opens 5 min before.</div>
+    <div class="fg-row">
+      <div class="fg"><label>Game Ref</label><input type="text" id="m-gid" placeholder="BHBA-2026-G06"></div>
+      <div class="fg"><label>Season</label><select id="m-season"><option value="2026">2026</option><option value="2027">2027</option></select></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Home Team</label><select id="m-home" onchange="pokaYokeTeams()"><option value="">— Select team —</option></select></div>
+      <div class="fg"><label>Away Team</label><select id="m-away" onchange="pokaYokeTeams()"><option value="">— Select team —</option></select></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Match Date & Time</label><input type="datetime-local" id="m-date"></div>
+      <div class="fg"><label>Venue</label><input type="text" id="m-venue" placeholder="Court / venue"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Match Commissioner</label><select id="m-commissioner"><option value="">— Select —</option></select></div>
+      <div class="fg"><label>Table Official</label><select id="m-tableoff"><option value="">— Select —</option></select></div>
+    </div>
+    <button class="btn btn-gold" onclick="scheduleMatch()">📅 Schedule Match</button>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Scheduled Matches</div>
+    <div id="match-list"><div style="color:var(--lgrey);font-size:12px">No matches scheduled yet.</div></div>
+  </div>
+</div>
+
+<!-- ══════════ ROSTER ══════════ -->
+<div class="page" id="page-roster">
+  <div class="card">
+    <div class="card-title">👥 Team Roster</div>
+    <div class="alert alert-warn">Player photos are required. Max 15 players per team pool (Art.3). Max 8 on any game day.</div>
+    <div class="fg"><label>Select Team</label><select id="rost-team" onchange="loadRoster()"><option value="">— Select team —</option></select></div>
+    <div class="fg"><label>Or register new team</label><input type="text" id="rost-new-team" placeholder="New team name"></div>
+    <div class="divider">
+      <div style="color:var(--gold);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:10px">Player Pool</div>
+      <div id="roster-players"></div>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:4px" onclick="addRosterPlayer()">+ Add Player</button>
+    </div>
+    <button class="btn btn-gold" style="margin-top:8px" onclick="saveRoster()">💾 Save Roster</button>
+  </div>
+</div>
+
+<!-- ══════════ MATCH FORM ══════════ -->
+<div class="page" id="page-form">
+  <div class="card">
+    <div class="card-title">📋 Team Manager — Match Day Lineup</div>
+    <div class="fg"><label>Select Match</label><select id="mf-match" onchange="loadMatchForm()"><option value="">— Select match —</option></select></div>
+    <div class="fg"><label>Your Team</label><select id="mf-team" onchange="loadMatchForm()"><option value="">— Select your team —</option></select></div>
+  </div>
+  <div id="match-form-body"></div>
+</div>
+
+<!-- ══════════ OFFICIAL PANEL ══════════ -->
+<div class="page" id="page-official">
+  <div class="card">
+    <div class="card-title">✅ Official Confirmation Panel</div>
+    <div class="alert alert-info">Available 5 minutes before match start. Confirm the lineups submitted by team managers.</div>
+    <div class="fg"><label>Select Match</label><select id="of-match" onchange="loadOfficialPanel()"><option value="">— Select match —</option></select></div>
+    <div class="fg"><label>Your Name (Official)</label>
+      <select id="of-name-sel"><option value="">— Select official —</option></select>
+    </div>
+  </div>
+  <div id="official-panel-body"></div>
+</div>
+
+<div id="toast"></div>
+<input type="file" id="photo-input" accept="image/jpeg,image/png" style="display:none" onchange="handlePhotoUpload(event)">
+
+<script>
+// ═══════════════════════════════════════════════════
+// FIBA JERSEY VALIDATION (Art.2 — No digit may exceed 5)
+// Valid: 0–5, 10–15, 20–25, 30–35, 40–45, 50–55
+// ═══════════════════════════════════════════════════
+const VALID_JERSEY=new Set([0,1,2,3,4,5,10,11,12,13,14,15,20,21,22,23,24,25,30,31,32,33,34,35,40,41,42,43,44,45,50,51,52,53,54,55]);
+function isValidFIBAJersey(v){const n=parseInt(v,10);return!isNaN(n)&&VALID_JERSEY.has(n);}
+
+// ═══════════════════════════════════════════════════
+// EMPLOYMENT ELIGIBILITY (BHBA Rules — 90-day minimum)
+// ═══════════════════════════════════════════════════
+const EMPLOYMENT_MIN_DAYS=90;
+// Tournament start date — stored in localStorage or defaulted to current season start
+function tournamentStart(){
+  const stored=localStorage.getItem('bhba_tournament_start');
+  if(stored)return new Date(stored);
+  return new Date('2026-09-01'); // 2026 season default
+}
+function tournamentEnd(){
+  const stored=localStorage.getItem('bhba_tournament_end');
+  if(stored)return new Date(stored);
+  return new Date('2026-12-15'); // 2026 season default
+}
+
+function checkEmploymentEligibility(player){
+  // Returns null if eligible, or error string if ineligible
+  if(!player.employmentStartDate)return'Employment start date is required';
+  const start=new Date(player.employmentStartDate);
+  const tStart=tournamentStart();
+  const daysDiff=Math.floor((tStart-start)/(1000*60*60*24));
+  const name=`${player.firstName||''} ${player.lastName||''}`.trim()||'Player';
+  if(daysDiff<EMPLOYMENT_MIN_DAYS){
+    return`${name}: Employment start date must be at least ${EMPLOYMENT_MIN_DAYS} days before tournament start (${tStart.toLocaleDateString()}). Currently only ${Math.max(0,daysDiff)} day(s). Player is INELIGIBLE.`;
+  }
+  if(player.contractType==='fixed-term'){
+    if(!player.contractEndDate)return`${name}: Fixed-term contract end date is required`;
+    const cEnd=new Date(player.contractEndDate);
+    if(cEnd<tournamentEnd()){
+      return`${name}: Fixed-term contract expires ${cEnd.toLocaleDateString()} before season end ${tournamentEnd().toLocaleDateString()}. Player is INELIGIBLE.`;
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════
+// STORAGE HELPERS (reads shared keys written by other modules)
+// ═══════════════════════════════════════════════════
+const S={
+  matches:()=>JSON.parse(localStorage.getItem('bhba_matches')||'[]'),
+  saveMatches:m=>localStorage.setItem('bhba_matches',JSON.stringify(m)),
+  rosters:()=>JSON.parse(localStorage.getItem('bhba_rosters')||'[]'),
+  saveRosters:r=>localStorage.setItem('bhba_rosters',JSON.stringify(r)),
+  subs:()=>JSON.parse(localStorage.getItem('bhba_mf_subs')||'[]'),
+  saveSubs:s=>localStorage.setItem('bhba_mf_subs',JSON.stringify(s)),
+  // Cross-module reads
+  tableOfficials:()=>JSON.parse(localStorage.getItem('bhba_tos')||'[]').filter(t=>t.status==='active'),
+  refs:()=>JSON.parse(localStorage.getItem('bhba_refs')||'[]').filter(r=>r.status==='active'),
+  users:()=>JSON.parse(localStorage.getItem('bhba_users')||'[]'),
+  nextId:()=>{const n=parseInt(localStorage.getItem('bhba_mid')||'1000');localStorage.setItem('bhba_mid',n+1);return'M'+n;}
+};
+
+// Resolve commissioner options from registered users (match_commissioner, bhba_president, bhba_vp, bhba_executive roles)
+function getCommissionerOptions(){
+  const users=S.users();
+  const execRoles=['bhba_president','bhba_vp','match_commissioner','bhba_executive'];
+  const options=[];
+  users.forEach(u=>{
+    if(u.roles&&u.roles.some(r=>execRoles.includes(r.role)&&r.status==='approved')){
+      options.push(u.name||u.email);
+    }
+  });
+  // Fallback: seed names if no auth users exist
+  if(!options.length){
+    ['Damion Crawford','Sandra Sutherland','Robert Morgan','Patricia Clarke','David Reid'].forEach(n=>options.push(n));
+  }
+  return options;
+}
+
+function getTableOfficialOptions(){
+  const tos=S.tableOfficials();
+  if(tos.length)return tos.map(t=>({id:t.id,name:`${t.name} (${t.badge})`}));
+  return[];
+}
+
+// ═══════════════════════════════════════════════════
+// TIME WINDOW LOGIC
+// ═══════════════════════════════════════════════════
+const MINS_OPEN=5*24*60,MINS_CLOSE=30,MINS_OFFICIAL=5;
+
+function getMatchStatus(m){
+  const now=new Date(),dt=new Date(m.matchDate),diff=(dt-now)/60000;
+  if(diff>MINS_OPEN)return{code:'not_open',label:'Not Open Yet',cls:'status-scheduled'};
+  if(diff>MINS_CLOSE)return{code:'open',label:'Form Open',cls:'status-open'};
+  if(diff>0)return{code:'closed',label:'Form Closed',cls:'status-closed'};
+  if(diff>-MINS_OFFICIAL)return{code:'official',label:'Official Window',cls:'status-official'};
+  return{code:'past',label:'Match Passed',cls:'status-closed'};
+}
+
+function canTeamEdit(m){return getMatchStatus(m).code==='open';}
+function canOfficialEdit(m){return['open','closed','official'].includes(getMatchStatus(m).code);}
+
+function timeToMatch(m){
+  const diff=new Date(m.matchDate)-new Date();
+  if(diff<0)return{text:'Match time passed',urgent:false,closed:true};
+  const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),
+        min=Math.floor((diff%3600000)/60000),sec=Math.floor((diff%60000)/1000);
+  return{text:d>0?`${d}d ${h}h ${min}m`:h>0?`${h}h ${min}m ${sec}s`:`${min}m ${sec}s`,
+         urgent:diff<3600000,closed:false};
+}
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`page-${p}`).classList.add('active');
+  ['matches','roster','form','official'].forEach((pg,i)=>
+    document.querySelectorAll('.nav-tab')[i].classList.toggle('active',pg===p));
+  if(p==='matches'){populateMatchScheduleSelects();renderMatchList();}
+  if(p==='roster')populateRosterTeams();
+  if(p==='form'){populateMatchFormSelects();loadMatchForm();}
+  if(p==='official'){populateOfficialSelects();loadOfficialPanel();}
+}
+
+// ═══════════════════════════════════════════════════
+// MATCH SCHEDULE SELECTS (integrated dropdowns)
+// ═══════════════════════════════════════════════════
+// ── POKA-YOKE: Home ≠ Away — makes it IMPOSSIBLE to select same team ──
+function pokaYokeTeams(){
+  const rosters=S.rosters();
+  const teams=[...new Set(rosters.map(r=>r.teamName))].sort();
+  const homeEl=document.getElementById('m-home');
+  const awayEl=document.getElementById('m-away');
+  const homeVal=homeEl.value;
+  const awayVal=awayEl.value;
+  // Rebuild away excluding home selection
+  const awayTeams=teams.filter(t=>t!==homeVal);
+  const curAway=awayEl.value;
+  awayEl.innerHTML='<option value="">— Select away team —</option>';
+  awayTeams.forEach(t=>awayEl.appendChild(new Option(t,t)));
+  if(curAway&&curAway!==homeVal)awayEl.value=curAway;
+  // Rebuild home excluding away selection
+  const homeTeams=teams.filter(t=>t!==awayVal);
+  const curHome=homeEl.value;
+  homeEl.innerHTML='<option value="">— Select home team —</option>';
+  homeTeams.forEach(t=>homeEl.appendChild(new Option(t,t)));
+  if(curHome&&curHome!==awayVal)homeEl.value=curHome;
+}
+
+function populateMatchScheduleSelects(){
+  // Teams from rosters
+  const rosters=S.rosters();
+  const teams=[...new Set(rosters.map(r=>r.teamName))].sort();
+  ['m-home','m-away'].forEach(id=>{
+    const s=document.getElementById(id);const cur=s.value;
+    s.innerHTML=`<option value="">— Select ${id==='m-home'?'home':'away'} team —</option>`;
+    teams.forEach(t=>{const o=new Option(t,t);s.appendChild(o);});
+    if(cur)s.value=cur;
+  });
+  // Apply Poka-yoke after initial population
+  pokaYokeTeams();
+
+  // Commissioner from registered execs/users
+  const commSel=document.getElementById('m-commissioner');const curC=commSel.value;
+  commSel.innerHTML='<option value="">— Select commissioner —</option>';
+  getCommissionerOptions().forEach(n=>{commSel.appendChild(new Option(n,n));});
+  if(curC)commSel.value=curC;
+
+  // Table Official from bhba_tos
+  const toSel=document.getElementById('m-tableoff');const curT=toSel.value;
+  toSel.innerHTML='<option value="">— Select table official —</option>';
+  S.tableOfficials().forEach(t=>{toSel.appendChild(new Option(`${t.name} (${t.badge})`,t.name));});
+  if(!S.tableOfficials().length){
+    // Fallback seed names
+    ['Marcia Thomas','Kevin Brown','Natasha Reid','Sharon Williams','Paul Anderson'].forEach(n=>
+      toSel.appendChild(new Option(n,n)));
+  }
+  if(curT)toSel.value=curT;
+}
+
+function scheduleMatch(){
+  const gid=document.getElementById('m-gid').value.trim();
+  const home=document.getElementById('m-home').value;
+  const away=document.getElementById('m-away').value;
+  const date=document.getElementById('m-date').value;
+  const venue=document.getElementById('m-venue').value.trim();
+  const commissioner=document.getElementById('m-commissioner').value;
+  const tableOff=document.getElementById('m-tableoff').value;
+  const season=document.getElementById('m-season').value;
+  if(!home||!away||!date){toast('Home team, away team and date are required','r');return;}
+  if(home===away){toast('Home and away teams cannot be the same','r');return;}
+  const matches=S.matches();
+  const dt=new Date(date);
+  const newMatch={id:S.nextId(),gid:gid||`BHBA-${season}-G${matches.length+1}`,
+    homeTeam:home,awayTeam:away,matchDate:dt.toISOString(),venue,season,
+    commissioner,tableOff,createdAt:new Date().toISOString()};
+  S.saveMatches([...matches,newMatch]);
+  ['m-gid','m-date','m-venue'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('m-commissioner').value='';
+  document.getElementById('m-tableoff').value='';
+  toast(`Match scheduled: ${home} vs ${away}`,'g');
+  renderMatchList();populateMatchFormSelects();populateOfficialSelects();
+}
+
+function renderMatchList(){
+  const el=document.getElementById('match-list');
+  const matches=[...S.matches()].sort((a,b)=>new Date(a.matchDate)-new Date(b.matchDate));
+  if(!matches.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No matches scheduled.</div>';return;}
+  el.innerHTML=matches.map(m=>{
+    const st=getMatchStatus(m);
+    const subs=S.subs().filter(s=>s.matchId===m.id);
+    const hSub=subs.some(s=>s.teamName===m.homeTeam),aSub=subs.some(s=>s.teamName===m.awayTeam);
+    return`<div class="match-item">
+      <div class="mi-teams">${m.homeTeam} <span style="color:var(--lgrey)">vs</span> ${m.awayTeam}</div>
+      <div class="mi-meta">${m.gid} · ${new Date(m.matchDate).toLocaleString()} · ${m.venue||'TBC'}</div>
+      <div class="mi-meta">Commissioner: ${m.commissioner||'—'} · Table Official: ${m.tableOff||'—'}</div>
+      <span class="mi-status ${st.cls}">${st.label}</span>
+      <div style="font-size:10px;color:var(--lgrey);margin-top:4px">
+        ${hSub?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--red)">✗</span>'} ${m.homeTeam}&nbsp;|&nbsp;
+        ${aSub?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--red)">✗</span>'} ${m.awayTeam}
+      </div>
+      <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+        ${st.code==='open'||st.code==='closed'||st.code==='official'
+          ?`<a href="https://sharable.link/wqrpfy94?match=${m.id}&tab=form" style="background:var(--blue);color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">📋 Open Match Form →</a>`:''}
+        <button class="btn btn-sm btn-red" onclick="deleteMatch('${m.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteMatch(id){if(!confirm('Delete this match?'))return;S.saveMatches(S.matches().filter(x=>x.id!==id));renderMatchList();}
+
+// ═══════════════════════════════════════════════════
+// ROSTER — integrated with registered teams
+// ═══════════════════════════════════════════════════
+let rosterPlayers=[],photoTarget=null;
+
+function populateRosterTeams(){
+  const rosters=S.rosters();
+  const teams=[...new Set([
+    ...rosters.map(r=>r.teamName),
+    ...S.matches().flatMap(m=>[m.homeTeam,m.awayTeam])
+  ])].sort();
+  const sel=document.getElementById('rost-team');const cur=sel.value;
+  sel.innerHTML='<option value="">— Select team —</option>';
+  teams.forEach(t=>sel.appendChild(new Option(t,t)));
+  if(cur)sel.value=cur;
+}
+
+function loadRoster(){
+  const team=document.getElementById('rost-team').value;
+  if(!team){rosterPlayers=[];renderRosterPlayers();return;}
+  const r=S.rosters().find(x=>x.teamName===team);
+  rosterPlayers=r?JSON.parse(JSON.stringify(r.players)):[];
+  renderRosterPlayers();
+}
+
+function addRosterPlayer(){
+  const team=document.getElementById('rost-team').value||document.getElementById('rost-new-team').value.trim();
+  if(!team){toast('Select or enter a team name first','w');return;}
+  if(rosterPlayers.length>=15){toast('Maximum 15 players in the pool (Art.3)','r');return;}
+  rosterPlayers.push({id:'rp_'+Date.now()+'_'+rosterPlayers.length,jersey:'',firstName:'',lastName:'',name:'',sex:'',isNBL:false,nblTeam:'',employmentStartDate:'',contractType:'permanent',contractEndDate:'',photoDataUrl:''});
+  renderRosterPlayers();
+}
+
+function renderRosterPlayers(){
+  const el=document.getElementById('roster-players');
+  if(!rosterPlayers.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px;margin-bottom:8px">No players added yet.</div>';return;}
+  const nblTeams=JSON.parse(localStorage.getItem('bhba_nbl_teams')||'[]');
+  el.innerHTML=rosterPlayers.map((p,i)=>{
+    const displayName=(p.firstName||p.lastName)?`${p.firstName||''} ${p.lastName||''}`.trim():p.name||'(No name)';
+    const init=displayName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()||'?';
+    const bg=['#2980B9','#8E44AD','#27AE60','#C0392B','#E67E22'][i%5];
+    // FIBA jersey warning
+    const jerseyOk=!p.jersey||isValidFIBAJersey(p.jersey);
+    // Employment eligibility inline check
+    const empErr=p.employmentStartDate?checkEmploymentEligibility(p):'';
+    return`<div class="roster-player" style="${empErr?'border:1px solid var(--red)':''}">
+      <div class="rp-header">
+        <div class="rp-photo-area" onclick="openPhotoUpload(${i})">
+          ${p.photoDataUrl
+            ?`<img class="rp-photo" src="${p.photoDataUrl}" alt="${displayName}">`
+            :`<div class="rp-photo" style="display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;background:${bg}">${init}</div>`}
+          <div class="rp-photo-overlay"><span style="font-size:20px">📷</span></div>
+        </div>
+        <div class="rp-info">
+          <div class="rp-name">${displayName}</div>
+          <div class="rp-sub">#${p.jersey||'?'} ${p.sex?'· '+p.sex:''} ${p.isNBL?'· <span style="color:var(--red)">★ NBL</span>':''}</div>
+          ${!jerseyOk?`<div style="font-size:10px;color:var(--red)">⛔ Invalid FIBA jersey #${p.jersey}</div>`:''}
+        </div>
+        <button style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px" onclick="removeRosterPlayer(${i})">✕</button>
+      </div>
+      <!-- Row 1: Jersey + First Name + Last Name -->
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <div class="fg" style="width:70px;margin:0">
+          <label>Jersey # <span style="color:var(--red)">*</span></label>
+          <input type="text" value="${p.jersey}" maxlength="3" style="text-align:center;${!jerseyOk&&p.jersey?'border-color:var(--red)':''}"
+            oninput="rosterPlayers[${i}].jersey=this.value;renderRosterPlayers()"
+            placeholder="e.g.5">
+        </div>
+        <div class="fg" style="flex:1;margin:0">
+          <label>First Name <span style="color:var(--red)">*</span></label>
+          <input type="text" value="${p.firstName||''}" oninput="rosterPlayers[${i}].firstName=this.value;rosterPlayers[${i}].name=(rosterPlayers[${i}].firstName+' '+rosterPlayers[${i}].lastName).trim();renderRosterPlayers()" placeholder="First name">
+        </div>
+        <div class="fg" style="flex:1;margin:0">
+          <label>Last Name <span style="color:var(--red)">*</span></label>
+          <input type="text" value="${p.lastName||''}" oninput="rosterPlayers[${i}].lastName=this.value;rosterPlayers[${i}].name=(rosterPlayers[${i}].firstName+' '+rosterPlayers[${i}].lastName).trim();renderRosterPlayers()" placeholder="Last name">
+        </div>
+      </div>
+      <!-- Row 2: Sex + Contract Type + NBL -->
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <div class="fg" style="width:110px;margin:0">
+          <label>Sex <span style="color:var(--red)">*</span></label>
+          <select onchange="rosterPlayers[${i}].sex=this.value" style="padding:7px">
+            <option value="" ${!p.sex?'selected':''}>— Select —</option>
+            <option value="Male" ${p.sex==='Male'?'selected':''}>Male</option>
+            <option value="Female" ${p.sex==='Female'?'selected':''}>Female</option>
+          </select>
+        </div>
+        <div class="fg" style="flex:1;margin:0">
+          <label>Contract Type</label>
+          <select onchange="rosterPlayers[${i}].contractType=this.value;renderRosterPlayers()">
+            <option value="permanent" ${p.contractType==='permanent'||!p.contractType?'selected':''}>Permanent</option>
+            <option value="fixed-term" ${p.contractType==='fixed-term'?'selected':''}>Fixed-Term</option>
+            <option value="probationary" ${p.contractType==='probationary'?'selected':''}>Probationary</option>
+          </select>
+        </div>
+        <div class="fg" style="width:60px;margin:0;text-align:center">
+          <label>NBL</label>
+          <input type="checkbox" ${p.isNBL?'checked':''} onchange="rosterPlayers[${i}].isNBL=this.checked;if(!this.checked)rosterPlayers[${i}].nblTeam='';renderRosterPlayers()" style="width:auto;height:20px;accent-color:var(--gold);margin-top:8px">
+        </div>
+      </div>
+      <!-- Row 3: Employment Start + (Fixed-Term End) -->
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <div class="fg" style="flex:1;margin:0">
+          <label>Employment Start Date <span style="color:var(--red)">*</span></label>
+          <input type="date" value="${p.employmentStartDate||''}" onchange="rosterPlayers[${i}].employmentStartDate=this.value;renderRosterPlayers()">
+        </div>
+        ${p.contractType==='fixed-term'?`<div class="fg" style="flex:1;margin:0">
+          <label>Contract End Date <span style="color:var(--red)">*</span></label>
+          <input type="date" value="${p.contractEndDate||''}" onchange="rosterPlayers[${i}].contractEndDate=this.value;renderRosterPlayers()">
+        </div>`:''}
+      </div>
+      <!-- Row 4: NBL Team (only if NBL checked) -->
+      ${p.isNBL?`<div class="fg" style="margin:0 0 6px 0">
+        <label>NBL Team <span style="color:var(--red)">*</span></label>
+        <select onchange="rosterPlayers[${i}].nblTeam=this.value">
+          <option value="">— Select NBL Team —</option>
+          ${nblTeams.map(t=>`<option value="${t}" ${p.nblTeam===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>`:''}
+      <!-- Errors -->
+      ${empErr?`<div style="font-size:10px;color:var(--red);background:rgba(192,57,43,.1);padding:6px 8px;border-radius:4px;margin-bottom:4px">⛔ ${empErr}</div>`:''}
+      ${!p.photoDataUrl?'<div style="font-size:10px;color:var(--warn);margin-top:4px">⚠ Photo required — tap avatar to upload</div>':''}
+      ${!jerseyOk&&p.jersey?`<div style="font-size:10px;color:var(--red);margin-top:2px">⛔ #${p.jersey} is not a valid FIBA jersey number. Valid: 0–5, 10–15, 20–25, 30–35, 40–45, 50–55</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function removeRosterPlayer(i){rosterPlayers.splice(i,1);renderRosterPlayers();}
+function openPhotoUpload(idx){photoTarget={type:'roster',index:idx};document.getElementById('photo-input').click();}
+function handlePhotoUpload(e){
+  const f=e.target.files[0];if(!f)return;
+  if(f.size>2*1024*1024){toast('Photo must be under 2 MB','r');e.target.value='';return;}
+  const reader=new FileReader();
+  reader.onload=ev=>{if(photoTarget?.type==='roster'){rosterPlayers[photoTarget.index].photoDataUrl=ev.target.result;renderRosterPlayers();toast('Photo uploaded ✓','g');}};
+  reader.readAsDataURL(f);e.target.value='';
+}
+
+function saveRoster(){
+  const team=(document.getElementById('rost-team').value||document.getElementById('rost-new-team').value.trim()).toUpperCase();
+  if(!team){toast('Select or enter a team name','r');return;}
+  if(!rosterPlayers.length){toast('Add at least one player','r');return;}
+
+  // Poka-yoke: First + Last name required
+  const missingName=rosterPlayers.find(p=>!p.firstName||!p.lastName);
+  if(missingName){toast(`⛔ First Name and Last Name are both required for all players`,'r');return;}
+
+  // Poka-yoke: Sex required
+  const missingSex=rosterPlayers.find(p=>!p.sex);
+  if(missingSex){
+    const n=`${missingSex.firstName} ${missingSex.lastName}`.trim();
+    toast(`⛔ Sex is required for ${n||'a player'}`,'r');return;
+  }
+
+  // Poka-yoke: Jersey required
+  const missingJersey=rosterPlayers.find(p=>!p.jersey&&p.jersey!==0);
+  if(missingJersey){
+    const n=`${missingJersey.firstName} ${missingJersey.lastName}`.trim();
+    toast(`⛔ Jersey number required for ${n||'a player'}`,'r');return;
+  }
+
+  // Poka-yoke: FIBA jersey validation — make invalid jersey IMPOSSIBLE to save
+  const badJersey=rosterPlayers.find(p=>!isValidFIBAJersey(p.jersey));
+  if(badJersey){
+    const n=`${badJersey.firstName} ${badJersey.lastName}`.trim();
+    toast(`⛔ #${badJersey.jersey} is not a valid FIBA jersey number for ${n}. Valid: 0–5, 10–15, 20–25, 30–35, 40–45, 50–55`,'r');return;
+  }
+
+  // Poka-yoke: Employment eligibility — ineligible players CANNOT enter the system
+  for(const p of rosterPlayers){
+    const err=checkEmploymentEligibility(p);
+    if(err){toast(`⛔ ${err}`,'r');return;}
+  }
+
+  // NBL team required if NBL flagged
+  const missingNBL=rosterPlayers.find(p=>p.isNBL&&!p.nblTeam);
+  if(missingNBL){
+    const n=`${missingNBL.firstName} ${missingNBL.lastName}`.trim();
+    toast(`⛔ NBL team required for ${n}`,'r');return;
+  }
+
+  // Employment start date required
+  const missingEmp=rosterPlayers.find(p=>!p.employmentStartDate);
+  if(missingEmp){
+    const n=`${missingEmp.firstName} ${missingEmp.lastName}`.trim();
+    toast(`⛔ Employment start date required for ${n}`,'r');return;
+  }
+
+  const rosters=S.rosters().filter(r=>r.teamName!==team);
+  S.saveRosters([...rosters,{teamName:team,players:rosterPlayers,savedAt:new Date().toISOString()}]);
+  toast(`Roster saved for ${team} (${rosterPlayers.length} players) ✓`,'g');
+  populateRosterTeams();populateMatchScheduleSelects();
+}
+
+// ═══════════════════════════════════════════════════
+// MATCH FORM
+// ═══════════════════════════════════════════════════
+let mfSelected=[],mfCountdown=null;
+
+function populateMatchFormSelects(){
+  const matches=S.matches();const rosters=S.rosters();
+  const mSel=document.getElementById('mf-match');const cur=mSel.value;
+  mSel.innerHTML='<option value="">— Select match —</option>';
+  [...matches].sort((a,b)=>new Date(a.matchDate)-new Date(b.matchDate)).forEach(m=>{
+    const dt=new Date(m.matchDate);
+    mSel.appendChild(new Option(`${m.gid} · ${m.homeTeam} vs ${m.awayTeam} · ${dt.toLocaleDateString()} ${dt.toLocaleTimeString()}`,m.id));
+  });
+  if(cur)mSel.value=cur;
+  const tSel=document.getElementById('mf-team');const curT=tSel.value;
+  tSel.innerHTML='<option value="">— Select your team —</option>';
+  [...new Set(rosters.map(r=>r.teamName))].sort().forEach(t=>tSel.appendChild(new Option(t,t)));
+  if(curT)tSel.value=curT;
+}
+
+function loadMatchForm(){
+  const matchId=document.getElementById('mf-match').value;
+  const teamName=document.getElementById('mf-team').value;
+  const el=document.getElementById('match-form-body');
+  clearInterval(mfCountdown);
+  if(!matchId||!teamName){el.innerHTML='';return;}
+  const match=S.matches().find(m=>m.id===matchId);
+  if(!match){el.innerHTML='<div class="alert alert-warn">Match not found.</div>';return;}
+  if(teamName!==match.homeTeam&&teamName!==match.awayTeam){
+    el.innerHTML='<div class="alert alert-warn">Your team is not scheduled for this match.</div>';return;}
+  const roster=S.rosters().find(r=>r.teamName===teamName);
+  if(!roster?.players?.length){
+    el.innerHTML='<div class="alert alert-warn">No roster found. Register your player pool in the Rosters tab.</div>';return;}
+  const existingSub=S.subs().find(s=>s.matchId===matchId&&s.teamName===teamName);
+  mfSelected=existingSub?[...existingSub.selectedPlayers]:[];
+
+  function render(){
+    const st=getMatchStatus(match);const isOpen=canTeamEdit(match);
+    const timeInfo=timeToMatch(match);
+    const starters=mfSelected.slice(0,3),subs=mfSelected.slice(3);
+    const nbl=mfSelected.filter(id=>roster.players.find(x=>x.id===id)?.isNBL).length;
+    el.innerHTML=`
+    <div class="${timeInfo.closed?'countdown closed':timeInfo.urgent?'countdown urgent':'countdown'}">
+      <div class="ct-label">${timeInfo.closed?'Match passed':isOpen?'Form closes in':'Form status'}</div>
+      <div class="ct-val" id="ct-display">${timeInfo.text}</div>
+      <div style="font-size:10px;color:var(--lgrey);margin-top:2px">${st.label}</div>
+    </div>
+    ${existingSub?'<div class="alert alert-success">✓ Lineup submitted. You can update while form is open.</div>':''}
+    ${!isOpen&&st.code!=='open'&&!existingSub?'<div class="alert alert-locked">🔒 Form is not currently open (opens 5 days before match, closes 30 min before).</div>':''}
+    ${st.code==='closed'&&existingSub?'<div class="alert alert-locked">🔒 Form closed — 30 minutes to match. Lineup is locked.</div>':''}
+    ${nbl>=2?'<div class="alert alert-warn">⚠ 2 NBL players selected — this is the maximum permitted on court simultaneously (Art.4.1c).</div>':''}
+    <div class="card">
+      <div class="card-title">${match.homeTeam} <span style="color:var(--lgrey)">vs</span> ${match.awayTeam}</div>
+      <div style="font-size:12px;color:var(--lgrey)">${match.gid} · ${new Date(match.matchDate).toLocaleString()} · ${match.venue||'TBC'}</div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="card-title" style="margin:0">Select Players — ${teamName}</div>
+        <div style="font-size:11px;color:var(--lgrey)">Tap to select</div>
+      </div>
+      <div class="sel-counter">
+        <div class="sc-box"><div class="sc-val" style="color:var(--green)">${starters.length}</div><div class="sc-lbl">Starters (3)</div></div>
+        <div class="sc-box"><div class="sc-val" style="color:var(--gold)">${mfSelected.length}</div><div class="sc-lbl">Total (max 8)</div></div>
+        <div class="sc-box"><div class="sc-val" style="color:var(--red)">${nbl}</div><div class="sc-lbl">NBL (max 2)</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--lgrey);margin-bottom:8px">
+        <span style="color:var(--green)">⬤</span> First 3 = Starters &nbsp;|&nbsp;
+        <span style="color:var(--gold)">✓</span> Substitutes
+      </div>
+      <div class="player-grid" id="mf-player-grid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Lineup Summary</div>
+      <div class="lineup-section"><h4>Starting 3</h4><div id="ls-starters">${renderLineup(starters,roster.players)}</div></div>
+      ${subs.length?`<div class="lineup-section"><h4>Substitutes (${subs.length})</h4>${renderLineup(subs,roster.players)}</div>`:''}
+    </div>
+    ${isOpen?`<button class="btn btn-gold" onclick="submitLineup('${matchId}','${teamName}')">✅ Submit Lineup</button>`:''}`;
+    renderPlayerGrid(roster.players,isOpen,match);
+  }
+
+  render();
+  if(canTeamEdit(match)){
+    mfCountdown=setInterval(()=>{
+      const t=timeToMatch(match);
+      const d=document.getElementById('ct-display');if(d)d.textContent=t.text;
+      if(!canTeamEdit(match)){clearInterval(mfCountdown);loadMatchForm();}
+    },1000);
+  }
+}
+
+function renderPlayerGrid(players,isOpen,match){
+  const grid=document.getElementById('mf-player-grid');if(!grid)return;
+  grid.innerHTML=players.map(p=>{
+    const idx=mfSelected.indexOf(p.id);
+    const cls=idx>=0&&idx<3?'starter':idx>=3?'selected':'';
+    const init=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const bgs=['#2980B9','#8E44AD','#27AE60','#C0392B','#E67E22'];
+    const bg=bgs[players.indexOf(p)%5];
+    return`<div class="player-card ${cls}${!isOpen?' locked':''}" onclick="${isOpen?`togglePlayer('${p.id}')`:''}" title="${p.name}">
+      <span class="pc-jersey">#${p.jersey}</span>
+      ${p.isNBL?'<span class="pc-nbl">NBL</span>':''}
+      ${p.photoDataUrl?`<img class="pc-photo" src="${p.photoDataUrl}" alt="${p.name}">`
+        :`<div class="pc-photo-placeholder" style="background:${bg}">${init}</div>`}
+      <div class="pc-name">${p.name}</div>
+      <div class="pc-role">${idx>=0&&idx<3?'Starter':idx>=3?'Sub':'—'}</div>
+      <span class="pc-check"></span>
+    </div>`;
+  }).join('');
+}
+
+function renderLineup(ids,players){
+  if(!ids.length)return'<div style="color:var(--lgrey);font-size:12px">No players selected.</div>';
+  return ids.map((id,i)=>{
+    const p=players.find(x=>x.id===id);if(!p)return'';
+    const init=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const bg=['#2980B9','#8E44AD','#27AE60','#C0392B','#E67E22'][i%5];
+    return`<div class="lineup-row">
+      <span class="lr-num">${i+1}</span>
+      ${p.photoDataUrl?`<img class="lr-photo" src="${p.photoDataUrl}">`
+        :`<div class="lr-photo" style="display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:${bg};color:#fff">${init}</div>`}
+      <span class="lr-name">${p.name}</span>
+      <span class="lr-jersey">#${p.jersey}</span>
+      ${p.isNBL?'<span class="lr-nbl">★NBL</span>':''}
+    </div>`;
+  }).join('');
+}
+
+function togglePlayer(id){
+  const idx=mfSelected.indexOf(id);
+  if(idx>=0){mfSelected.splice(idx,1);}
+  else{if(mfSelected.length>=8){toast('Maximum 8 players (Art.3)','r');return;}mfSelected.push(id);}
+  const matchId=document.getElementById('mf-match').value;
+  const teamName=document.getElementById('mf-team').value;
+  const match=S.matches().find(m=>m.id===matchId);
+  const roster=S.rosters().find(r=>r.teamName===teamName);
+  if(!roster)return;
+  const starters=mfSelected.slice(0,3),subs=mfSelected.slice(3);
+  const nbl=mfSelected.filter(id=>roster.players.find(x=>x.id===id)?.isNBL).length;
+  ['sc-starters','sc-total','sc-nbl'].forEach((id,i)=>{
+    const el=document.getElementById(id);if(el)el.textContent=[starters.length,mfSelected.length,nbl][i];
+  });
+  renderPlayerGrid(roster.players,canTeamEdit(match),match);
+  const ls=document.getElementById('ls-starters');if(ls)ls.innerHTML=renderLineup(starters,roster.players);
+}
+
+function submitLineup(matchId,teamName){
+  if(mfSelected.length<3){toast('Select at least 3 players (3 starters required)','r');return;}
+  const match=S.matches().find(m=>m.id===matchId);
+  if(!canTeamEdit(match)){toast('Form is closed','r');return;}
+  S.saveSubs([...S.subs().filter(s=>!(s.matchId===matchId&&s.teamName===teamName)),
+    {matchId,teamName,selectedPlayers:[...mfSelected],starters:mfSelected.slice(0,3),
+     subs:mfSelected.slice(3),submittedAt:new Date().toISOString()}]);
+  toast(`✅ Lineup submitted for ${teamName}`,'g');
+  renderMatchList();loadMatchForm();
+}
+
+// ═══════════════════════════════════════════════════
+// OFFICIAL PANEL
+// ═══════════════════════════════════════════════════
+let ofConfirmed={};
+
+function populateOfficialSelects(){
+  const matches=S.matches();
+  const mSel=document.getElementById('of-match');const cur=mSel.value;
+  mSel.innerHTML='<option value="">— Select match —</option>';
+  [...matches].sort((a,b)=>new Date(a.matchDate)-new Date(b.matchDate)).forEach(m=>{
+    mSel.appendChild(new Option(`${m.gid} · ${m.homeTeam} vs ${m.awayTeam} · ${new Date(m.matchDate).toLocaleDateString()}`,m.id));
+  });
+  if(cur)mSel.value=cur;
+
+  // Official name: combine TOs + refs for the panel
+  const nameSel=document.getElementById('of-name-sel');const curN=nameSel.value;
+  nameSel.innerHTML='<option value="">— Select official —</option>';
+  [...S.tableOfficials(),...S.refs()].forEach(o=>nameSel.appendChild(new Option(`${o.name} (${o.badge})`,o.name)));
+  // Fallback commissioner names
+  getCommissionerOptions().forEach(n=>nameSel.appendChild(new Option(n,n)));
+  if(curN)nameSel.value=curN;
+}
+
+function loadOfficialPanel(){
+  const matchId=document.getElementById('of-match').value;
+  const el=document.getElementById('official-panel-body');
+  if(!matchId){el.innerHTML='';return;}
+  const match=S.matches().find(m=>m.id===matchId);
+  if(!match){el.innerHTML='<div class="alert alert-warn">Match not found.</div>';return;}
+  const canEdit=canOfficialEdit(match);
+  if(!canEdit){el.innerHTML='<div class="alert alert-warn">Official panel not yet active. Available once the form opens (5 days before match).</div>';return;}
+
+  const subs=S.subs().filter(s=>s.matchId===matchId);
+  const homeSub=subs.find(s=>s.teamName===match.homeTeam);
+  const awaySub=subs.find(s=>s.teamName===match.awayTeam);
+  const ofKey=`bhba_of_${matchId}`;
+  const existingOf=JSON.parse(localStorage.getItem(ofKey)||'null');
+  if(existingOf){ofConfirmed=existingOf.confirmed||{};}
+  else{
+    ofConfirmed={};
+    if(homeSub)ofConfirmed[match.homeTeam]=[...homeSub.selectedPlayers];
+    if(awaySub)ofConfirmed[match.awayTeam]=[...awaySub.selectedPlayers];
+  }
+
+  el.innerHTML=`
+  <div class="card">
+    <div class="card-title">${match.homeTeam} vs ${match.awayTeam}</div>
+    <div style="font-size:12px;color:var(--lgrey)">${match.gid} · ${new Date(match.matchDate).toLocaleString()} · ${match.venue||'TBC'}</div>
+    <div class="alert alert-success" style="margin-top:8px">✓ Official panel active.</div>
+  </div>
+  ${[{team:match.homeTeam,sub:homeSub},{team:match.awayTeam,sub:awaySub}].map(({team,sub})=>{
+    const roster=S.rosters().find(r=>r.teamName===team);
+    return`<div class="official-card">
+      <div class="oc-title">✅ ${team} — Official Confirmation</div>
+      ${!sub?'<div class="alert alert-warn">Manager has not yet submitted a lineup.</div>':''}
+      ${sub&&roster?`<div style="font-size:11px;color:var(--lgrey);margin-bottom:8px">Manager submitted ${sub.selectedPlayers.length} player(s) · Tap to confirm/remove</div>
+      <div class="player-grid">
+        ${roster.players.filter(p=>sub.selectedPlayers.includes(p.id)).map(p=>{
+          const isConf=(ofConfirmed[team]||[]).includes(p.id);
+          const init=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+          const bg=['#2980B9','#8E44AD','#27AE60','#C0392B','#E67E22'][roster.players.indexOf(p)%5];
+          return`<div class="player-card ${isConf?'confirmed':''}" onclick="toggleOfficialConf('${team}','${p.id}','${matchId}')">
+            <span class="pc-jersey">#${p.jersey}</span>
+            ${p.isNBL?'<span class="pc-nbl">NBL</span>':''}
+            ${p.photoDataUrl?`<img class="pc-photo" src="${p.photoDataUrl}">`:`<div class="pc-photo-placeholder" style="background:${bg}">${init}</div>`}
+            <div class="pc-name">${p.name}</div>
+            <div class="pc-role">${sub.starters.includes(p.id)?'Starter':'Sub'}</div>
+            <span class="pc-check"></span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--teal);margin-top:6px">✓ Confirmed: ${(ofConfirmed[team]||[]).length}/${sub.selectedPlayers.length}</div>`:''}
+    </div>`;
+  }).join('')}
+  <div class="card">
+    <div class="card-title">🖊 Official Notes</div>
+    <div class="fg"><textarea id="of-notes" rows="3" placeholder="Lineup changes, late arrivals, rule observations…">${existingOf?.notes||''}</textarea></div>
+    <button class="btn btn-gold" onclick="saveOfficialConfirmation('${matchId}')">✅ Save Confirmation</button>
+  </div>`;
+}
+
+function toggleOfficialConf(team,pid,matchId){
+  if(!ofConfirmed[team])ofConfirmed[team]=[];
+  const idx=ofConfirmed[team].indexOf(pid);
+  if(idx>=0)ofConfirmed[team].splice(idx,1);else ofConfirmed[team].push(pid);
+  loadOfficialPanel();
+}
+
+function saveOfficialConfirmation(matchId){
+  const name=document.getElementById('of-name-sel').value;
+  if(!name){toast('Select your name as the confirming official','r');return;}
+  const notes=document.getElementById('of-notes')?.value||'';
+  localStorage.setItem(`bhba_of_${matchId}`,JSON.stringify({
+    matchId,confirmedBy:name,confirmedAt:new Date().toISOString(),confirmed:ofConfirmed,notes}));
+  toast(`✅ Confirmation saved by ${name}`,'g');
+  renderMatchList();loadOfficialPanel();
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function toast(msg,t='g'){
+  const el=document.getElementById('toast');
+  el.style.background={g:'var(--green)',r:'var(--red)',w:'var(--warn)'}[t]||'#333';
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(window._tT);window._tT=setTimeout(()=>el.style.opacity='0',4000);
+}
+
+// ═══════════════════════════════════════════════════
+// COMPREHENSIVE SEED DATA — 20 registered BHBA teams,
+// 10 players per team, 10 demo matches
+// ═══════════════════════════════════════════════════
+(function seedAll(){
+  if(localStorage.getItem('bhba_mf_seeded_v3'))return;
+
+  // Jamaican name pools for deterministic player generation
+  const FN=['Marcus','Devon','Raheem','Terrence','Andre','Christopher','Damion','Ricardo','Shawn','Rohan',
+            'Kyle','Jordan','Omar','Dwayne','Mikhail','Kenton','Roshane','Garfield','Sheldon','Marlon',
+            'Rushane','Kemar','Deandre','Fitzroy','Shaquille','Adrian','Tavon','Demarco','Kwame','Rowan',
+            'Lamar','Tremaine','Donte','Kerwin','Andrew','Gavin','Dane','Oral','Javon','Jermaine',
+            'Clive','Errol','Basil','Leroy','Chadwick','Donovan','Nathaniel','Carlton','Romaine','Nigel',
+            'Delano','Everton','Lennox','Milton','Noel','Oswald','Quincy','Rudyard','Steadman','Upton',
+            'Vernal','Winston','Xavier','Yannick','Zachary','Rohan','Fabian','Cordell','Lascelles','Hopeton',
+            'Bertram','Godfrey','Hilton','Leton','Ralston','Seymour','Tyrone','Ulric','Vivian','Wendell',
+            'Alton','Barrington','Cecil','Dunston','Edmund','Franklyn','Gibson','Harold','Ivan','Jeffrey'];
+  const LN=['Johnson','Williams','Clarke','Brown','Mitchell','Thompson','Campbell','Davis','Reid','Stewart',
+            'Morgan','Grant','Bailey','Gordon','Hamilton','McKenzie','Morrison','Patterson','Thomas','Anderson',
+            'Wright','Robinson','Hall','Scott','Turner','Harris','Nelson','Carter','Phillips','Evans',
+            'Lewis','Walker','Allen','Young','King','Wright','Lopez','Hill','Green','Adams',
+            'Baker','Gonzalez','Nelson','Carter','Mitchell','Perez','Roberts','Turner','Phillips','Campbell'];
+  const jerseys=[5,10,15,23,7,12,4,9,33,21, 4,8,11,21,33,6,17,2,19,27,
+                 3,14,22,9,11,7,18,5,24,30, 6,13,25,8,1,16,20,32,10,44,
+                 2,19,8,15,7,26,11,34,5,22, 3,7,12,18,24,30,6,14,22,9,
+                 11,5,24,30,33,4,8,11,21,19, 6,13,25,8,1,16,20,32,10,44,
+                 2,19,8,15,7,26,11,34,5,22, 3,7,12,18,24,30,6,14,22,9,
+                 5,10,15,23,7,12,4,9,33,21, 4,8,11,21,33,6,17,2,19,27,
+                 3,14,22,9,11,7,18,5,24,30, 6,13,25,8,1,16,20,32,10,44,
+                 2,19,8,15,7,26,11,34,5,22, 3,7,12,18,24,30,6,14,22,9];
+
+  function mkPlayer(tid,pi){
+    const n=(tid*10+pi)%FN.length;const l=(tid*7+pi*3)%LN.length;
+    return{id:`p_${tid}_${pi}`,jersey:String(jerseys[(tid*10+pi)%jerseys.length]),
+           name:`${FN[n]} ${LN[l]}`,isNBL:pi<2,photoDataUrl:''};
+  }
+
+  const TEAM_NAMES=[
+    'BANK OF JAMAICA','ATL AUTOMOTIVE GROUP','JAMAICA CONSTABULARY FORCE',
+    'BRITISH CARIBBEAN INSURANCE CO.','JAMAICA RACING COMMISSION','CARIMED GROUP',
+    'KPMG JAMAICA','CIVIL AVIATION AUTHORITY','NCB FINANCIAL LTD.','JAMAICA FIRE BRIGADE',
+    'NATIONAL HOUSING TRUST','JAMAICA MONEY MARKET BROKERS','SAGICOR GROUP A',
+    'LORING CONSULTING ENGINEERS','SAGICOR GROUP B','MAIN EVENTS ENTERTAINMENT GROUP',
+    'SUPREME VENTURES','NATIONAL LAND AGENCY','SCOTIABANK','UNICOMER COURTS'
+  ];
+
+  const venues=[
+    'NCB Kingston Branch — Atrium Court','BOJ Conference Centre — Court A',
+    'JCF Regional HQ — Outdoor Court','Scotiabank Centre — Main Court',
+    'KPMG Head Office — Rooftop Arena','Digicel HQ — New Kingston',
+    'Sagicor Barbican — East Court','Sagicor Barbican — West Court',
+    'Supreme Ventures HQ — Court B','NHT Corporate Office — Ground Level'
+  ];
+
+  const teams=TEAM_NAMES.map((name,i)=>({
+    teamName:name,
+    players:Array.from({length:10},(_,pi)=>mkPlayer(i,pi)),
+    savedAt:new Date().toISOString()
+  }));
+  S.saveRosters(teams);
+
+  // Also store the canonical team list for all modules to reference
+  localStorage.setItem('bhba_teams',JSON.stringify(TEAM_NAMES));
+
+  // 10 demo matches across the season
+  const now=new Date();
+  const d=(days,h=18)=>{const dt=new Date(now);dt.setDate(dt.getDate()+days);dt.setHours(h,0,0,0);return dt.toISOString();};
+  const toOpts=S.tableOfficials();const toN=(i)=>toOpts[i%Math.max(toOpts.length,1)]?.name||['Marcia Thomas','Kevin Brown','Natasha Reid','Sharon Williams','Paul Anderson'][i%5];
+  const cOpts=getCommissionerOptions();const cN=(i)=>cOpts[i%Math.max(cOpts.length,1)]||'James Patterson';
+
+  const matchPairs=[
+    ['BANK OF JAMAICA','ATL AUTOMOTIVE GROUP',3,venues[0]],
+    ['NCB FINANCIAL LTD.','SCOTIABANK',5,venues[3]],
+    ['SAGICOR GROUP A','SAGICOR GROUP B',7,venues[6]],
+    ['KPMG JAMAICA','CARIMED GROUP',9,venues[5]],
+    ['NATIONAL HOUSING TRUST','SUPREME VENTURES',10,venues[8]],
+    ['JAMAICA CONSTABULARY FORCE','JAMAICA FIRE BRIGADE',12,venues[1]],
+    ['CIVIL AVIATION AUTHORITY','NATIONAL LAND AGENCY',14,venues[4]],
+    ['BRITISH CARIBBEAN INSURANCE CO.','JAMAICA MONEY MARKET BROKERS',15,venues[9]],
+    ['JAMAICA RACING COMMISSION','LORING CONSULTING ENGINEERS',17,venues[2]],
+    ['MAIN EVENTS ENTERTAINMENT GROUP','UNICOMER COURTS',19,venues[7]],
+  ];
+
+  const matches=matchPairs.map(([home,away,days,venue],i)=>({
+    id:`M${1000+i}`,gid:`BHBA-2026-G${String(i+1).padStart(2,'0')}`,
+    homeTeam:home,awayTeam:away,matchDate:d(days,18+Math.floor(i/2)),
+    venue,season:'2026',commissioner:cN(i),tableOff:toN(i),
+    createdAt:now.toISOString()
+  }));
+  S.saveMatches(matches);
+  localStorage.setItem('bhba_mid','1010');
+  localStorage.setItem('bhba_mf_seeded_v3','1');
+  renderMatchList();populateMatchScheduleSelects();populateMatchFormSelects();populateOfficialSelects();
+})();
+
+// Init
+populateMatchScheduleSelects();
+renderMatchList();
+
+// ═══════════════════════════════════════════════════
+// URL PARAMS HANDLER — ?match=MATCH_ID&tab=form
+// Deep link from match list or portal
+// ═══════════════════════════════════════════════════
+(function handleURLParams(){
+  const params=new URLSearchParams(window.location.search);
+  const matchId=params.get('match');
+  const tab=params.get('tab');
+  if(tab==='form'&&matchId){
+    goPage('form');
+    // Wait one tick for the form page to render + selects to populate
+    setTimeout(()=>{
+      const mSel=document.getElementById('mf-match');
+      if(mSel){
+        mSel.value=matchId;
+        loadMatchForm();
+      }
+    },100);
+  }
+})();
+</script>
+</body>
+</html>
