@@ -2,6 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+  /* ── BHBA AUTH GUARD ── poka-yoke: no unauthenticated access ── */
+  (function(){
+    try{
+      var s=JSON.parse(localStorage.getItem('bhba_session')||'null');
+      if(!s||!s.userId){
+        sessionStorage.setItem('bhba_redirect',window.location.href);
+        window.location.replace('bhba_auth.html');
+      }
+    }catch(e){ window.location.replace('bhba_auth.html'); }
+  })();
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>BHBA Table Official Scoresheet v2.0</title>
 <!-- BHBA 2026 Rule Compliance: Art.8.1 2×15min | Art.8.2 OT 2-min+SD | Art.10.1 foul reset halftime
