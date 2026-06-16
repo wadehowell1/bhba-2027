@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BHBA Financial Management — Fees, Fines & Statements</title>
+<!-- CLASSIFICATION: INTERNAL USE | v1.1.0 | 2026-06-13
+     BHBA 2026 Fee & Fine Schedule — All 14 Offence Categories per BHBA Offences 2026 PDF
+     doLevy() bug fixed (find(x=>x.id===typeId))
+     Accounting: double-entry, contra entries for reversed fines
+     Protest workflow: Fine levied → Payment confirmed → Protest → Hearing → Ruling → Contra (if applicable)
+     NOTE: Fees are NON-REFUNDABLE. Fines MAY be reversed via protest process. -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);--border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);--white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;--red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--teal:#1ABC9C;--purple:#9B59B6;--pending:#9B59B6}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.05) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.03) 0%,transparent 55%);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh}
+#hdr{background:linear-gradient(135deg,#04040c 0%,#0c0b18 60%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 24px rgba(0,0,0,0.6)}
+#hdr .brand{color:var(--gold);font-size:18px;font-weight:900}
+#hdr .sub{color:var(--lgrey);font-size:11px}
+.nav-tabs{display:flex;gap:6px;padding:10px 14px;overflow-x:auto;background:rgba(0,0,0,0.5);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.nav-tab{background:rgba(12,12,22,0.8);border:1px solid var(--border);color:var(--lgrey);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s,color .15s}
+.nav-tab:hover{border-color:var(--border-h);color:var(--gold)}
+.nav-tab.active{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%);color:#000;border-color:var(--gold);box-shadow:0 2px 14px rgba(245,166,35,0.3)}
+.page{display:none;padding:12px}
+.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s}.card:hover{border-color:var(--border-h);box-shadow:0 4px 20px rgba(245,166,35,0.06)}
+.card-title{color:var(--gold);font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.fg{margin-bottom:10px}
+.fg label{display:block;color:var(--lgrey);font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;background:#1a1a1a;border:1px solid var(--border);color:var(--white);padding:9px;border-radius:6px;font-size:13px}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--gold)}
+.fg select option{background:var(--card)}
+.btn{border:none;padding:9px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;font-weight:800;width:100%;margin-bottom:6px;transition:opacity .15s,transform .1s}.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-red{background:var(--red);color:var(--white)}
+.btn-blue{background:var(--blue);color:var(--white)}
+.btn-warn{background:var(--warn);color:var(--white)}
+.btn-purple{background:var(--purple);color:var(--white)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--lgrey)}
+/* Fine/fee schedule table */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--black);color:var(--gold);padding:7px 8px;text-align:left;border:1px solid var(--border)}
+td{padding:7px 8px;border:1px solid var(--border);background:var(--card)}
+td.amt{font-weight:700;color:var(--white);text-align:right}
+td.player-amt{color:var(--blue)}
+td.team-amt{color:var(--warn)}
+td.coach-amt{color:var(--red)}
+/* Ledger */
+.ledger{font-size:12px}
+.ledger-row{display:flex;align-items:flex-start;gap:8px;padding:8px;border-bottom:1px solid var(--border)}
+.ledger-row:last-child{border-bottom:none}
+.ledger-row .dr{color:var(--red);font-weight:700;min-width:80px;text-align:right}
+.ledger-row .cr{color:var(--green);font-weight:700;min-width:80px;text-align:right}
+.ledger-row .desc{flex:1;color:var(--white)}
+.ledger-row .date{color:var(--lgrey);min-width:70px}
+.ledger-row.contra{background:rgba(39,174,96,.05);border-left:3px solid var(--green)}
+.ledger-row.pending-pay{background:rgba(230,126,34,.05);border-left:3px solid var(--warn)}
+.ledger-row.total-row{background:var(--black);font-weight:700}
+/* Transaction card */
+.txn-card{background:#1a1a1a;border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:8px}
+.txn-card .txn-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.txn-card .txn-ref{font-weight:700;font-size:13px}
+.txn-card .txn-amt{font-weight:700;font-size:14px}
+.txn-card .txn-det{font-size:11px;color:var(--lgrey)}
+.badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;margin:2px}
+.badge-paid{background:var(--green);color:#fff}
+.badge-unpaid{background:var(--red);color:#fff}
+.badge-protest{background:var(--purple);color:#fff}
+.badge-overturned{background:var(--teal);color:#fff}
+.badge-upheld{background:var(--warn);color:#fff}
+.badge-fee{background:var(--blue);color:#fff}
+.badge-fine{background:var(--red);color:#fff}
+.badge-contra{background:var(--teal);color:#fff}
+/* Summary stats */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-box{background:#1a1a1a;border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.stat-label{color:var(--lgrey);font-size:10px;text-transform:uppercase;margin-bottom:4px}
+.stat-val{font-size:20px;font-weight:900}
+.stat-val.income{color:var(--green)}
+.stat-val.expense{color:var(--red)}
+.stat-val.net.positive{color:var(--green)}
+.stat-val.net.negative{color:var(--red)}
+/* Workflow steps */
+.workflow{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.wf-step{background:#1a1a1a;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:10px;color:var(--lgrey);white-space:nowrap}
+.wf-step.active{background:var(--gold);color:var(--black);border-color:var(--gold);font-weight:700}
+.wf-step.done{background:var(--green);color:var(--white);border-color:var(--green)}
+/* Alert */
+.alert{padding:10px;border-radius:6px;font-size:12px;margin-bottom:10px}
+.alert-warn{background:rgba(230,126,34,.15);border:1px solid var(--warn);color:var(--warn)}
+.alert-info{background:rgba(41,128,185,.15);border:1px solid var(--blue);color:var(--blue)}
+.alert-success{background:rgba(39,174,96,.15);border:1px solid var(--green);color:var(--green)}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div><div class="brand">BHBA</div><div class="sub">Financial Management · v1.0.0</div></div>
+  <div style="font-size:11px;color:var(--lgrey);text-align:right">2026 Season<br><span style="color:var(--gold)">Internal Use Only</span></div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="goPage('schedule')">📋 Fee Schedule</div>
+  <div class="nav-tab" onclick="goPage('levy')">⚖️ Levy Fine/Fee</div>
+  <div class="nav-tab" onclick="goPage('protest')">📢 Protest</div>
+  <div class="nav-tab" onclick="goPage('team-stmt')">🏀 Team Statement</div>
+  <div class="nav-tab" onclick="goPage('bhba-stmt')">🏛 BHBA Statement</div>
+</div>
+
+<!-- ══════════ FEE/FINE SCHEDULE ══════════ -->
+<div class="page active" id="page-schedule">
+  <div class="card">
+    <div class="card-title">⚠️ BHBA 2026 Fines Schedule — All 14 Categories</div>
+    <div class="alert alert-warn">All amounts in Jamaican Dollars (JMD). Source: BHBA Offences 2026 (official PDF). Fines subject to protest process. Repeat offences doubled automatically.</div>
+    <table>
+      <thead><tr><th>Section / Offence</th><th>Player / Team</th><th>Coach/Official</th><th>Suspension</th></tr></thead>
+      <tbody id="fines-table-body"></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">💳 BHBA 2026 Fees Schedule</div>
+    <div class="alert alert-info">Fees are NON-REFUNDABLE under any circumstances, including protest outcomes.</div>
+    <table>
+      <thead><tr><th>Fee Type</th><th>Amount (JMD)</th><th>Applies To</th><th>Notes</th></tr></thead>
+      <tbody id="fees-table-body"></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Protest & Fine Workflow</div>
+    <div style="font-size:12px;color:var(--lgrey);line-height:1.7">
+      <p><strong style="color:var(--gold)">1. Fine Levied</strong> — BHBA Executive attaches fine to team/player. DR: Team Account | CR: BHBA Fine Revenue.</p>
+      <p><strong style="color:var(--gold)">2. Payment Window</strong> — Team has <strong style="color:var(--white)">14 days</strong> to settle. After 14 days, No Pay No Play rule enforced.</p>
+      <p><strong style="color:var(--gold)">3. Payment Confirmed</strong> — Wire transfer or manager's cheque cleared. DR: Cash/Bank | CR: Team Receivable.</p>
+      <p><strong style="color:var(--gold)">4. Protest Lodged</strong> — Team may file protest within <strong style="color:var(--white)">7 days of payment</strong>. BHBA logs protest, schedules hearing.</p>
+      <p><strong style="color:var(--gold)">5. Hearing</strong> — Match Commissioner or BHBA Executive panel reviews. Ruling: <em>Upheld</em> (fine stands) or <em>Overturned</em> (fine reversed).</p>
+      <p><strong style="color:var(--gold)">6. Fine Overturned</strong> — Contra entry posted: DR: BHBA Fine Revenue | CR: Cash (refund). Accounts balanced. Net effect = zero.</p>
+      <p><strong style="color:var(--gold)">7. Fine Upheld</strong> — No refund. Fine income remains on BHBA statement.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ LEVY FINE/FEE ══════════ -->
+<div class="page" id="page-levy">
+  <div class="card">
+    <div class="card-title">⚖️ Levy Fine or Fee</div>
+    <div class="alert alert-warn">Only authorised BHBA Executives may levy fines and fees. All entries are permanent and auditable.</div>
+    <div class="fg"><label>Levied By (Executive Name)</label><input type="text" id="lv-exec" placeholder="Executive Name / Title"></div>
+    <div class="fg"><label>Fine / Fee Type</label>
+      <select id="lv-type" onchange="onLevyTypeChange()">
+        <option value="">— Select type —</option>
+        <optgroup label="── FINES ──" id="levy-fines-group"></optgroup>
+        <optgroup label="── FEES ──" id="levy-fees-group"></optgroup>
+      </select>
+    </div>
+    <div id="lv-type-info" style="display:none;font-size:11px;color:var(--lgrey);background:#1a1a1a;padding:8px;border-radius:4px;margin-bottom:10px"></div>
+    <div class="fg"><label>Apply To</label>
+      <select id="lv-target">
+        <option value="team">Team</option>
+        <option value="player">Player</option>
+        <option value="team_and_player">Team AND Player</option>
+        <option value="referee">Referee</option>
+        <option value="table_official">Table Official</option>
+      </select>
+    </div>
+    <div class="fg"><label>Team Name</label><input type="text" id="lv-team" placeholder="Team name"></div>
+    <div class="fg" id="lv-player-fg"><label>Player Name / Jersey #</label><input type="text" id="lv-player" placeholder="Player name or jersey #"></div>
+    <div class="fg"><label>Amount (JMD $)</label><input type="number" id="lv-amount" placeholder="Auto-filled from schedule" min="0"></div>
+    <div class="fg"><label>Repeat Offence?</label>
+      <select id="lv-repeat"><option value="no">No</option><option value="yes">Yes — amount doubled per rules</option></select>
+    </div>
+    <div class="fg"><label>Match Reference</label><input type="text" id="lv-match" placeholder="e.g. BHBA-2026-G05 · H1 · 14:32"></div>
+    <div class="fg"><label>Infraction Description</label><textarea id="lv-desc" rows="2" placeholder="Describe the incident…"></textarea></div>
+    <div id="lv-preview" style="display:none;background:#1a1a1a;border:1px solid var(--gold);border-radius:6px;padding:10px;margin-bottom:10px;font-size:12px"></div>
+    <button class="btn btn-gold" onclick="doLevy()">Post Entry</button>
+  </div>
+</div>
+
+<!-- ══════════ PROTEST ══════════ -->
+<div class="page" id="page-protest">
+  <div class="card">
+    <div class="card-title">📢 Lodge / Manage Protest</div>
+    <div class="fg"><label>Transaction Reference #</label>
+      <select id="pr-txn"><option value="">— Select fine transaction —</option></select>
+    </div>
+    <div id="pr-txn-preview" style="display:none;background:#1a1a1a;padding:8px;border-radius:6px;margin-bottom:10px;font-size:12px"></div>
+    <div class="fg" id="pr-lodge-fg">
+      <label>Grounds for Protest</label>
+      <textarea id="pr-grounds" rows="3" placeholder="Detail why the fine should be overturned…"></textarea>
+    </div>
+    <div class="fg" id="pr-lodge-btn-fg">
+      <button class="btn btn-purple" style="width:100%" onclick="lodgeProtest()">📢 Lodge Protest</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚖️ Protest Hearing — Record Ruling</div>
+    <div class="fg"><label>Protest Reference</label><select id="hr-protest"><option value="">— Select open protest —</option></select></div>
+    <div id="hr-preview" style="display:none;background:#1a1a1a;padding:8px;border-radius:6px;margin-bottom:10px;font-size:12px"></div>
+    <div class="fg"><label>Hearing Panel (names)</label><input type="text" id="hr-panel" placeholder="Match Commissioner, VP…"></div>
+    <div class="fg"><label>Ruling</label>
+      <select id="hr-ruling">
+        <option value="">— Select ruling —</option>
+        <option value="upheld">UPHELD — Fine stands, no refund</option>
+        <option value="overturned">OVERTURNED — Fine reversed, refund issued</option>
+      </select>
+    </div>
+    <div class="fg"><label>Ruling Notes</label><textarea id="hr-notes" rows="2" placeholder="Hearing outcome summary…"></textarea></div>
+    <button class="btn btn-gold" onclick="recordRuling()">Record Ruling</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 All Protests</div>
+    <div id="protest-list"></div>
+  </div>
+</div>
+
+<!-- ══════════ TEAM STATEMENT ══════════ -->
+<div class="page" id="page-team-stmt">
+  <div class="card">
+    <div class="card-title">🏀 Team Statement of Account</div>
+    <div class="fg"><label>Select Team</label>
+      <select id="ts-team" onchange="renderTeamStmt()"><option value="">— Select team —</option></select>
+    </div>
+  </div>
+  <div id="team-stmt-body"></div>
+</div>
+
+<!-- ══════════ BHBA STATEMENT ══════════ -->
+<div class="page" id="page-bhba-stmt">
+  <div class="card">
+    <div class="card-title">🏛 BHBA Overall Statement of Accounts</div>
+    <div id="bhba-stmt-summary"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📒 Full Ledger</div>
+    <div id="bhba-full-ledger"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// BHBA 2026 FEE & FINE SCHEDULE
+// Source: BHBA Competition Rules 2026 + CLAUDE.md
+// ═══════════════════════════════════════════════════
+// ── ALL 14 OFFENCE CATEGORIES FROM BHBA OFFENCES 2026 PDF ──
+const FINES = [
+  // SECTION 1 — Ejections
+  {id:'1st_ejection',       label:'1st Ejection',              player:10000, coach:15000, suspension:'1 game',  refundable:true,  category:'fine', desc:'1-game suspension + fine. Art.3 conduct framework.'},
+  {id:'2nd_ejection',       label:'2nd Ejection',              player:15000, coach:20000, suspension:'2 games', refundable:true,  category:'fine', desc:'2-game suspension + escalated fine.'},
+  {id:'3rd_ejection',       label:'3rd Ejection',              player:20000, coach:25000, suspension:'6 games', refundable:true,  category:'fine', desc:'6-game suspension. Severe escalation. Double for repeat.'},
+  // SECTION 2 — Unsportsmanlike Conduct
+  {id:'unsport_conduct',    label:'Unsportsmanlike Conduct',   player:5000,  coach:10000, suspension:'2 games (player) / 4 games (coach)', refundable:true, category:'fine', desc:'Double baseline fine for repeat offence.'},
+  // SECTION 3 — Violence / Physical Assault
+  {id:'violence_assault',   label:'Violence / Physical Assault', player:20000, coach:30000, suspension:'5 games', refundable:true, category:'fine', desc:'Deliberate assault or blow to face. Immediate 5-game suspension.'},
+  // SECTION 4 — Coaches & Team Officials Conduct
+  {id:'coach_insult_official', label:'Insult to Referee / Table Official', player:0, coach:20000, suspension:'3 games (subsequent: season ban)', refundable:true, category:'fine', desc:'Disqualified & expelled for insulting match officials. Subsequent: season ban + $20,000.'},
+  {id:'coach_provoke_aggression', label:'Provoking / Aggression Against Officials or Players', player:0, coach:20000, suspension:'Remainder of Season', refundable:true, category:'fine', desc:'Initiates aggression against referee, table official, or opposing player.'},
+  {id:'coach_continuous_protest', label:'Continuous Protests to Referees / Table Officials', player:0, coach:10000, suspension:'N/A', refundable:true, category:'fine', desc:'Coach expelled for persistent protest behaviour. Each subsequent occurrence: fine doubles.'},
+  // SECTION 5 — Ineligible Players
+  {id:'ineligible_player',  label:'Ineligible Player Fielded', player:0, coach:0, suspension:'Game Forfeit (Loss)', refundable:false, category:'fine', desc:'$10,000 TEAM fine + immediate mandatory game forfeit. Non-negotiable. Must be paid before team can continue.', team:10000},
+  // SECTION 6 — Intimidation of Match Officials
+  {id:'intimidation_official', label:'Intimidation of Match Official', player:20000, coach:20000, suspension:'Repeat: Remainder of Season', refundable:true, category:'fine', desc:'Serious threats against match official. Up to $20,000. Repeat: fine + season suspension.'},
+  // SECTION 7 — Team / Spectator Offences
+  {id:'spectator_team_offence', label:'Spectator / Team Misconduct', player:0, coach:0, suspension:'1-Year Ban from Competition', refundable:false, category:'fine', desc:'Abusive language, illegal substances, court invasion, missile throwing, fighting by spectators/team. Up to $30,000.', team:30000},
+  // SECTION 8 — Performance Enhancing Substances
+  {id:'performance_enhancing', label:'Performance Enhancing Substance Use', player:0, coach:0, suspension:'Per JADCO / WADA', refundable:false, category:'fine', desc:'Penalties as stipulated by JADCO / WADA. Refer to anti-doping commission.', team:0},
+  // SECTION 9 — Alcohol
+  {id:'alcohol_influence',  label:'Under Influence of Alcohol (Participating)', player:10000, coach:20000, suspension:'Barred from game', refundable:false, category:'fine', desc:'Player barred from game + $10,000. Coach/official: $20,000.'},
+  {id:'alcohol_on_bench',   label:'Bringing Alcohol to Bench / Court', player:10000, coach:20000, suspension:'Barred from game', refundable:false, category:'fine', desc:'Player barred + $10,000. Coach/official: $20,000.'},
+  // SECTION 10 — Equipment Destruction
+  {id:'equipment_destruction', label:'Destruction of BHBA Equipment', player:0, coach:0, suspension:'1 Match Suspended', refundable:false, category:'fine', desc:'Full replacement cost charged + 1-match suspension. Applies to any affiliate.', team:0},
+  // SECTION 11 — Forfeiture
+  {id:'forfeit_preliminary', label:'Game Forfeit — Preliminary / League', player:0, coach:0, suspension:'N/A', refundable:false, category:'fine', desc:'$15,000 payable before next game. Repeat: $15,000 + expelled from league + relegated to lower division.', team:15000},
+  {id:'forfeit_playoff',    label:'Game Forfeit — Play-off', player:0, coach:0, suspension:'1-Year Ban from Promotion', refundable:false, category:'fine', desc:'$25,000 + relegated to lower division + 1-year ban from promotion.', team:25000},
+  // SECTION 12 — BHBA Rally / Opening Ceremony
+  {id:'rally_absence',      label:'BHBA Rally / Opening Ceremony — No Show', player:0, coach:0, suspension:'N/A', refundable:false, category:'fine', desc:'Failure to participate in BHBA Rally or Opening Ceremony without BHBA consent.', team:20000},
+  // SECTION 13 — Media Interview
+  {id:'media_interview_fail', label:'Failure to Provide Media Interview', player:0, coach:0, suspension:'N/A', refundable:false, category:'fine', desc:'Failure to make player or coach available for post-game media interview. Payable by team.', team:5000},
+  // SECTION 14 — Verbal / Physical Abuse of Official
+  {id:'abuse_official',     label:'Verbal Abuse / Threat / Violence vs Match Official', player:30000, coach:30000, suspension:'6 Matches', refundable:true, category:'fine', desc:'Any act of verbal abuse, threat, or physical violence against a match or BHBA official. 6-match suspension.'},
+  // Administrative fines (system-generated)
+  {id:'no_pay_no_play',     label:'No Pay No Play Violation',  player:0, coach:0, suspension:'Barred from court', refundable:false, category:'fine', desc:'Team owes outstanding fees/fines. Barred from court until all amounts cleared.', team:0},
+  {id:'late_reg_penalty',   label:'Late Registration Penalty', player:0, coach:0, suspension:'N/A', refundable:false, category:'fine', desc:'Administrative fine for late team/player registration.', team:5000},
+];
+
+const FEES = [
+  {id:'team_reg',        label:'Team Registration Fee',      amount:50000, target:'Team',   refundable:false, desc:'Annual team registration. Due before first game.'},
+  {id:'player_reg',      label:'Player Registration Fee',    amount:5000,  target:'Player', refundable:false, desc:'Per-player annual registration.'},
+  {id:'jersey_deposit',  label:'Jersey / Kit Deposit',       amount:10000, target:'Team',   refundable:false, desc:'Non-refundable kit registration fee.'},
+  {id:'protest_filing',  label:'Protest Filing Fee',         amount:3000,  target:'Team',   refundable:false, desc:'Administrative fee to lodge protest. Non-refundable regardless of outcome.'},
+  {id:'game_forfeit_fee',label:'Game Forfeit Admin Fee',     amount:5000,  target:'Team',   refundable:false, desc:'Charged when team forfeits a scheduled game.'},
+  {id:'medical_levy',    label:'Medical / Insurance Levy',   amount:2000,  target:'Player', refundable:false, desc:'Per-player insurance levy. Mandatory.'},
+];
+
+// ═══════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════
+function getTxns(){return JSON.parse(localStorage.getItem('bhba_txns')||'[]');}
+function saveTxns(t){localStorage.setItem('bhba_txns',JSON.stringify(t));}
+function getProtests(){return JSON.parse(localStorage.getItem('bhba_protests')||'[]');}
+function saveProtests(p){localStorage.setItem('bhba_protests',JSON.stringify(p));}
+function nextRef(){const n=parseInt(localStorage.getItem('bhba_ref')||'1000');localStorage.setItem('bhba_ref',n+1);return'BHBA-TXN-'+n;}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+(function init(){
+  // Fines table
+  const fb=document.getElementById('fines-table-body');
+  FINES.forEach(f=>{
+    const tr=document.createElement('tr');
+    const playerAmt=f.player?`$${f.player.toLocaleString()}`:(f.team?'(see team)':'—');
+    const coachAmt=f.coach?`$${f.coach.toLocaleString()}`:'—';
+    const teamAmt=f.team&&f.team>0?`<br><small style="color:var(--warn)">Team: $${f.team.toLocaleString()}</small>`:'';
+    tr.innerHTML=`<td>${f.label}${teamAmt}</td><td class="amt player-amt">${playerAmt}</td><td class="amt coach-amt">${coachAmt}</td><td>${f.suspension}</td>`;
+    fb.appendChild(tr);
+  });
+  // Fees table
+  const feeB=document.getElementById('fees-table-body');
+  FEES.forEach(f=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${f.label}</td><td class="amt" style="color:var(--blue)">$${f.amount.toLocaleString()}</td><td>${f.target}</td><td style="color:var(--lgrey);font-size:11px">${f.desc}</td>`;
+    feeB.appendChild(tr);
+  });
+  // Levy dropdowns
+  const finGrp=document.getElementById('levy-fines-group');
+  FINES.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.label;finGrp.appendChild(o);});
+  const feeGrp=document.getElementById('levy-fees-group');
+  FEES.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.label;feeGrp.appendChild(o);});
+})();
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`page-${p}`).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>{
+    const tabs=['schedule','levy','protest','team-stmt','bhba-stmt'];
+    t.classList.toggle('active',tabs[i]===p);
+  });
+  if(p==='protest')refreshProtestSelects();
+  if(p==='team-stmt')refreshTeamSelect();
+  if(p==='bhba-stmt')renderBhbaStmt();
+}
+
+// ═══════════════════════════════════════════════════
+// LEVY
+// ═══════════════════════════════════════════════════
+function onLevyTypeChange(){
+  const id=document.getElementById('lv-type').value;
+  const infoEl=document.getElementById('lv-type-info');
+  const amtEl=document.getElementById('lv-amount');
+  const prevEl=document.getElementById('lv-preview');
+  if(!id){infoEl.style.display='none';prevEl.style.display='none';return;}
+  const entry=[...FINES,...FEES].find(x=>x.id===id);
+  if(!entry){infoEl.style.display='none';return;}
+  const isFine=entry.category==='fine';
+  const target=document.getElementById('lv-target').value;
+  let defaultAmt=0;
+  if(isFine){
+    if(target==='player'||target==='team_and_player')defaultAmt=entry.player||0;
+    if(target==='team')defaultAmt=entry.team||entry.player||0;
+    if(target==='referee'||target==='table_official')defaultAmt=entry.coach||entry.player||0;
+  } else {defaultAmt=entry.amount||0;}
+  amtEl.value=defaultAmt;
+  infoEl.innerHTML=`<strong style="color:var(--gold)">${entry.label}</strong><br>${entry.desc}<br><span style="color:${isFine?'var(--red)':'var(--blue)'}">Category: ${isFine?'FINE (protest eligible)':'FEE (non-refundable)'}</span>`;
+  infoEl.style.display='block';
+  updateLevyPreview();
+}
+function updateLevyPreview(){
+  const id=document.getElementById('lv-type').value;
+  const amt=parseFloat(document.getElementById('lv-amount').value)||0;
+  const repeat=document.getElementById('lv-repeat').value==='yes';
+  const finalAmt=repeat?amt*2:amt;
+  const prevEl=document.getElementById('lv-preview');
+  if(!id||!amt){prevEl.style.display='none';return;}
+  const entry=[...FINES,...FEES].find(x=>x.id===id);
+  prevEl.innerHTML=`<strong style="color:var(--gold)">Ledger Preview:</strong><br>
+    DR: ${document.getElementById('lv-team').value||'[Team]'} Account &nbsp;|&nbsp; $${finalAmt.toLocaleString()}<br>
+    CR: BHBA ${entry?.category==='fine'?'Fine Revenue':'Fee Income'} &nbsp;|&nbsp; $${finalAmt.toLocaleString()}
+    ${repeat?'<br><span style="color:var(--warn)">⚠ Doubled for repeat offence</span>':''}`;
+  prevEl.style.display='block';
+}
+document.getElementById('lv-amount').addEventListener('input',updateLevyPreview);
+document.getElementById('lv-repeat').addEventListener('change',()=>{onLevyTypeChange();});
+document.getElementById('lv-target').addEventListener('change',onLevyTypeChange);
+
+function doLevy(){
+  const exec=document.getElementById('lv-exec').value.trim();
+  const typeId=document.getElementById('lv-type').value;
+  const target=document.getElementById('lv-target').value;
+  const team=document.getElementById('lv-team').value.trim();
+  const player=document.getElementById('lv-player').value.trim();
+  const amt=parseFloat(document.getElementById('lv-amount').value)||0;
+  const repeat=document.getElementById('lv-repeat').value==='yes';
+  const match=document.getElementById('lv-match').value.trim();
+  const desc=document.getElementById('lv-desc').value.trim();
+
+  if(!exec){toast('Enter executive name','w');return;}
+  if(!typeId){toast('Select fine/fee type','w');return;}
+  if(!team){toast('Enter team name','w');return;}
+  if(!amt){toast('Enter amount','w');return;}
+  if(!desc){toast('Describe the infraction','w');return;}
+
+  const entry=[...FINES,...FEES].find(x=>x.id===typeId);
+  const finalAmt=repeat?amt*2:amt;
+  const isFine=entry?.category==='fine';
+  const ref=nextRef();
+  const txn={
+    ref,typeId,label:entry?.label||typeId,category:isFine?'fine':'fee',
+    team,player:player||'',target,
+    amount:finalAmt,originalAmount:amt,isRepeat:repeat,
+    match,description:desc,leviedBy:exec,
+    status:'unpaid',              // unpaid → paid → [contested]
+    protestId:null,
+    postedAt:new Date().toISOString(),
+    paidAt:null,paidRef:'',
+    dr:`${team} Account`,cr:isFine?'BHBA Fine Revenue':'BHBA Fee Income',
+    notes:''
+  };
+  const txns=getTxns();txns.push(txn);saveTxns(txns);
+
+  // Clear form
+  ['lv-exec','lv-team','lv-player','lv-match','lv-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('lv-type').value='';document.getElementById('lv-amount').value='';
+  document.getElementById('lv-preview').style.display='none';document.getElementById('lv-type-info').style.display='none';
+
+  toast(`✓ Entry posted: ${ref} — $${finalAmt.toLocaleString()} on ${team}`,'g');
+  refreshTeamSelect();
+}
+
+// ═══════════════════════════════════════════════════
+// PROTEST WORKFLOW
+// ═══════════════════════════════════════════════════
+function refreshProtestSelects(){
+  const txns=getTxns();
+  const protests=getProtests();
+  // Populate fine transactions eligible for protest (paid fines, no existing open protest)
+  const pr=document.getElementById('pr-txn');
+  const protestedRefs=protests.filter(p=>['open','hearing'].includes(p.status)).map(p=>p.txnRef);
+  pr.innerHTML='<option value="">— Select fine transaction —</option>';
+  txns.filter(t=>t.category==='fine'&&t.status==='paid'&&!protestedRefs.includes(t.ref)).forEach(t=>{
+    const o=document.createElement('option');o.value=t.ref;
+    o.textContent=`${t.ref} — ${t.label} — ${t.team} — $${t.amount.toLocaleString()}`;
+    pr.appendChild(o);
+  });
+  pr.onchange=()=>{
+    const ref=pr.value;const prev=document.getElementById('pr-txn-preview');
+    if(!ref){prev.style.display='none';return;}
+    const t=txns.find(x=>x.ref===ref);
+    if(!t){prev.style.display='none';return;}
+    prev.innerHTML=`<strong>${t.label}</strong> — ${t.team} — $${t.amount.toLocaleString()}<br>
+      Match: ${t.match||'—'} | Posted: ${new Date(t.postedAt).toLocaleDateString()} | Levied by: ${t.leviedBy}<br>
+      <em>${t.description}</em>`;
+    prev.style.display='block';
+  };
+
+  // Hearing select: open protests
+  const hr=document.getElementById('hr-protest');
+  hr.innerHTML='<option value="">— Select open protest —</option>';
+  protests.filter(p=>['open','hearing'].includes(p.status)).forEach(p=>{
+    const o=document.createElement('option');o.value=p.id;
+    const t=txns.find(x=>x.ref===p.txnRef);
+    o.textContent=`PROTEST-${p.id.slice(-4).toUpperCase()} — ${t?.team||'?'} — $${t?.amount?.toLocaleString()||0}`;
+    hr.appendChild(o);
+  });
+  hr.onchange=()=>{
+    const id=hr.value;const prev=document.getElementById('hr-preview');
+    if(!id){prev.style.display='none';return;}
+    const p=protests.find(x=>x.id===id);if(!p){prev.style.display='none';return;}
+    const t=txns.find(x=>x.ref===p.txnRef);
+    prev.innerHTML=`<strong>Fine:</strong> ${t?.label||p.txnRef} — $${t?.amount?.toLocaleString()||0}<br>
+      <strong>Team:</strong> ${t?.team||'?'} | Lodged: ${new Date(p.lodgedAt).toLocaleDateString()}<br>
+      <strong>Grounds:</strong> ${p.grounds}`;
+    prev.style.display='block';
+  };
+  renderProtestList();
+  // Also mark paid: add payment action to unpaid txns via quick actions
+}
+
+function lodgeProtest(){
+  const ref=document.getElementById('pr-txn').value;
+  const grounds=document.getElementById('pr-grounds').value.trim();
+  if(!ref){toast('Select a fine transaction','w');return;}
+  if(!grounds){toast('State the grounds for protest','w');return;}
+
+  // Post protest filing fee automatically
+  const filingFee=FEES.find(f=>f.id==='protest_filing');
+  const txns=getTxns();
+  const original=txns.find(t=>t.ref===ref);
+  if(!original){toast('Transaction not found','r');return;}
+
+  // Protest filing fee entry (non-refundable, auto-posted)
+  const feeRef=nextRef();
+  txns.push({ref:feeRef,typeId:'protest_filing',label:'Protest Filing Fee',category:'fee',
+    team:original.team,player:'',target:'team',amount:3000,originalAmount:3000,isRepeat:false,
+    match:'',description:`Auto-posted: protest filing fee for ${ref}`,leviedBy:'SYSTEM',
+    status:'unpaid',protestId:null,postedAt:new Date().toISOString(),paidAt:null,paidRef:'',
+    dr:`${original.team} Account`,cr:'BHBA Fee Income',notes:''});
+  saveTxns(txns);
+
+  const protests=getProtests();
+  protests.push({id:'prot_'+Date.now(),txnRef:ref,status:'open',grounds,
+    lodgedAt:new Date().toISOString(),filingFeeRef:feeRef,
+    panel:'',ruling:null,rulingNotes:'',ruledAt:null,contraRef:null});
+  saveProtests(protests);
+
+  document.getElementById('pr-grounds').value='';
+  document.getElementById('pr-txn').value='';
+  document.getElementById('pr-txn-preview').style.display='none';
+  toast(`Protest lodged for ${ref}. Filing fee $3,000 posted (non-refundable).`,'g');
+  refreshProtestSelects();
+  refreshTeamSelect();
+}
+
+function recordRuling(){
+  const protestId=document.getElementById('hr-protest').value;
+  const ruling=document.getElementById('hr-ruling').value;
+  const panel=document.getElementById('hr-panel').value.trim();
+  const notes=document.getElementById('hr-notes').value.trim();
+  if(!protestId){toast('Select a protest','w');return;}
+  if(!ruling){toast('Select a ruling','w');return;}
+  if(!panel){toast('Enter panel names','w');return;}
+
+  const protests=getProtests();
+  const p=protests.find(x=>x.id===protestId);if(!p){toast('Protest not found','r');return;}
+  const txns=getTxns();
+  const original=txns.find(t=>t.ref===p.txnRef);if(!original){toast('Original transaction not found','r');return;}
+
+  p.ruling=ruling;p.panel=panel;p.rulingNotes=notes;p.status='closed';p.ruledAt=new Date().toISOString();
+
+  if(ruling==='overturned'){
+    // Post contra entry: reverses the fine
+    const contraRef=nextRef();
+    txns.push({
+      ref:contraRef,typeId:`CONTRA_${original.typeId}`,
+      label:`CONTRA — ${original.label} (Fine Overturned)`,
+      category:'contra',
+      team:original.team,player:original.player||'',target:original.target,
+      amount:original.amount,originalAmount:original.amount,isRepeat:false,
+      match:original.match,
+      description:`Contra entry: protest ${protestId} ruled OVERTURNED by ${panel}. Fine reversed. Refund of $${original.amount.toLocaleString()} to ${original.team}.`,
+      leviedBy:panel,
+      status:'posted',protestId,
+      postedAt:new Date().toISOString(),paidAt:new Date().toISOString(),paidRef:'CONTRA',
+      dr:'BHBA Fine Revenue',cr:`${original.team} Account (Refund)`,
+      notes:`Protest ruled: OVERTURNED. Net effect on accounts = $0.`
+    });
+    p.contraRef=contraRef;
+    original.status='overturned';
+    toast(`Fine OVERTURNED — contra entry ${contraRef} posted. Net effect = $0.`,'g');
+  } else {
+    original.status='upheld';
+    toast(`Fine UPHELD — no refund issued. Fine of $${original.amount.toLocaleString()} stands.`,'w');
+  }
+
+  saveTxns(txns);saveProtests(protests);
+  refreshProtestSelects();renderBhbaStmt();renderTeamStmt();
+  document.getElementById('hr-protest').value='';
+  document.getElementById('hr-ruling').value='';
+  document.getElementById('hr-panel').value='';
+  document.getElementById('hr-notes').value='';
+  document.getElementById('hr-preview').style.display='none';
+}
+
+function renderProtestList(){
+  const protests=getProtests();const txns=getTxns();
+  const el=document.getElementById('protest-list');
+  if(!protests.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No protests on record.</div>';return;}
+  el.innerHTML=[...protests].reverse().map(p=>{
+    const t=txns.find(x=>x.ref===p.txnRef);
+    const statusBadge=p.status==='open'?'<span class="badge badge-protest">⏳ Open</span>':p.ruling==='overturned'?'<span class="badge badge-overturned">✓ Overturned</span>':'<span class="badge badge-upheld">✗ Upheld</span>';
+    const workflow=['Levied','Paid','Protest Lodged','Hearing','Ruling'];
+    const wfActive=p.status==='open'?2:p.status==='hearing'?3:4;
+    return `<div class="txn-card">
+      <div class="txn-hdr"><div><div class="txn-ref">PROTEST-${p.id.slice(-4).toUpperCase()} → ${p.txnRef}</div><div class="txn-det">${t?.team||'?'} | ${t?.label||'?'} | $${t?.amount?.toLocaleString()||0}</div></div>${statusBadge}</div>
+      <div class="workflow">${workflow.map((w,i)=>`<div class="wf-step ${i<wfActive?'done':i===wfActive?'active':''}">${w}</div>`).join('')}</div>
+      <div style="font-size:11px;color:var(--lgrey)">Grounds: ${p.grounds}</div>
+      ${p.ruling?`<div style="font-size:11px;margin-top:4px"><strong style="color:var(--gold)">Ruling:</strong> ${p.ruling.toUpperCase()} — ${p.panel||''}<br><em>${p.rulingNotes}</em></div>`:''}
+      ${p.contraRef?`<div style="font-size:11px;color:var(--teal);margin-top:4px">Contra entry: ${p.contraRef} (accounts balanced)</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// TEAM STATEMENT
+// ═══════════════════════════════════════════════════
+function refreshTeamSelect(){
+  const txns=getTxns();
+  const teams=[...new Set(txns.map(t=>t.team).filter(Boolean))];
+  const sel=document.getElementById('ts-team');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— Select team —</option>';
+  teams.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});
+  if(cur)sel.value=cur;
+  renderTeamStmt();
+}
+
+function renderTeamStmt(){
+  const team=document.getElementById('ts-team').value;
+  const el=document.getElementById('team-stmt-body');
+  if(!team){el.innerHTML='';return;}
+  const txns=getTxns().filter(t=>t.team===team);
+  const protests=getProtests();
+
+  // Running balance
+  let dr=0,cr=0;
+  txns.forEach(t=>{
+    if(t.category==='contra'){cr+=t.amount;}       // Contra reduces what team owes
+    else if(t.status!=='overturned')dr+=t.amount;  // All non-overturned charges
+  });
+  const outstanding=txns.filter(t=>t.status==='unpaid'&&t.category!=='contra').reduce((s,t)=>s+t.amount,0);
+  const paid=txns.filter(t=>t.status==='paid'&&t.category!=='contra').reduce((s,t)=>s+t.amount,0);
+  const refunded=txns.filter(t=>t.category==='contra').reduce((s,t)=>s+t.amount,0);
+
+  el.innerHTML=`
+  <div class="card">
+    <div class="card-title">📊 ${team} — Statement of Account</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-label">Total Levied</div><div class="stat-val expense">$${dr.toLocaleString()}</div></div>
+      <div class="stat-box"><div class="stat-label">Total Paid</div><div class="stat-val" style="color:var(--green)">$${paid.toLocaleString()}</div></div>
+      <div class="stat-box"><div class="stat-label">Outstanding</div><div class="stat-val ${outstanding>0?'expense':'income'}">$${outstanding.toLocaleString()}</div></div>
+      <div class="stat-box"><div class="stat-label">Refunded (Contra)</div><div class="stat-val" style="color:var(--teal)">$${refunded.toLocaleString()}</div></div>
+    </div>
+    ${outstanding>0?`<div class="alert alert-warn">⚠ Outstanding balance: $${outstanding.toLocaleString()} — No Pay No Play rule applies.</div>`:'<div class="alert alert-success">✓ Account clear — no outstanding balance.</div>'}
+  </div>
+  <div class="card">
+    <div class="card-title">📒 Transaction Ledger</div>
+    <div class="ledger">
+      <div class="ledger-row" style="font-weight:700;border-bottom:2px solid var(--gold)">
+        <div class="date">Date</div><div class="desc">Description</div><div class="dr">DR (JMD)</div><div class="cr">CR (JMD)</div>
+      </div>
+      ${txns.length?txns.map(t=>{
+        const isContra=t.category==='contra';
+        const rowClass=isContra?'contra':t.status==='unpaid'?'pending-pay':'';
+        const badge=t.category==='fee'?'<span class="badge badge-fee">FEE</span>':isContra?'<span class="badge badge-contra">CONTRA</span>':'<span class="badge badge-fine">FINE</span>';
+        const statusBadge=t.status==='paid'?'<span class="badge badge-paid">PAID</span>':t.status==='unpaid'?'<span class="badge badge-unpaid">UNPAID</span>':t.status==='overturned'?'<span class="badge badge-overturned">OVERTURNED</span>':'';
+        return `<div class="ledger-row ${rowClass}">
+          <div class="date">${new Date(t.postedAt).toLocaleDateString()}</div>
+          <div class="desc"><strong>${t.ref}</strong> — ${t.label} ${badge}${statusBadge}<br><span style="font-size:10px;color:var(--lgrey)">${t.description}</span></div>
+          <div class="dr">${isContra?'':('$'+t.amount.toLocaleString())}</div>
+          <div class="cr">${isContra?('$'+t.amount.toLocaleString()):''}</div>
+        </div>`;
+      }).join(''):'<div style="color:var(--lgrey);font-size:12px;padding:8px">No transactions on record.</div>'}
+      <div class="ledger-row total-row">
+        <div class="date"></div><div class="desc" style="color:var(--gold)">RUNNING BALANCE</div>
+        <div class="dr">$${dr.toLocaleString()}</div><div class="cr">$${refunded.toLocaleString()}</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--lgrey);margin-top:8px">
+      Add payment: <button class="btn btn-sm btn-green" onclick="markPaidPrompt('${team}')">Mark Transaction Paid</button>
+    </div>
+  </div>`;
+}
+
+function markPaidPrompt(team){
+  const ref=prompt('Enter Transaction Reference # to mark as PAID:');
+  if(!ref)return;
+  const txns=getTxns();const t=txns.find(x=>x.ref===ref.trim().toUpperCase()&&x.team===team);
+  if(!t){toast('Transaction not found for this team','r');return;}
+  if(t.status==='paid'){toast('Already marked as paid','w');return;}
+  const payRef=prompt('Enter payment reference (wire transfer / cheque #):');
+  if(!payRef)return;
+  t.status='paid';t.paidAt=new Date().toISOString();t.paidRef=payRef;
+  saveTxns(txns);toast(`${ref} marked PAID (${payRef})`,'g');
+  refreshTeamSelect();refreshProtestSelects();
+}
+
+// ═══════════════════════════════════════════════════
+// BHBA OVERALL STATEMENT
+// ═══════════════════════════════════════════════════
+function renderBhbaStmt(){
+  const txns=getTxns();
+  // Income = all paid fines + paid fees, less contra entries
+  let fineIncome=0,feeIncome=0,contraTotal=0,outstanding=0;
+  txns.forEach(t=>{
+    if(t.category==='contra'){contraTotal+=t.amount;return;}
+    if(t.status==='paid'||t.status==='upheld'){
+      if(t.category==='fine')fineIncome+=t.amount;
+      if(t.category==='fee')feeIncome+=t.amount;
+    }
+    if(t.status==='unpaid')outstanding+=t.amount;
+  });
+  const netFines=fineIncome-contraTotal;
+  const total=netFines+feeIncome;
+
+  document.getElementById('bhba-stmt-summary').innerHTML=`
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-label">Fine Income (Gross)</div><div class="stat-val" style="color:var(--warn)">$${fineIncome.toLocaleString()}</div></div>
+      <div class="stat-box"><div class="stat-label">Fee Income</div><div class="stat-val income">$${feeIncome.toLocaleString()}</div></div>
+      <div class="stat-box"><div class="stat-label">Contra / Refunded</div><div class="stat-val" style="color:var(--teal)">($${contraTotal.toLocaleString()})</div></div>
+      <div class="stat-box"><div class="stat-label">Net Fine Revenue</div><div class="stat-val ${netFines>=0?'income':'expense'}">$${netFines.toLocaleString()}</div></div>
+    </div>
+    <div style="background:var(--black);border:2px solid var(--gold);border-radius:6px;padding:12px;text-align:center;margin-bottom:12px">
+      <div style="color:var(--lgrey);font-size:11px;text-transform:uppercase">TOTAL BHBA INCOME (Net)</div>
+      <div style="font-size:28px;font-weight:900;color:${total>=0?'var(--green)':'var(--red)'}">$${total.toLocaleString()}</div>
+    </div>
+    <div class="alert alert-info">Outstanding (uncollected): <strong>$${outstanding.toLocaleString()}</strong> across all teams.</div>`;
+
+  // Full ledger
+  const teams=[...new Set(txns.map(t=>t.team).filter(Boolean))];
+  let html='<div class="ledger">';
+  html+=`<div class="ledger-row" style="font-weight:700;border-bottom:2px solid var(--gold)"><div class="date">Date</div><div class="desc">Description</div><div class="dr">DR</div><div class="cr">CR</div></div>`;
+  [...txns].sort((a,b)=>new Date(b.postedAt)-new Date(a.postedAt)).forEach(t=>{
+    const isContra=t.category==='contra';
+    const badge=t.category==='fee'?'<span class="badge badge-fee">FEE</span>':isContra?'<span class="badge badge-contra">CONTRA</span>':'<span class="badge badge-fine">FINE</span>';
+    const statusBadge=t.status==='paid'?'<span class="badge badge-paid">PAID</span>':t.status==='unpaid'?'<span class="badge badge-unpaid">UNPAID</span>':t.status==='overturned'?'<span class="badge badge-overturned">OVERTURNED</span>':'';
+    html+=`<div class="ledger-row ${isContra?'contra':t.status==='unpaid'?'pending-pay':''}">
+      <div class="date">${new Date(t.postedAt).toLocaleDateString()}</div>
+      <div class="desc"><strong>${t.ref}</strong> — ${t.label} ${badge}${statusBadge}<br><span style="font-size:10px;color:var(--lgrey)">${t.team}${t.player?' — '+t.player:''} | ${t.description}</span></div>
+      <div class="dr">${isContra?'':'$'+t.amount.toLocaleString()}</div>
+      <div class="cr">${isContra?'$'+t.amount.toLocaleString():''}</div>
+    </div>`;
+  });
+  html+=`<div class="ledger-row total-row"><div class="date"></div><div class="desc" style="color:var(--gold)">BHBA NET REVENUE</div><div class="dr">$${(fineIncome+feeIncome).toLocaleString()}</div><div class="cr">$${contraTotal.toLocaleString()}</div></div>`;
+  html+='</div>';
+  if(!txns.length)html='<div style="color:var(--lgrey);font-size:12px">No transactions posted yet.</div>';
+  document.getElementById('bhba-full-ledger').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+let tTimer;
+function toast(msg,t='g'){
+  const el=document.getElementById('toast');const c={g:'var(--green)',r:'var(--red)',w:'var(--warn)'};
+  el.style.background=c[t]||'#333';el.style.color='#fff';el.textContent=msg;el.style.opacity='1';
+  clearTimeout(tTimer);tTimer=setTimeout(()=>el.style.opacity='0',4000);
+}
+
+// Init BHBA statement on load
+renderBhbaStmt();
+</script>
+</body>
+</html>
