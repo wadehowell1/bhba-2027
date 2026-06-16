@@ -880,4 +880,271 @@ function show(id){
 
 // ═══════════════════════════════════════════════════
 // ROLE GRID (register screen)
-// ══════════════════════════════════════════════════�
+// ═══════════════════════════════════════════════════
+let selectedRole='';
+function buildRoleGrid(){
+  const grid=document.getElementById('role-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  SELF_REGISTER_ROLES.forEach(rk=>{
+    const r=ROLES[rk];
+    const card=document.createElement('div');
+    card.className='role-card'+(selectedRole===rk?' selected':'');
+    card.innerHTML='<div class="ri">'+r.icon+'</div><div class="rn">'+r.label+'</div><div class="rd">'+r.desc+'</div>';
+    card.onclick=()=>selectRole(rk);
+    grid.appendChild(card);
+  });
+}
+function selectRole(rk){
+  selectedRole=rk;
+  buildRoleGrid();
+  const tf=document.getElementById('r-team-field');
+  if(tf) tf.style.display=(rk==='player'||rk==='team_manager'||rk==='team_captain')?'block':'none';
+}
+
+// ═══════════════════════════════════════════════════
+// XSS HELPERS
+// ═══════════════════════════════════════════════════
+function esc(s){const t=document.createTextNode(String(s||''));const d=document.createElement('span');d.appendChild(t);return d.innerHTML;}
+function escAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+let _tt;
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  const map={success:['rgba(0,214,143,0.92)','#000'],error:['rgba(255,61,87,0.92)','#fff'],info:['rgba(77,138,240,0.92)','#fff'],warn:['rgba(255,159,10,0.92)','#000']};
+  const[bg,col]=map[type||'success']||map.success;
+  t.style.background=bg;t.style.color=col;t.textContent=msg;
+  t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(_tt);_tt=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';},3200);
+}
+
+// ═══════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════
+function doLogin(){
+  const email=(document.getElementById('l-email').value||'').trim().toLowerCase();
+  const pass=document.getElementById('l-pass').value||'';
+  const err=document.getElementById('l-err');
+  err.style.display='none';
+  if(!email||!pass){err.textContent='Please enter your email and password.';err.style.display='block';return;}
+  const users=getUsers();
+  const user=users[email];
+  if(!user||user.passHash!==simpleHash(pass)){
+    err.textContent='Invalid email or password. Please try again.';err.style.display='block';return;
+  }
+  saveSession({userId:email,name:user.name,loginAt:new Date().toISOString()});
+  toast('Welcome back, '+user.name.split(' ')[0]+'! 🏀','success');
+  const redir=sessionStorage.getItem('bhba_redirect');
+  if(redir){sessionStorage.removeItem('bhba_redirect');setTimeout(()=>{window.location.href=redir;},600);}
+  else{setTimeout(()=>{initDashboard();},600);}
+}
+
+// ═══════════════════════════════════════════════════
+// REGISTER
+// ═══════════════════════════════════════════════════
+function doRegister(){
+  const name=(document.getElementById('r-name').value||'').trim();
+  const email=(document.getElementById('r-email').value||'').trim().toLowerCase();
+  const pass=document.getElementById('r-pass').value||'';
+  const phone=(document.getElementById('r-phone').value||'').trim();
+  const org=(document.getElementById('r-org').value||'').trim();
+  const team=(document.getElementById('r-team')?.value||'').trim();
+  const err=document.getElementById('r-err');
+  err.style.display='none';
+  if(!name||!email||!pass){err.textContent='Name, email, and password are required.';err.style.display='block';return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){err.textContent='Please enter a valid email address.';err.style.display='block';return;}
+  if(pass.length<8||!/[A-Z]/.test(pass)||!/[0-9]/.test(pass)){
+    err.textContent='Password must be at least 8 characters with 1 uppercase letter and 1 number.';err.style.display='block';return;
+  }
+  if(!selectedRole){err.textContent='Please select a primary role.';err.style.display='block';return;}
+  const users=getUsers();
+  if(users[email]){err.textContent='An account with this email already exists. Please sign in.';err.style.display='block';return;}
+  users[email]={
+    name,email,phone,org,
+    passHash:simpleHash(pass),
+    roles:[{role:selectedRole,status:'approved',team,approvedBy:'self',approvedAt:new Date().toISOString()}],
+    createdAt:new Date().toISOString()
+  };
+  saveUsers(users);
+  saveSession({userId:email,name,loginAt:new Date().toISOString()});
+  toast('Welcome to BHBA, '+name.split(' ')[0]+'! 🎉','success');
+  const redir=sessionStorage.getItem('bhba_redirect');
+  if(redir){sessionStorage.removeItem('bhba_redirect');setTimeout(()=>{window.location.href=redir;},600);}
+  else{setTimeout(()=>{initDashboard();},600);}
+}
+
+// ═══════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════
+function initDashboard(){
+  const sess=getSession();
+  if(!sess){show('screen-landing');return;}
+  const users=getUsers();
+  const user=users[sess.userId];
+  if(!user){logout();return;}
+  const approvedRoles=(user.roles||[]).filter(r=>r.status==='approved');
+  const isExec=approvedRoles.some(r=>{const d=ROLES[r.role];return d&&(EXEC_APPROVER_TIERS.includes(d.tier)||SENIOR_EXEC_TIERS.includes(d.tier));});
+  const navUser=document.getElementById('nav-user');
+  const navName=document.getElementById('nav-name');
+  const navRole=document.getElementById('nav-role');
+  const btnOut=document.getElementById('btn-logout');
+  if(navUser)navUser.style.display='block';
+  if(navName)navName.textContent=user.name;
+  if(btnOut)btnOut.style.display='inline-block';
+  if(navRole&&approvedRoles.length){const d=ROLES[approvedRoles[0].role];navRole.textContent=d?d.label:approvedRoles[0].role;}
+  const av=document.getElementById('dash-avatar');if(av)av.textContent=user.name.charAt(0).toUpperCase();
+  const dn=document.getElementById('dash-name');if(dn)dn.textContent=user.name;
+  const de=document.getElementById('dash-email');if(de)de.textContent=user.email;
+  const db=document.getElementById('dash-badges');
+  if(db)db.innerHTML=approvedRoles.map(r=>{const d=ROLES[r.role];return '<span class="badge badge-approved">'+(d?d.icon+' '+d.label:r.role)+'</span>';}).join('');
+  const ta=document.getElementById('tab-approvals');const tm=document.getElementById('tab-members');
+  if(isExec){if(ta)ta.style.display='';if(tm)tm.style.display='';renderApprovalQueue();}
+  renderMyRoles(approvedRoles);
+  populateRoleSelect(user);
+  show('screen-dashboard');
+}
+function renderMyRoles(approvedRoles){
+  const list=document.getElementById('my-roles-list');
+  if(!list)return;
+  if(!approvedRoles.length){list.innerHTML='<div style="color:var(--lgrey);font-size:12px;text-align:center;padding:16px">No active roles yet. Request one below.</div>';return;}
+  list.innerHTML=approvedRoles.map(r=>{
+    const d=ROLES[r.role]||{};
+    return '<div class="role-item"><div class="ri-left"><div class="ri-name">'+(d.icon||'')+' '+(d.label||r.role)+'</div><div class="ri-det">'+(d.desc||'')+(r.team?' · '+esc(r.team):'')+'</div></div><span class="badge badge-approved">✔ Active</span></div>';
+  }).join('');
+}
+function populateRoleSelect(user){
+  const sel=document.getElementById('req-role');if(!sel)return;
+  const existing=(user.roles||[]).map(r=>r.role);
+  sel.innerHTML='<option value="">— Select role —</option>';
+  Object.keys(ROLES).forEach(rk=>{
+    if(!existing.includes(rk)){const o=document.createElement('option');o.value=rk;o.textContent=ROLES[rk].icon+' '+ROLES[rk].label;sel.appendChild(o);}
+  });
+}
+function dashTab(tab){
+  ['my-roles','request-role','approvals','members'].forEach(t=>{const el=document.getElementById('dt-'+t);if(el)el.style.display='none';});
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const panel=document.getElementById('dt-'+tab);if(panel)panel.style.display='block';
+  document.querySelectorAll('.nav-tab').forEach(t=>{if(t.getAttribute('onclick')==="dashTab('"+tab+"')")t.classList.add('active');});
+  if(tab==='members')renderMembers();
+  if(tab==='approvals')renderApprovalQueue();
+  if(tab==='request-role')renderPendingRequests();
+}
+
+// ═══════════════════════════════════════════════════
+// APPROVALS
+// ═══════════════════════════════════════════════════
+function renderApprovalQueue(){
+  const queue=document.getElementById('approval-queue');const countEl=document.getElementById('appr-count');if(!queue)return;
+  const requests=getRequests().filter(r=>r.status==='pending');
+  if(countEl)countEl.textContent=requests.length||0;
+  if(!requests.length){queue.innerHTML='<div style="color:var(--lgrey);font-size:12px;text-align:center;padding:16px">No pending approvals.</div>';return;}
+  queue.innerHTML=requests.map((req,i)=>{
+    const d=ROLES[req.role]||{};
+    return '<div class="approval-item"><div class="ai-hdr"><div><div class="ai-name">'+esc(req.name)+'</div><div class="ai-role">'+(d.icon||'')+' '+(d.label||req.role)+(req.team?' · '+esc(req.team):'')+'</div><div style="font-size:10px;color:var(--lgrey);margin-top:3px">'+esc(req.email)+(req.reason?' · '+esc(req.reason):'')+'</div></div><div class="ai-actions"><button class="btn btn-green btn-sm" onclick="approveRequest('+i+')">✔</button><button class="btn btn-red btn-sm" onclick="rejectRequest('+i+')">✗</button></div></div></div>';
+  }).join('');
+  const rmRole=document.getElementById('rm-role');
+  if(rmRole){rmRole.innerHTML='<option value="">— Select —</option>';Object.keys(ROLES).forEach(rk=>{const o=document.createElement('option');o.value=rk;o.textContent=ROLES[rk].label;rmRole.appendChild(o);});}
+}
+function approveRequest(idx){
+  const reqs=getRequests();const req=reqs[idx];if(!req)return;
+  req.status='approved';req.decidedAt=new Date().toISOString();
+  const users=getUsers();
+  if(users[req.email]){
+    users[req.email].roles=users[req.email].roles||[];
+    const ex=users[req.email].roles.find(r=>r.role===req.role);
+    if(ex){ex.status='approved';}else{users[req.email].roles.push({role:req.role,status:'approved',team:req.team||'',approvedBy:getSession()?.userId,approvedAt:new Date().toISOString()});}
+    saveUsers(users);
+  }
+  saveRequests(reqs);toast('Role approved for '+req.name,'success');renderApprovalQueue();
+}
+function rejectRequest(idx){
+  const reqs=getRequests();if(reqs[idx]){reqs[idx].status='rejected';reqs[idx].decidedAt=new Date().toISOString();saveRequests(reqs);toast('Request rejected.','warn');renderApprovalQueue();}
+}
+function removeRoleFromMember(){
+  const email=(document.getElementById('rm-email')?.value||'').trim().toLowerCase();
+  const role=document.getElementById('rm-role')?.value;
+  if(!email||!role){toast('Enter member email and select a role.','warn');return;}
+  const users=getUsers();if(!users[email]){toast('Member not found.','error');return;}
+  users[email].roles=(users[email].roles||[]).filter(r=>r.role!==role);
+  saveUsers(users);toast('Role removed from '+email,'success');
+}
+
+// ═══════════════════════════════════════════════════
+// ROLE REQUEST
+// ═══════════════════════════════════════════════════
+function submitRoleRequest(){
+  const sess=getSession();if(!sess)return;
+  const role=document.getElementById('req-role')?.value;
+  const team=(document.getElementById('req-team')?.value||'').trim();
+  const reason=(document.getElementById('req-reason')?.value||'').trim();
+  const warn=document.getElementById('req-warn');
+  if(!role){if(warn){warn.style.display='block';warn.textContent='Please select a role.';}return;}
+  if(warn)warn.style.display='none';
+  const users=getUsers();const user=users[sess.userId];if(!user)return;
+  const reqs=getRequests();
+  if(reqs.find(r=>r.email===sess.userId&&r.role===role&&r.status==='pending')){toast('You already have a pending request for this role.','warn');return;}
+  reqs.push({email:sess.userId,name:user.name,role,team,reason,status:'pending',requestedAt:new Date().toISOString()});
+  saveRequests(reqs);
+  user.roles=user.roles||[];
+  user.roles.push({role,status:'pending',team,approvedBy:null,approvedAt:null});
+  saveUsers(users);
+  toast('Role request submitted. Awaiting approval.','success');
+  if(document.getElementById('req-role'))document.getElementById('req-role').value='';
+  if(document.getElementById('req-reason'))document.getElementById('req-reason').value='';
+  renderPendingRequests();
+}
+function renderPendingRequests(){
+  const sess=getSession();const el=document.getElementById('pending-requests');if(!el||!sess)return;
+  const users=getUsers();const user=users[sess.userId];
+  const pending=(user?.roles||[]).filter(r=>r.status==='pending');
+  if(!pending.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px;text-align:center;padding:12px">No pending requests.</div>';return;}
+  el.innerHTML=pending.map(r=>{const d=ROLES[r.role]||{};return '<div class="role-item"><div class="ri-left"><div class="ri-name">'+(d.icon||'')+' '+(d.label||r.role)+'</div><div class="ri-det">Awaiting approval'+(r.team?' · '+esc(r.team):'')+'</div></div><span class="badge badge-pending">⏳ Pending</span></div>';}).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// MEMBERS
+// ═══════════════════════════════════════════════════
+function renderMembers(){
+  const el=document.getElementById('member-list');if(!el)return;
+  const q=(document.getElementById('member-search')?.value||'').toLowerCase();
+  const users=getUsers();
+  const list=Object.values(users).filter(u=>u.name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q));
+  if(!list.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px;text-align:center;padding:16px">No members found.</div>';return;}
+  el.innerHTML=list.map(u=>{
+    const initials=u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const aRoles=(u.roles||[]).filter(r=>r.status==='approved');
+    return '<div class="member-item"><div class="m-avatar">'+initials+'</div><div class="m-info"><div class="m-name">'+esc(u.name)+'</div><div class="m-email">'+esc(u.email)+'</div><div style="margin-top:4px">'+aRoles.map(r=>'<span class="badge badge-team" style="font-size:9px">'+(ROLES[r.role]?.icon||'')+' '+(ROLES[r.role]?.label||r.role)+'</span>').join('')+'</div></div></div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// LOGOUT
+// ═══════════════════════════════════════════════════
+function logout(){
+  localStorage.removeItem('bhba_session');
+  const nu=document.getElementById('nav-user');if(nu)nu.style.display='none';
+  const bl=document.getElementById('btn-logout');if(bl)bl.style.display='none';
+  toast('Signed out successfully.','info');
+  show('screen-landing');
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+(function init(){
+  buildRoleGrid();
+  const reqRole=document.getElementById('req-role');
+  if(reqRole){reqRole.addEventListener('change',function(){
+    const tf=document.getElementById('req-team-fg');
+    if(tf)tf.style.display=(this.value==='player'||this.value==='team_manager'||this.value==='team_captain')?'block':'none';
+  });}
+  ['l-email','l-pass'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});});
+  const sess=getSession();
+  if(sess&&sess.userId)initDashboard();
+})();
+</script>
+</body>
+</html>
