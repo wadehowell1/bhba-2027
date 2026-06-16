@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SysAdmin Email Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e3a8a',
+            secondary: '#3b82f6',
+            accent: '#f59e0b'
+          },
+          animation: {
+            /* FIX #5 — animate-fade-in was not a Tailwind built-in */
+            'fade-in': 'fadeIn 0.25s ease-out'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(-6px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            }
+          },
+          boxShadow: {
+            /* FIX #5 — shadow-xs is not valid in base Tailwind */
+            xs: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen text-slate-800">
+
+  <header class="bg-primary text-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between">
+      <div class="flex items-center space-x-3 mb-2 sm:mb-0">
+        <div class="bg-white p-2 rounded-lg text-primary">
+          <i class="fa-solid fa-square-envelope text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">SysAdmin Help Desk</h1>
+          <p class="text-xs text-blue-200">Email dispatcher &amp; request engine</p>
+        </div>
+      </div>
+      <nav class="flex space-x-2">
+        <button onclick="switchTab('contact-tab')" id="btn-contact-tab"
+          class="px-4 py-2 rounded-md font-medium text-sm transition bg-white/10 hover:bg-white/20 text-white border-b-2 border-white">
+          <i class="fa-regular fa-paper-plane mr-1"></i> Submit Request
+        </button>
+        <button onclick="switchTab('admin-tab')" id="btn-admin-tab"
+          class="px-4 py-2 rounded-md font-medium text-sm transition hover:bg-white/10 text-blue-100">
+          <i class="fa-solid fa-lock mr-1"></i> Admin Dashboard
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8 max-w-5xl">
+
+    <!-- Toast Banner -->
+    <div id="toast-banner" class="hidden mb-6 p-4 rounded-lg flex items-start space-x-3 shadow-md border animate-fade-in"></div>
+
+    <!-- ═══ CONTACT VIEW ═══ -->
+    <section id="contact-view" class="block">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <!-- Info Panel -->
+        <div class="md:col-span-1 space-y-6">
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">How It Works</h2>
+            <ul class="space-y-4 text-sm text-slate-600">
+              <li class="flex items-start">
+                <span class="flex items-center justify-center bg-blue-100 text-primary font-bold rounded-full h-6 w-6 mr-3 mt-0.5 text-xs">1</span>
+                <div>
+                  <p class="font-medium text-slate-800">Submit Details</p>
+                  <p class="text-slate-500">Fill out the secure communication request on the right.</p>
+                </div>
+              </li>
+              <li class="flex items-start">
+                <span class="flex items-center justify-center bg-blue-100 text-primary font-bold rounded-full h-6 w-6 mr-3 mt-0.5 text-xs">2</span>
+                <div>
+                  <p class="font-medium text-slate-800">Instant Routing</p>
+                  <p class="text-slate-500">System delivers details straight to the administrator inbox.</p>
+                </div>
+              </li>
+              <li class="flex items-start">
+                <span class="flex items-center justify-center bg-blue-100 text-primary font-bold rounded-full h-6 w-6 mr-3 mt-0.5 text-xs">3</span>
+                <div>
+                  <p class="font-medium text-slate-800">Secure Archiving</p>
+                  <p class="text-slate-500">Information is cataloged in the centralized Spreadsheet database.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="bg-gradient-to-br from-slate-900 to-primary text-white rounded-2xl p-6 shadow-md">
+            <h3 class="font-bold text-base mb-2">Secure Admin Link</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">This application connects to target workflows using certified Google Workspace APIs for lightning fast delivery and tracking.</p>
+            <span class="inline-flex items-center text-xs text-blue-300 font-semibold">
+              <i class="fa-solid fa-shield-halved mr-1"></i> TLS 1.3 Encryption Active
+            </span>
+          </div>
+        </div>
+
+        <!-- Form Panel -->
+        <div class="md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
+          <div class="border-b border-slate-100 pb-4 mb-6">
+            <h2 class="text-2xl font-bold text-slate-900">Create Message Dispatch</h2>
+            <p class="text-sm text-slate-500">Complete this form to initiate official email correspondence with the helpdesk.</p>
+          </div>
+          <form id="contact-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Full Name</label>
+                <input type="text" id="sender-name" required maxlength="120"
+                  class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-sm"
+                  placeholder="John Doe">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Email Address</label>
+                <input type="email" id="sender-email" required maxlength="200"
+                  class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-sm"
+                  placeholder="yourname@domain.com">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
+              <input type="text" id="sender-subject" required maxlength="250"
+                class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-sm"
+                placeholder="Reason for inquiry">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Detailed Message</label>
+              <textarea id="sender-message" rows="5" required maxlength="5000"
+                class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-sm scrollbar-thin"
+                placeholder="Provide all operational parameters, links, or issues here..."></textarea>
+            </div>
+            <div class="pt-2">
+              <button type="submit" id="btn-submit"
+                class="w-full bg-primary hover:bg-blue-800 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-md flex items-center justify-center space-x-2">
+                <span id="btn-text">Send Message</span>
+                <i id="btn-spinner" class="fa-solid fa-spinner animate-spin hidden"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ADMIN VIEW ═══ -->
+    <section id="admin-view" class="hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+
+        <!-- Auth Panel -->
+        <div id="admin-auth-panel" class="p-8 text-center">
+          <div class="max-w-md mx-auto">
+            <div class="bg-slate-100 p-4 rounded-full inline-block text-slate-500 mb-4">
+              <i class="fa-solid fa-shield text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Administrator Passcode Needed</h3>
+            <p class="text-sm text-slate-500 mb-6">Please key in your verification token. The system logs all dashboard view operations.</p>
+            <form onsubmit="authenticateAdmin(event)" class="space-y-4">
+              <input type="password" id="admin-passcode-input" required autocomplete="current-password"
+                class="w-full text-center px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
+                placeholder="••••••••••••">
+              <button type="submit"
+                class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-4 rounded-lg transition-all text-sm">
+                Verify &amp; Initialize
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Admin Dashboard (revealed after auth) -->
+        <div id="admin-content-panel" class="hidden">
+          <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900">Central Admin Desk</h2>
+              <p class="text-xs text-slate-500">Control status updates and monitor real-time message telemetry.</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="loadMessages()"
+                class="px-3 py-1.5 bg-white text-slate-700 hover:bg-slate-100 text-xs border rounded-md font-medium transition flex items-center space-x-1">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>Reload Database</span>
+              </button>
+              <button onclick="logoutAdmin()"
+                class="px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs border border-rose-200 rounded-md font-medium transition">
+                Lock Console
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+            <!-- Message List -->
+            <div class="lg:col-span-5 p-4 space-y-3 h-[450px] overflow-y-auto scrollbar-thin" id="admin-list-container">
+              <div class="text-center py-12 text-slate-400 text-sm">
+                <i class="fa-solid fa-box-open text-2xl mb-2 block"></i>
+                No entries populated.
+              </div>
+            </div>
+            <!-- Detail Panel -->
+            <div class="lg:col-span-7 p-6 bg-slate-50/50 flex flex-col justify-between h-[450px] overflow-y-auto scrollbar-thin" id="admin-detail-container">
+              <div class="text-center py-20 text-slate-400 text-sm">
+                <i class="fa-solid fa-arrow-left text-2xl mb-2 block"></i>
+                Select a request block from the left-hand column to edit details or respond.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FIX #8 — updated copyright year -->
+  <footer class="py-12 text-center text-xs text-slate-400 border-t border-slate-200/50 mt-12 bg-white">
+    <p>&copy; 2026 bhbasysadmin Web Portal. All rights reserved.</p>
+    <p class="mt-1 text-slate-300">Powered by Google Apps Script | Fully responsive dynamic deployment</p>
+  </footer>
+
+  <script>
+    let cachedPasscode = "";
+    let selectedMessage = null;
+    let allMessages = [];
+
+    // ─────────────────────────────────────────────
+    // FIX #1 #2 #3 — XSS sanitizer
+    // All user-originated data MUST pass through esc() before innerHTML injection
+    // ─────────────────────────────────────────────
+    function esc(str) {
+      const d = document.createElement('div');
+      d.appendChild(document.createTextNode(str == null ? '' : String(str)));
+      return d.innerHTML;
+    }
+    // For HTML attribute values (e.g. input value="...") encode quotes too
+    function escAttr(str) {
+      return esc(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ─────────────────────────────────────────────
+    // Tab switching
+    // ─────────────────────────────────────────────
+    function switchTab(tabId) {
+      const contactView = document.getElementById('contact-view');
+      const adminView   = document.getElementById('admin-view');
+      const btnContact  = document.getElementById('btn-contact-tab');
+      const btnAdmin    = document.getElementById('btn-admin-tab');
+      const ACTIVE = 'px-4 py-2 rounded-md font-medium text-sm transition bg-white/10 hover:bg-white/20 text-white border-b-2 border-white';
+      const IDLE   = 'px-4 py-2 rounded-md font-medium text-sm transition hover:bg-white/10 text-blue-100';
+
+      if (tabId === 'contact-tab') {
+        contactView.classList.remove('hidden');
+        adminView.classList.add('hidden');
+        btnContact.className = ACTIVE;
+        btnAdmin.className   = IDLE;
+      } else {
+        contactView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        btnContact.className = IDLE;
+        btnAdmin.className   = ACTIVE;
+        if (!cachedPasscode) {
+          setTimeout(() => document.getElementById('admin-passcode-input').focus(), 100);
+        }
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // Toast — FIX #3: escape message before innerHTML
+    // FIX #7: removed premature "success" toast during auth
+    // ─────────────────────────────────────────────
+    let toastTimer;
+    function showToast(message, type = 'success') {
+      const banner = document.getElementById('toast-banner');
+      const isSuccess = type === 'success';
+      const colorClass = isSuccess
+        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+        : 'bg-rose-50 border-rose-200 text-rose-800';
+      const iconClass = isSuccess
+        ? 'fa-solid fa-circle-check text-emerald-500 mt-0.5'
+        : 'fa-solid fa-circle-exclamation text-rose-500 mt-0.5';
+
+      banner.className = `p-4 rounded-lg flex items-start space-x-3 shadow-md border animate-fade-in mb-6 ${colorClass}`;
+      banner.innerHTML = `
+        <i class="${iconClass}"></i>
+        <div class="text-sm flex-1">
+          <p class="font-semibold">${isSuccess ? 'Success' : 'Error'}</p>
+          <p class="opacity-90">${esc(message)}</p>
+        </div>
+        <button onclick="document.getElementById('toast-banner').classList.add('hidden')"
+          class="opacity-70 hover:opacity-100 font-bold text-sm px-1">&times;</button>
+      `;
+      banner.classList.remove('hidden');
+      banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => banner.classList.add('hidden'), 6000);
+    }
+
+    // ─────────────────────────────────────────────
+    // Contact form submission — FIX #6: 30s timeout guard
+    // ─────────────────────────────────────────────
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const btnText    = document.getElementById('btn-text');
+      const btnSpinner = document.getElementById('btn-spinner');
+      const btnSubmit  = document.getElementById('btn-submit');
+
+      btnSubmit.disabled     = true;
+      btnText.textContent    = 'Processing…';
+      btnSpinner.classList.remove('hidden');
+
+      const data = {
+        name:    document.getElementById('sender-name').value.trim(),
+        email:   document.getElementById('sender-email').value.trim(),
+        subject: document.getElementById('sender-subject').value.trim(),
+        message: document.getElementById('sender-message').value.trim()
+      };
+
+      // FIX #6 — timeout guard: re-enable button if Apps Script hangs
+      const timeout = setTimeout(() => {
+        btnSubmit.disabled  = false;
+        btnText.textContent = 'Send Message';
+        btnSpinner.classList.add('hidden');
+        showToast('Request timed out. Please try again.', 'error');
+      }, 30000);
+
+      google.script.run
+        .withSuccessHandler((response) => {
+          clearTimeout(timeout);
+          btnSubmit.disabled  = false;
+          btnText.textContent = 'Send Message';
+          btnSpinner.classList.add('hidden');
+          if (response.success) {
+            showToast(response.message, 'success');
+            document.getElementById('contact-form').reset();
+          } else {
+            showToast(response.error || 'Submission failed.', 'error');
+          }
+        })
+        .withFailureHandler((err) => {
+          clearTimeout(timeout);
+          btnSubmit.disabled  = false;
+          btnText.textContent = 'Send Message';
+          btnSpinner.classList.add('hidden');
+          showToast(err.message || err.toString(), 'error');
+        })
+        .submitMessage(data);
+    }
+
+    // ─────────────────────────────────────────────
+    // Admin auth — FIX #6: timeout guard
+    // FIX #7: removed premature green "Authenticating..." toast
+    // ─────────────────────────────────────────────
+    function authenticateAdmin(e) {
+      e.preventDefault();
+      const code = document.getElementById('admin-passcode-input').value;
+      const btn  = e.target.querySelector('button[type=submit]');
+      btn.disabled     = true;
+      btn.textContent  = 'Verifying…';
+
+      const timeout = setTimeout(() => {
+        btn.disabled    = false;
+        btn.textContent = 'Verify & Initialize';
+        showToast('Authentication timed out. Please try again.', 'error');
+      }, 30000);
+
+      google.script.run
+        .withSuccessHandler((response) => {
+          clearTimeout(timeout);
+          btn.disabled    = false;
+          btn.textContent = 'Verify & Initialize';
+          if (response.success) {
+            cachedPasscode = code;
+            allMessages    = response.data;
+            document.getElementById('admin-auth-panel').classList.add('hidden');
+            document.getElementById('admin-content-panel').classList.remove('hidden');
+            renderMessageList(response.data);
+            showToast('Console verified. Welcome.', 'success');
+          } else {
+            showToast(response.error || 'Invalid passcode.', 'error');
+          }
+        })
+        .withFailureHandler((err) => {
+          clearTimeout(timeout);
+          btn.disabled    = false;
+          btn.textContent = 'Verify & Initialize';
+          showToast('Verification failed: ' + (err.message || err.toString()), 'error');
+        })
+        .getMessages(code);
+    }
+
+    // ─────────────────────────────────────────────
+    // Logout — FIX #4: clear selectedMessage on logout
+    // ─────────────────────────────────────────────
+    function logoutAdmin() {
+      cachedPasscode  = "";
+      selectedMessage = null;   // FIX #4
+      allMessages     = [];
+      document.getElementById('admin-passcode-input').value = "";
+      document.getElementById('admin-auth-panel').classList.remove('hidden');
+      document.getElementById('admin-content-panel').classList.add('hidden');
+      // Reset panels to default empty state
+      document.getElementById('admin-list-container').innerHTML = `
+        <div class="text-center py-12 text-slate-400 text-sm">
+          <i class="fa-solid fa-box-open text-2xl mb-2 block"></i>
+          No entries populated.
+        </div>`;
+      document.getElementById('admin-detail-container').innerHTML = `
+        <div class="text-center py-20 text-slate-400 text-sm">
+          <i class="fa-solid fa-arrow-left text-2xl mb-2 block"></i>
+          Select a request block from the left-hand column to edit details or respond.
+        </div>`;
+      showToast('Console session destroyed.', 'success');
+    }
+
+    // ─────────────────────────────────────────────
+    // Load messages — FIX #6: timeout guard
+    // ─────────────────────────────────────────────
+    function loadMessages() {
+      if (!cachedPasscode) return;
+
+      const timeout = setTimeout(() => {
+        showToast('Reload timed out. Please try again.', 'error');
+      }, 30000);
+
+      google.script.run
+        .withSuccessHandler((response) => {
+          clearTimeout(timeout);
+          if (response.success) {
+            allMessages = response.data;
+            renderMessageList(response.data);
+            if (selectedMessage) {
+              const refreshed = allMessages.find(m => m.ID === selectedMessage.ID);
+              if (refreshed) viewDetails(refreshed);
+            }
+            showToast('Data refreshed from Sheet.', 'success');
+          } else {
+            showToast(response.error || 'Reload failed.', 'error');
+          }
+        })
+        .withFailureHandler((err) => {
+          clearTimeout(timeout);
+          showToast(err.message || err.toString(), 'error');
+        })
+        .getMessages(cachedPasscode);
+    }
+
+    // ─────────────────────────────────────────────
+    // Render message list — FIX #1 #2: all fields through esc()
+    // FIX #5: hover:shadow-xs now valid via tailwind config extension
+    // ─────────────────────────────────────────────
+    function renderMessageList(messages) {
+      const container = document.getElementById('admin-list-container');
+      container.innerHTML = '';
+
+      if (!messages || messages.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-slate-400 text-sm">
+            <i class="fa-solid fa-box-open text-2xl mb-2 block"></i>
+            No messages saved in database yet.
+          </div>`;
+        return;
+      }
+
+      messages.forEach(msg => {
+        const date = new Date(msg.Timestamp).toLocaleDateString();
+        let statusColor = 'bg-amber-100 text-amber-800';
+        if (msg.Status === 'Completed') statusColor = 'bg-emerald-100 text-emerald-800';
+        if (msg.Status === 'Archived')  statusColor = 'bg-slate-100 text-slate-800';
+
+        const isSelected = selectedMessage && selectedMessage.ID === msg.ID;
+        const cardClass = `p-4 rounded-xl border text-left cursor-pointer transition-all duration-150 flex flex-col justify-between ${
+          isSelected
+            ? 'border-blue-500 bg-blue-50/50 shadow-sm'
+            : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+        }`;
+
+        const div = document.createElement('div');
+        div.className = cardClass;
+        div.onclick = () => viewDetails(msg);
+        // FIX #1: esc() on all user-originated fields
+        div.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-mono text-slate-400">${esc(msg.ID)}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${statusColor}">${esc(msg.Status || 'New')}</span>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm truncate">${esc(msg.Subject)}</h4>
+          <p class="text-xs text-slate-500 truncate mb-2">From: ${esc(msg.Name)}</p>
+          <p class="text-[11px] text-slate-400 self-end">${esc(date)}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // ─────────────────────────────────────────────
+    // View message details — FIX #1 #2: all fields through esc() / escAttr()
+    // ─────────────────────────────────────────────
+    function viewDetails(msg) {
+      selectedMessage = msg;
+      renderMessageList(allMessages);
+
+      const container = document.getElementById('admin-detail-container');
+      const date = new Date(msg.Timestamp).toLocaleString();
+
+      // FIX #1: every user-supplied field goes through esc() or escAttr()
+      container.innerHTML = `
+        <div class="space-y-6 flex-1">
+          <div class="flex justify-between items-start flex-wrap gap-2">
+            <div>
+              <span class="text-xs font-mono bg-slate-200 px-2 py-1 rounded text-slate-600 font-bold mr-2">${esc(msg.ID)}</span>
+              <span class="text-xs text-slate-400">Submitted: ${esc(date)}</span>
+              <h3 class="text-xl font-bold text-slate-900 mt-2">${esc(msg.Subject)}</h3>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg p-4 border border-slate-200/60 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Sender Name</p>
+              <p class="text-sm font-bold text-slate-800">${esc(msg.Name)}</p>
+              <p class="text-xs text-slate-500">Email:
+                <a href="mailto:${escAttr(msg.Email)}" class="text-blue-600 underline">${esc(msg.Email)}</a>
+              </p>
+            </div>
+            <div class="bg-blue-50 p-3 rounded-full text-blue-500">
+              <i class="fa-regular fa-user text-xl"></i>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Original Message Content</p>
+            <div class="bg-white border border-slate-200/60 rounded-lg p-4 text-sm text-slate-700 whitespace-pre-wrap max-h-[160px] overflow-y-auto scrollbar-thin">${esc(msg.Message)}</div>
+          </div>
+
+          <div class="border-t border-slate-200/60 pt-4">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Management Action</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">Operational Status</label>
+                <select id="update-status-select"
+                  class="w-full px-3 py-2 text-xs rounded border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <option value="Pending Review" ${msg.Status === 'Pending Review' ? 'selected' : ''}>Pending Review</option>
+                  <option value="Completed"      ${msg.Status === 'Completed'      ? 'selected' : ''}>Completed</option>
+                  <option value="Archived"       ${msg.Status === 'Archived'       ? 'selected' : ''}>Archived</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">Admin Console Notes</label>
+                <!-- FIX #1: escAttr() prevents attribute injection via Notes field -->
+                <input type="text" id="update-notes-input"
+                  value="${escAttr(msg.Notes)}"
+                  class="w-full px-3 py-2 text-xs rounded border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Add private follow-up steps..." maxlength="500">
+              </div>
+            </div>
+            <button onclick="submitStatusUpdate()"
+              class="mt-4 bg-slate-800 hover:bg-slate-950 text-white font-semibold py-2 px-4 rounded text-xs transition duration-150">
+              Apply Update Changes
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // ─────────────────────────────────────────────
+    // Submit status update — FIX #6: timeout guard
+    // ─────────────────────────────────────────────
+    function submitStatusUpdate() {
+      if (!selectedMessage) return;
+
+      const status = document.getElementById('update-status-select').value;
+      const notes  = document.getElementById('update-notes-input').value;
+      const btn    = document.querySelector('#admin-detail-container button[onclick="submitStatusUpdate()"]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+      const timeout = setTimeout(() => {
+        if (btn) { btn.disabled = false; btn.textContent = 'Apply Update Changes'; }
+        showToast('Update timed out. Please try again.', 'error');
+      }, 30000);
+
+      google.script.run
+        .withSuccessHandler((response) => {
+          clearTimeout(timeout);
+          if (btn) { btn.disabled = false; btn.textContent = 'Apply Update Changes'; }
+          if (response.success) {
+            showToast('Entry updated successfully.', 'success');
+            loadMessages();
+          } else {
+            showToast(response.error || 'Update failed.', 'error');
+          }
+        })
+        .withFailureHandler((err) => {
+          clearTimeout(timeout);
+          if (btn) { btn.disabled = false; btn.textContent = 'Apply Update Changes'; }
+          showToast(err.message || err.toString(), 'error');
+        })
+        .updateMessageStatus(selectedMessage.ID, status, notes, cachedPasscode);
+    }
+  </script>
+</body>
+</html>
