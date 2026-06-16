@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<!--
+  BHBA Portal MVP v1.0.0
+  Classification: INTERNAL USE
+  File size: ~95KB
+  Features: Dashboard · Live Fixtures · Standings · Team Roster · Table Official Scoresheet · Photo Upload
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BHBA 2027 · Corporate Basketball Portal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0e1a;--bg2:#111827;--card:#1a2035;--card2:#1f2845;
+  --accent:#f59e0b;--a:#3b82f6;--b:#ef4444;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;
+  --t1:#f1f5f9;--t2:#94a3b8;--t3:#475569;--bdr:rgba(255,255,255,.08);
+  --r:12px;--rl:20px;--nav:220px
+}
+html{height:100%}
+body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+
+/* ─── NAV ─── */
+.nav{width:var(--nav);background:var(--bg2);border-right:1px solid var(--bdr);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:50;overflow-y:auto}
+.nav-brand{padding:24px 20px 20px;border-bottom:1px solid var(--bdr)}
+.nav-brand .logo{font-size:24px;font-weight:900;letter-spacing:4px;color:var(--accent)}
+.nav-brand .sub{font-size:10px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-top:3px}
+.nav-section{padding:16px 12px 4px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;cursor:pointer;margin:2px 8px;font-size:14px;font-weight:500;color:var(--t2);transition:all .15s}
+.nav-item:hover{background:var(--card);color:var(--t1)}
+.nav-item.active{background:rgba(245,158,11,.15);color:var(--accent);font-weight:700}
+.nav-item .ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-bottom{margin-top:auto;padding:16px;border-top:1px solid var(--bdr)}
+.nav-user{font-size:12px;color:var(--t3)}
+.nav-user strong{display:block;color:var(--t2);font-size:13px;margin-bottom:1px}
+
+/* ─── MAIN ─── */
+.main{margin-left:var(--nav);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.topbar h1{font-size:19px;font-weight:700}
+.topbar-right{display:flex;gap:10px;align-items:center}
+.badge-season{background:rgba(245,158,11,.15);color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:4px 12px;font-size:12px;font-weight:700;letter-spacing:.5px}
+.content{padding:24px;flex:1}
+
+/* ─── PAGES ─── */
+.page{display:none}.page.on{display:block}
+
+/* ─── CARDS ─── */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rl);padding:20px}
+.card-title{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+/* ─── STAT CARDS ─── */
+.stat-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rl);padding:20px}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:8px;font-weight:700}
+.stat-value{font-size:36px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.stat-sub{font-size:12px;color:var(--t3);margin-top:6px}
+.stat-trend-up{color:var(--ok);font-size:12px;font-weight:700;margin-top:4px}
+.stat-trend-dn{color:var(--err);font-size:12px;font-weight:700;margin-top:4px}
+
+/* ─── FIXTURES ─── */
+.fixture-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .15s}
+.fixture-card:hover{border-color:var(--accent);background:var(--card2)}
+.fixture-date{text-align:center;min-width:52px}
+.fixture-date .day{font-size:22px;font-weight:900;line-height:1}
+.fixture-date .mon{font-size:10px;text-transform:uppercase;color:var(--t3);letter-spacing:1px}
+.fixture-teams{flex:1}
+.fixture-teams .matchup{font-size:15px;font-weight:700;margin-bottom:3px}
+.fixture-teams .meta{font-size:12px;color:var(--t3)}
+.fixture-score{text-align:center;min-width:80px}
+.fixture-score .score{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.fixture-score .score .dash{color:var(--t3);font-weight:300}
+.state-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.st-live{background:rgba(239,68,68,.15);color:var(--err);border:1px solid var(--err);animation:pulse-b .8s infinite}
+@keyframes pulse-b{0%,100%{opacity:1}50%{opacity:.5}}
+.st-sched{background:rgba(245,158,11,.12);color:var(--warn);border:1px solid var(--warn)}
+.st-done{background:rgba(16,185,129,.12);color:var(--ok);border:1px solid var(--ok)}
+.st-post{background:rgba(148,163,184,.1);color:var(--t2);border:1px solid var(--t2)}
+
+/* ─── STANDINGS TABLE ─── */
+.standings-table{width:100%;border-collapse:collapse}
+.standings-table th{padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);font-weight:700;border-bottom:1px solid var(--bdr);text-align:left}
+.standings-table th.num{text-align:right}
+.standings-table td{padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:14px}
+.standings-table td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.standings-table tr:last-child td{border-bottom:none}
+.standings-table tr:hover td{background:rgba(255,255,255,.02)}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:800;background:var(--bg2)}
+.rank-1{background:rgba(245,158,11,.2);color:var(--accent)}
+.rank-2{background:rgba(148,163,184,.1);color:var(--t2)}
+.rank-3{background:rgba(180,83,9,.15);color:#cd6c22}
+
+/* ─── ROSTER ─── */
+.player-row{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px}
+.player-avatar{width:40px;height:40px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0}
+.player-info{flex:1}
+.player-info .pname{font-size:15px;font-weight:700}
+.player-info .pmeta{font-size:12px;color:var(--t3);margin-top:2px}
+.elig-ok{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:rgba(16,185,129,.12);color:var(--ok);border:1px solid var(--ok)}
+.elig-no{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:rgba(239,68,68,.12);color:var(--err);border:1px solid var(--err)}
+.elig-pend{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:rgba(245,158,11,.12);color:var(--warn);border:1px solid var(--warn)}
+
+/* ─── SCORESHEET embed ─── */
+.scoresheet-frame{border:none;width:100%;height:calc(100vh - 120px);border-radius:var(--rl);overflow:hidden}
+
+/* ─── BUTTONS ─── */
+.btn{padding:10px 20px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.2px}
+.btn:active{transform:scale(.97)}
+.btn-accent{background:var(--accent);color:#000}
+.btn-outline{background:transparent;color:var(--t1);border:1px solid var(--bdr)}
+.btn-outline:hover{background:var(--card)}
+
+/* ─── LIVE SCORE TICKER ─── */
+.ticker{background:var(--bg2);border-bottom:1px solid var(--bdr);overflow:hidden;height:32px;display:flex;align-items:center}
+.ticker-inner{display:flex;gap:0;animation:scroll 20s linear infinite;white-space:nowrap}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-item{padding:0 32px;font-size:12px;color:var(--t2);font-weight:600;border-right:1px solid var(--bdr)}
+.ticker-item span{color:var(--accent);margin:0 6px}
+
+/* ─── CHARTS (SVG) ─── */
+.chart-bar{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:4px}
+.chart-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--a),var(--accent))}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .nav{transform:translateX(-100%);transition:transform .25s}
+  .nav.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .grid-4{grid-template-columns:1fr 1fr}
+  .grid-3{grid-template-columns:1fr}
+}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;top:18px;right:18px;background:var(--card);border:1px solid var(--bdr);border-radius:11px;padding:12px 20px;font-size:14px;font-weight:600;z-index:999;transform:translateX(120%);transition:transform .28s ease}
+.toast.on{transform:translateX(0)}
+.toast.ok{border-color:var(--ok);color:var(--ok)}
+.toast.w{border-color:var(--warn);color:var(--warn)}
+
+/* ── NAV CONTROLS (Home / Back / Forward) ── */
+.nav-controls{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.nav-ctrl-btn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:9px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);color:var(--gold);cursor:pointer;font-size:17px;text-decoration:none;transition:all .2s cubic-bezier(.4,0,.2,1);font-family:inherit;line-height:1;padding:0 9px;user-select:none}
+.nav-ctrl-btn:hover{background:rgba(245,166,35,0.18);border-color:rgba(245,166,35,0.5);transform:translateY(-1px);box-shadow:0 4px 12px rgba(245,166,35,0.15)}
+.nav-ctrl-btn:active{transform:scale(0.95)}
+.nav-ctrl-home{font-size:11px;font-weight:700;letter-spacing:0.4px;padding:0 13px;background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.35);gap:5px}
+</style>
+</head>
+<body>
+
+<!-- ─── NAVIGATION ─── -->
+<nav class="nav" id="nav">
+  <div class="nav-brand">
+    <div class="logo">BHBA</div>
+    <div class="sub">Jamaica · 3×3 League</div>
+  </div>
+  <div class="nav-section">Overview</div>
+  <div class="nav-item active" onclick="goto('dashboard',this)"><span class="ico">🏠</span>Dashboard</div>
+  <div class="nav-item" onclick="goto('fixtures',this)"><span class="ico">📅</span>Fixtures</div>
+  <div class="nav-item" onclick="goto('standings',this)"><span class="ico">🏆</span>Standings</div>
+  <div class="nav-section">Teams</div>
+  <div class="nav-item" onclick="goto('roster',this)"><span class="ico">👥</span>Rosters</div>
+  <div class="nav-item" onclick="goto('players',this)"><span class="ico">🏀</span>Player Stats</div>
+  <div class="nav-section">Officials</div>
+  <div class="nav-item" onclick="goto('scoresheet',this)"><span class="ico">📋</span>Scoresheet</div>
+  <div class="nav-item" onclick="goto('photos',this)"><span class="ico">📸</span>Photo Gallery</div>
+  <div class="nav-section">Admin</div>
+  <div class="nav-item" onclick="goto('eligibility',this)"><span class="ico">✅</span>Eligibility</div>
+  <div class="nav-item" onclick="goto('audit',this)"><span class="ico">🔒</span>Audit Log</div>
+  <div class="nav-bottom">
+    <div class="nav-user">
+      <strong>Wade Howell</strong>
+      <span>BHBA Staff · Executive</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<div class="main">
+  <div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 20px 0;gap:6px"><div class="nav-controls"><button class="nav-ctrl-btn" onclick="history.back()" title="Go back">&#8592;</button><button class="nav-ctrl-btn" onclick="history.forward()" title="Go forward">&#8594;</button><a href="bhba_portal.html" class="nav-ctrl-btn nav-ctrl-home">&#127968; Home</a></div></div>
+
+  <!-- Ticker -->
+  <div class="ticker">
+    <div class="ticker-inner">
+      <div class="ticker-item">🔴 LIVE: NCB <span>14</span>–<span>11</span> JPS · 4:22 remaining</div>
+      <div class="ticker-item">✅ FINAL: Sagicor <span>21</span>–<span>17</span> GraceKennedy · R3</div>
+      <div class="ticker-item">📅 Tonight 6:30PM: BOJ vs Digicel · Half Court A</div>
+      <div class="ticker-item">⚠️ POSTPONED: BNS vs JMMB · Weather · Rescheduling</div>
+      <div class="ticker-item">🔴 LIVE: NCB <span>14</span>–<span>11</span> JPS · 4:22 remaining</div>
+      <div class="ticker-item">✅ FINAL: Sagicor <span>21</span>–<span>17</span> GraceKennedy · R3</div>
+      <div class="ticker-item">📅 Tonight 6:30PM: BOJ vs Digicel · Half Court A</div>
+      <div class="ticker-item">⚠️ POSTPONED: BNS vs JMMB · Weather · Rescheduling</div>
+    </div>
+  </div>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <h1 id="page-title">Dashboard</h1>
+    <div class="topbar-right">
+      <div class="badge-season">BHBA 2027 · Season 1</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ══════════════════ DASHBOARD ══════════════════ -->
+    <div id="page-dashboard" class="page on">
+      <div class="grid-4" style="margin-bottom:20px">
+        <div class="stat-card">
+          <div class="stat-label">Registered Teams</div>
+          <div class="stat-value" style="color:var(--a)">16</div>
+          <div class="stat-sub">8 companies · 2027 Season</div>
+          <div class="stat-trend-up">↑ +2 from 2026</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Players</div>
+          <div class="stat-value" style="color:var(--ok)">64</div>
+          <div class="stat-sub">58 eligible · 6 pending</div>
+          <div class="stat-trend-up">↑ 91% eligibility rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Fixtures Played</div>
+          <div class="stat-value" style="color:var(--accent)">24</div>
+          <div class="stat-sub">of 56 total · Round 3</div>
+          <div class="stat-sub" style="margin-top:2px">2 postponed · 1 forfeited</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Top Scorer</div>
+          <div class="stat-value" style="color:var(--b);font-size:28px">K. Brown</div>
+          <div class="stat-sub">NCB · 8.4 PPG</div>
+          <div class="stat-trend-up">↑ Leading the league</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">Live & Upcoming — Today</div>
+            <div class="fixture-card">
+              <div class="fixture-date"><div class="day">12</div><div class="mon">Jun</div></div>
+              <div class="fixture-teams">
+                <div class="matchup">NCB vs JPS Financial</div>
+                <div class="meta">Half Court A · 5:30 PM · Round 3</div>
+              </div>
+              <div class="fixture-score"><div class="score">14 <span class="dash">–</span> 11</div></div>
+              <span class="state-badge st-live">● Live</span>
+            </div>
+            <div class="fixture-card">
+              <div class="fixture-date"><div class="day">12</div><div class="mon">Jun</div></div>
+              <div class="fixture-teams">
+                <div class="matchup">BOJ vs Digicel Jamaica</div>
+                <div class="meta">Half Court B · 6:30 PM · Round 3</div>
+              </div>
+              <div class="fixture-score"><div class="score" style="font-size:16px;color:var(--t3)">6:30 PM</div></div>
+              <span class="state-badge st-sched">Scheduled</span>
+            </div>
+            <div class="fixture-card">
+              <div class="fixture-date"><div class="day">12</div><div class="mon">Jun</div></div>
+              <div class="fixture-teams">
+                <div class="matchup">Sagicor vs GraceKennedy</div>
+                <div class="meta">Half Court A · FINAL</div>
+              </div>
+              <div class="fixture-score"><div class="score">21 <span class="dash">–</span> 17</div></div>
+              <span class="state-badge st-done">Final</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">League Standings — Top 5</div>
+            <table class="standings-table">
+              <thead><tr><th>#</th><th>Team</th><th class="num">W</th><th class="num">L</th><th class="num">Pts</th></tr></thead>
+              <tbody>
+                <tr><td><span class="rank-badge rank-1">1</span></td><td><strong>Sagicor Life</strong></td><td class="num">7</td><td class="num">1</td><td class="num" style="color:var(--accent)">14</td></tr>
+                <tr><td><span class="rank-badge rank-2">2</span></td><td><strong>NCB</strong></td><td class="num">6</td><td class="num">2</td><td class="num">12</td></tr>
+                <tr><td><span class="rank-badge rank-3">3</span></td><td><strong>JPS Financial</strong></td><td class="num">5</td><td class="num">3</td><td class="num">10</td></tr>
+                <tr><td><span class="rank-badge">4</span></td><td>GraceKennedy</td><td class="num">4</td><td class="num">4</td><td class="num">8</td></tr>
+                <tr><td><span class="rank-badge">5</span></td><td>BOJ</td><td class="num">4</td><td class="num">4</td><td class="num">8</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">Eligibility Summary</div>
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+              <div style="flex:1">
+                <div style="font-size:12px;color:var(--t3);margin-bottom:4px">Eligible</div>
+                <div class="chart-bar"><div class="chart-bar-fill" style="width:91%;background:var(--ok)"></div></div>
+                <div style="font-size:12px;color:var(--ok);font-weight:700;margin-top:3px">58 / 64 (91%)</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <div style="font-size:12px"><span class="elig-ok">ELIGIBLE</span> <span style="color:var(--t3)">58 players</span></div>
+              <div style="font-size:12px"><span class="elig-pend">PHOTO PENDING</span> <span style="color:var(--t3)">4 players</span></div>
+              <div style="font-size:12px"><span class="elig-no">INELIGIBLE</span> <span style="color:var(--t3)">2 players</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ FIXTURES ══════════════════ -->
+    <div id="page-fixtures" class="page">
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="btn btn-accent">All Rounds</button>
+        <button class="btn btn-outline">Round 1</button>
+        <button class="btn btn-outline">Round 2</button>
+        <button class="btn btn-outline">Round 3</button>
+        <button class="btn btn-outline">Quarter Finals</button>
+        <button class="btn btn-outline">Semi Finals</button>
+        <button class="btn btn-outline">Final</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Round 3 — Week of June 9–13, 2027</div>
+        <div class="fixture-card"><div class="fixture-date"><div class="day">09</div><div class="mon">Jun</div></div><div class="fixture-teams"><div class="matchup">Sagicor Life vs GraceKennedy Logistics</div><div class="meta">Half Court A · 5:30 PM · Ref: C. Watson</div></div><div class="fixture-score"><div class="score">21 <span class="dash">–</span> 17</div></div><span class="state-badge st-done">Final</span></div>
+        <div class="fixture-card"><div class="fixture-date"><div class="day">09</div><div class="mon">Jun</div></div><div class="fixture-teams"><div class="matchup">Digicel Jamaica vs JMMB Group</div><div class="meta">Half Court B · 6:30 PM · Ref: L. Campbell</div></div><div class="fixture-score"><div class="score">18 <span class="dash">–</span> 21</div></div><span class="state-badge st-done">Final</span></div>
+        <div class="fixture-card"><div class="fixture-date"><div class="day">10</div><div class="mon">Jun</div></div><div class="fixture-teams"><div class="matchup">BNS Jamaica vs JMMB Group</div><div class="meta">Half Court A · 5:30 PM — Weather postponement</div></div><div class="fixture-score"><div class="score" style="font-size:14px;color:var(--t3)">TBD</div></div><span class="state-badge st-post">Postponed</span></div>
+        <div class="fixture-card"><div class="fixture-date"><div class="day">11</div><div class="mon">Jun</div></div><div class="fixture-teams"><div class="matchup">NCB vs Scotiabank Jamaica</div><div class="meta">Half Court B · 5:30 PM · Ref: D. Fraser</div></div><div class="fixture-score"><div class="score">21 <span class="dash">–</span> 14</div></div><span class="state-badge st-done">Final</span></div>
+        <div class="fixture-card"><div class="fixture-date"><div class="day">12</div><div class="mon">Jun</div></div><div class="fixture-teams"><div class="matchup">NCB vs JPS Financial</div><div class="meta">Half Court A · 5:30 PM · Ref: K. Alexander · NOW LIVE</div></div><div class="fixture-score"><div class="score">14 <span class="dash">–</span> 11</div></div><span class="state-badge st-live">● Live</span></div>
+        <div class="fixture-card"><div class="fixture-date"><div class="day">12</div><div class="mon">Jun</div></div><div class="fixture-teams"><div class="matchup">BOJ vs Digicel Jamaica</div><div class="meta">Half Court B · 6:30 PM · Ref: R. Simpson</div></div><div class="fixture-score"><div class="score" style="font-size:16px;color:var(--t3)">6:30 PM</div></div><span class="state-badge st-sched">Scheduled</span></div>
+        <div class="fixture-card"><div class="fixture-date"><div class="day">13</div><div class="mon">Jun</div></div><div class="fixture-teams"><div class="matchup">Sagicor Life vs JNBS</div><div class="meta">Half Court A · 5:30 PM · Ref: TBD</div></div><div class="fixture-score"><div class="score" style="font-size:16px;color:var(--t3)">5:30 PM</div></div><span class="state-badge st-sched">Scheduled</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ STANDINGS ══════════════════ -->
+    <div id="page-standings" class="page">
+      <div class="card">
+        <div class="card-title">2027 Season 1 — Round Robin Standings</div>
+        <table class="standings-table">
+          <thead><tr><th>#</th><th>Company Team</th><th class="num">P</th><th class="num">W</th><th class="num">L</th><th class="num">Pts For</th><th class="num">Pts Agst</th><th class="num">+/−</th><th class="num">Table Pts</th></tr></thead>
+          <tbody>
+            <tr style="background:rgba(245,158,11,.04)"><td><span class="rank-badge rank-1">1</span></td><td><strong>Sagicor Life</strong></td><td class="num">8</td><td class="num">7</td><td class="num">1</td><td class="num">156</td><td class="num">112</td><td class="num" style="color:var(--ok)">+44</td><td class="num" style="color:var(--accent);font-size:16px;font-weight:900">14</td></tr>
+            <tr><td><span class="rank-badge rank-2">2</span></td><td><strong>NCB</strong></td><td class="num">8</td><td class="num">6</td><td class="num">2</td><td class="num">148</td><td class="num">120</td><td class="num" style="color:var(--ok)">+28</td><td class="num" style="font-weight:700">12</td></tr>
+            <tr><td><span class="rank-badge rank-3">3</span></td><td><strong>JPS Financial</strong></td><td class="num">8</td><td class="num">5</td><td class="num">3</td><td class="num">139</td><td class="num">128</td><td class="num" style="color:var(--ok)">+11</td><td class="num" style="font-weight:700">10</td></tr>
+            <tr><td><span class="rank-badge">4</span></td><td>GraceKennedy Logistics</td><td class="num">8</td><td class="num">4</td><td class="num">4</td><td class="num">132</td><td class="num">135</td><td class="num" style="color:var(--err)">−3</td><td class="num">8</td></tr>
+            <tr><td><span class="rank-badge">5</span></td><td>Bank of Jamaica</td><td class="num">8</td><td class="num">4</td><td class="num">4</td><td class="num">128</td><td class="num">133</td><td class="num" style="color:var(--err)">−5</td><td class="num">8</td></tr>
+            <tr><td><span class="rank-badge">6</span></td><td>Digicel Jamaica</td><td class="num">8</td><td class="num">3</td><td class="num">5</td><td class="num">119</td><td class="num">138</td><td class="num" style="color:var(--err)">−19</td><td class="num">6</td></tr>
+            <tr><td><span class="rank-badge">7</span></td><td>BNS Jamaica</td><td class="num">7</td><td class="num">2</td><td class="num">5</td><td class="num">102</td><td class="num">129</td><td class="num" style="color:var(--err)">−27</td><td class="num">4</td></tr>
+            <tr><td><span class="rank-badge">8</span></td><td>JMMB Group</td><td class="num">7</td><td class="num">1</td><td class="num">6</td><td class="num">98</td><td class="num">127</td><td class="num" style="color:var(--err)">−29</td><td class="num">2</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:14px;font-size:12px;color:var(--t3)">Top 4 advance to Quarter Finals. Table points: W=2, L=0. Tiebreaker: point differential, then head-to-head.</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ ROSTER ══════════════════ -->
+    <div id="page-roster" class="page">
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+        <select style="background:var(--card);border:1px solid var(--bdr);color:var(--t1);padding:10px 16px;border-radius:10px;font-size:14px;outline:none">
+          <option>All Teams</option>
+          <option>NCB</option>
+          <option>Sagicor Life</option>
+          <option>JPS Financial</option>
+          <option>GraceKennedy</option>
+        </select>
+        <select style="background:var(--card);border:1px solid var(--bdr);color:var(--t1);padding:10px 16px;border-radius:10px;font-size:14px;outline:none">
+          <option>All Status</option>
+          <option>Eligible</option>
+          <option>Photo Pending</option>
+          <option>Ineligible</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="card-title">NCB — Active Roster (2027 S1)</div>
+        <div class="player-row"><div class="player-avatar" style="background:rgba(59,130,246,.15);color:var(--a)">#7</div><div class="player-info"><div class="pname">Kevin Brown</div><div class="pmeta">BHBA-2024-001337 · Guard · NCB Kingston</div></div><span class="elig-ok">ELIGIBLE</span><div style="margin-left:auto;font-size:13px;text-align:right"><div style="font-weight:700;color:var(--accent)">8.4 PPG</div><div style="color:var(--t3);font-size:11px">32 min avg</div></div></div>
+        <div class="player-row"><div class="player-avatar" style="background:rgba(59,130,246,.15);color:var(--a)">#11</div><div class="player-info"><div class="pname">Marcus Williams</div><div class="pmeta">BHBA-2024-001338 · Forward · NCB Corporate</div></div><span class="elig-ok">ELIGIBLE</span><div style="margin-left:auto;font-size:13px;text-align:right"><div style="font-weight:700;color:var(--accent)">6.1 PPG</div><div style="color:var(--t3);font-size:11px">28 min avg</div></div></div>
+        <div class="player-row"><div class="player-avatar" style="background:rgba(59,130,246,.15);color:var(--a)">#3</div><div class="player-info"><div class="pname">Damion Clarke</div><div class="pmeta">BHBA-2025-002041 · Center · NCB New Kingston</div></div><span class="elig-pend">PHOTO PENDING</span><div style="margin-left:auto;font-size:13px;text-align:right"><div style="font-weight:700;color:var(--t3)">—</div><div style="color:var(--t3);font-size:11px">Ineligible</div></div></div>
+        <div class="player-row"><div class="player-avatar" style="background:rgba(59,130,246,.15);color:var(--a)">#15</div><div class="player-info"><div class="pname">Andre Thompson</div><div class="pmeta">BHBA-2026-003201 · Guard · NCB Portmore</div></div><span class="elig-ok">ELIGIBLE</span><div style="margin-left:auto;font-size:13px;text-align:right"><div style="font-weight:700;color:var(--accent)">4.8 PPG</div><div style="color:var(--t3);font-size:11px">Sub</div></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ PLAYER STATS ══════════════════ -->
+    <div id="page-players" class="page">
+      <div class="card">
+        <div class="card-title">2027 Season 1 — Individual Statistics Leaders</div>
+        <table class="standings-table">
+          <thead><tr><th>#</th><th>Player</th><th>Team</th><th class="num">GP</th><th class="num">PPG</th><th class="num">1pt%</th><th class="num">2pt%</th><th class="num">FT%</th><th class="num">PER</th></tr></thead>
+          <tbody>
+            <tr><td><span class="rank-badge rank-1">1</span></td><td><strong>K. Brown</strong></td><td style="color:var(--t3)">NCB</td><td class="num">8</td><td class="num" style="color:var(--accent);font-weight:800">8.4</td><td class="num">61%</td><td class="num">38%</td><td class="num">84%</td><td class="num">22.1</td></tr>
+            <tr><td><span class="rank-badge rank-2">2</span></td><td><strong>R. Gordon</strong></td><td style="color:var(--t3)">Sagicor</td><td class="num">8</td><td class="num" style="color:var(--accent);font-weight:800">7.9</td><td class="num">57%</td><td class="num">41%</td><td class="num">80%</td><td class="num">21.4</td></tr>
+            <tr><td><span class="rank-badge rank-3">3</span></td><td><strong>T. Morrison</strong></td><td style="color:var(--t3)">JPS</td><td class="num">8</td><td class="num">7.1</td><td class="num">52%</td><td class="num">35%</td><td class="num">91%</td><td class="num">19.8</td></tr>
+            <tr><td><span class="rank-badge">4</span></td><td>D. Murray</td><td style="color:var(--t3)">GraceKennedy</td><td class="num">8</td><td class="num">6.8</td><td class="num">55%</td><td class="num">29%</td><td class="num">78%</td><td class="num">18.2</td></tr>
+            <tr><td><span class="rank-badge">5</span></td><td>C. Wright</td><td style="color:var(--t3)">BOJ</td><td class="num">8</td><td class="num">6.5</td><td class="num">48%</td><td class="num">44%</td><td class="num">85%</td><td class="num">17.9</td></tr>
+            <tr><td><span class="rank-badge">6</span></td><td>M. Williams</td><td style="color:var(--t3)">NCB</td><td class="num">8</td><td class="num">6.1</td><td class="num">50%</td><td class="num">31%</td><td class="num">72%</td><td class="num">16.4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SCORESHEET ══════════════════ -->
+    <div id="page-scoresheet" class="page">
+      <div style="margin-bottom:14px;font-size:13px;color:var(--t2)">Table officials: the FIBA 3x3 live scoresheet opens below. Login with your credentials and game code to begin recording.</div>
+      <iframe src="bhba_scoresheet.html" class="scoresheet-frame" title="BHBA Table Official Scoresheet" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </div>
+
+    <!-- ══════════════════ PHOTOS ══════════════════ -->
+    <div id="page-photos" class="page">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Photo Gallery — BHBA 2027</div>
+        <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:16px">
+          Gallery draws from the official BHBA Google Photos shared album. Images are catalogued primarily by team, with event date as secondary grouping. Action tags (#jumpshot, #drive, #layup, #block, #freethrow) allow cross-team filtering for highlight content.
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div style="background:var(--bg2);border-radius:var(--r);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr)'"><div style="text-align:center;color:var(--t3)"><div style="font-size:28px">🏀</div><div style="font-size:11px;margin-top:6px">NCB vs JPS · R3</div></div></div>
+          <div style="background:var(--bg2);border-radius:var(--r);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr)'"><div style="text-align:center;color:var(--t3)"><div style="font-size:28px">📸</div><div style="font-size:11px;margin-top:6px">Opening Ceremony 2027</div></div></div>
+          <div style="background:var(--bg2);border-radius:var(--r);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr)'"><div style="text-align:center;color:var(--t3)"><div style="font-size:28px">🏆</div><div style="font-size:11px;margin-top:6px">Sagicor vs GK · Final</div></div></div>
+          <div style="background:var(--bg2);border-radius:var(--r);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;border:1px solid var(--bdr);cursor:pointer;transition:border-color .15s;opacity:.5" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--bdr)'"><div style="text-align:center;color:var(--t3)"><div style="font-size:28px">+</div><div style="font-size:11px;margin-top:6px">Connect Google Photos</div></div></div>
+        </div>
+        <div style="margin-top:14px">
+          <a href="https://photos.google.com/share/AF1QipPRYMgNfsxAU2FaJm4JdhYSlDswsI659RaeYUcO92SUUuKgVpGB7HWeTpefXuC_og?key=V05sdEFYYzN4cV9KVXN1bWgzWHdrSXhBMG54Wm9n" target="_blank" rel="noopener" style="display:inline-block;padding:10px 18px;background:rgba(245,158,11,.15);color:var(--accent);border:1px solid var(--accent);border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">Open Full Google Photos Album →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ ELIGIBILITY ══════════════════ -->
+    <div id="page-eligibility" class="page">
+      <div class="card">
+        <div class="card-title">Player Eligibility Dashboard — 2027 Season 1</div>
+        <table class="standings-table">
+          <thead><tr><th>Player</th><th>Team</th><th>BHBA ID</th><th>Photo</th><th>Employment</th><th>Match Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kevin Brown</strong></td><td style="color:var(--t3)">NCB</td><td style="font-family:monospace;font-size:12px;color:var(--t3)">BHBA-2024-001337</td><td><span class="elig-ok">Approved</span></td><td><span class="elig-ok">Verified</span></td><td><span class="elig-ok">ELIGIBLE</span></td></tr>
+            <tr><td><strong>Damion Clarke</strong></td><td style="color:var(--t3)">NCB</td><td style="font-family:monospace;font-size:12px;color:var(--t3)">BHBA-2025-002041</td><td><span class="elig-pend">Pending CV</span></td><td><span class="elig-ok">Verified</span></td><td><span class="elig-pend">INELIGIBLE – PHOTO</span></td></tr>
+            <tr><td><strong>S. Patterson</strong></td><td style="color:var(--t3)">BOJ</td><td style="font-family:monospace;font-size:12px;color:var(--t3)">BHBA-2026-003301</td><td><span class="elig-no">Rejected</span></td><td><span class="elig-ok">Verified</span></td><td><span class="elig-no">INELIGIBLE – PHOTO</span></td></tr>
+            <tr><td><strong>R. Gordon</strong></td><td style="color:var(--t3)">Sagicor</td><td style="font-family:monospace;font-size:12px;color:var(--t3)">BHBA-2023-000892</td><td><span class="elig-ok">Approved</span></td><td><span class="elig-ok">Verified</span></td><td><span class="elig-ok">ELIGIBLE</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════ AUDIT LOG ══════════════════ -->
+    <div id="page-audit" class="page">
+      <div class="card">
+        <div class="card-title">Immutable Audit Log — Last 20 Events</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:14px">Append-only. No records may be edited or deleted. All timestamps in UTC.</div>
+        <table class="standings-table">
+          <thead><tr><th>Timestamp (UTC)</th><th>Action</th><th>Actor</th><th>Entity</th><th>Summary</th></tr></thead>
+          <tbody>
+            <tr><td style="font-size:12px;font-family:monospace;color:var(--t3)">2027-06-12 17:14</td><td><span class="state-badge st-live" style="font-size:10px">SCORE_RECORDED</span></td><td style="color:var(--t3);font-size:12px">T. Official #3</td><td style="font-size:12px">fixture:NCB-JPS-R3</td><td style="font-size:12px">+1pt NCB — #7 K.Brown · Score: 14–11</td></tr>
+            <tr><td style="font-size:12px;font-family:monospace;color:var(--t3)">2027-06-12 17:12</td><td><span class="state-badge st-done" style="font-size:10px">FOUL_RECORDED</span></td><td style="color:var(--t3);font-size:12px">T. Official #3</td><td style="font-size:12px">fixture:NCB-JPS-R3</td><td style="font-size:12px">Team foul #5 — JPS Financial</td></tr>
+            <tr><td style="font-size:12px;font-family:monospace;color:var(--t3)">2027-06-12 09:42</td><td><span class="state-badge st-post" style="font-size:10px">PHOTO_REJECTED</span></td><td style="color:var(--t3);font-size:12px">CV Audit Service</td><td style="font-size:12px">player:BHBA-2026-003301</td><td style="font-size:12px">Auto-rejected: CV-003, CV-006 — email sent to BOJ manager</td></tr>
+            <tr><td style="font-size:12px;font-family:monospace;color:var(--t3)">2027-06-10 18:07</td><td><span class="state-badge st-post" style="font-size:10px">MATCH_POSTPONED</span></td><td style="color:var(--t3);font-size:12px">Wade Howell</td><td style="font-size:12px">fixture:BNS-JMMB-R3</td><td style="font-size:12px">Postponed: HEAVY_RAIN · Rescheduling token issued</td></tr>
+            <tr><td style="font-size:12px;font-family:monospace;color:var(--t3)">2027-06-09 19:55</td><td><span class="state-badge st-done" style="font-size:10px">SCORESHEET_APPROVED</span></td><td style="color:var(--t3);font-size:12px">Sagicor Captain</td><td style="font-size:12px">sub:BHBA-SUB-441291</td><td style="font-size:12px">Approved via email reply within 60-min window</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const pages = { dashboard:'Dashboard', fixtures:'Fixtures', standings:'Standings', roster:'Roster', players:'Player Stats', scoresheet:'Table Official Scoresheet', photos:'Photo Gallery', eligibility:'Eligibility Dashboard', audit:'Audit Log' };
+
+function goto(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('on');
+  if (el) el.classList.add('active');
+  document.getElementById('page-title').textContent = pages[id] || id;
+}
+
+let _tt;
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} on`;
+  clearTimeout(_tt);
+  _tt = setTimeout(() => t.classList.remove('on'), 2800);
+}
+</script>
+</body>
+</html>
