@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BHBA — Operations Portal</title>
+<!-- CLASSIFICATION: INTERNAL USE | v1.0.0 | 2026-06-13
+     Business House Basketball Association — Unified Operations Portal
+     Central hub for all BHBA modules. Role-based access, live stats, alert system. -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--gold-mid:rgba(245,166,35,0.3);
+  --black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);
+  --border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);
+  --white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;
+  --red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--teal:#1ABC9C;--purple:#9B59B6;
+}
+body{
+  background:var(--bg);
+  background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.06) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.04) 0%,transparent 55%);
+  color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh;
+}
+
+/* ── HEADER ── */
+#hdr{background:linear-gradient(135deg,#04040c 0%,#0c0b18 45%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;overflow:hidden}
+#hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,var(--gold) 50%,transparent 100%)}
+.brand-block{display:flex;align-items:center;gap:16px}
+.brand-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#000;flex-shrink:0;box-shadow:0 0 24px rgba(245,166,35,0.35)}
+.brand-name{font-size:24px;font-weight:900;color:var(--gold);letter-spacing:2px;text-shadow:0 0 30px rgba(245,166,35,0.3)}
+.brand-sub{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:0.5px}
+.season-badge{background:linear-gradient(135deg,rgba(245,166,35,0.15),rgba(245,166,35,0.05));border:1px solid rgba(245,166,35,0.4);color:var(--gold);font-size:10px;font-weight:800;padding:5px 14px;border-radius:20px;letter-spacing:1px;text-transform:uppercase}
+.login-area{text-align:right;font-size:11px;color:var(--muted)}
+.login-area strong{color:var(--gold)}
+
+/* ── STATS BAR ── */
+.stats-bar{background:rgba(0,0,0,0.5);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;gap:0;backdrop-filter:blur(12px)}
+.stat-item{flex:1;min-width:120px;padding:14px 16px;border-right:1px solid var(--border);text-align:center;cursor:default;transition:background .2s}
+.stat-item:hover{background:var(--gold-dim)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:26px;font-weight:900;color:var(--gold);line-height:1}
+.stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+.stat-sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* ── ALERTS ── */
+.alerts-zone{padding:12px 16px;display:flex;flex-direction:column;gap:8px;max-width:960px;margin:0 auto}
+.alert-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;font-size:12px;backdrop-filter:blur(10px)}
+.alert-item.warn{background:rgba(230,126,34,0.08);border:1px solid rgba(230,126,34,0.3);color:var(--warn)}
+.alert-item.danger{background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.3);color:var(--red)}
+.alert-item.info{background:rgba(52,152,219,0.08);border:1px solid rgba(52,152,219,0.3);color:var(--blue)}
+.alert-item.success{background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.3);color:var(--green)}
+
+/* ── CONTENT GRID ── */
+.content{max-width:960px;margin:0 auto;padding:14px}
+
+/* ── SECTION HEADERS ── */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin:22px 0 14px;border-bottom:1px solid var(--border);padding-bottom:10px}
+.section-title{font-size:10px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:2px}
+
+/* ── MODULE GRID ── */
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}
+.module-tile{
+  background:linear-gradient(135deg,rgba(11,11,22,0.98) 0%,rgba(15,13,28,0.98) 100%);
+  border:1px solid var(--border);border-radius:16px;padding:20px 16px;
+  text-decoration:none;color:var(--white);cursor:pointer;
+  transition:border-color .2s,transform .15s,box-shadow .2s;
+  display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;
+}
+.module-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .25s}
+.module-tile:hover{border-color:var(--border-h);transform:translateY(-3px);box-shadow:0 12px 36px rgba(245,166,35,0.1)}
+.module-tile:hover::before{opacity:1}
+.module-tile:active{transform:translateY(0) scale(.99)}
+.module-tile.public-tile{border-color:rgba(26,188,156,0.18)}
+.module-tile.public-tile:hover{border-color:rgba(26,188,156,0.5);box-shadow:0 12px 36px rgba(26,188,156,0.08)}
+.module-tile.public-tile::before{background:linear-gradient(90deg,transparent,var(--teal),transparent)}
+.tile-icon{font-size:32px;margin-bottom:4px}
+.tile-name{font-size:13px;font-weight:800;color:var(--white);letter-spacing:0.3px}
+.tile-desc{font-size:10px;color:var(--muted);line-height:1.5}
+.tile-badge{position:absolute;top:10px;right:10px;font-size:9px;font-weight:800;padding:3px 8px;border-radius:10px;letter-spacing:0.5px;text-transform:uppercase}
+.badge-new{background:rgba(46,204,113,0.2);color:var(--green);border:1px solid rgba(46,204,113,0.3)}
+.badge-warn{background:rgba(230,126,34,0.2);color:var(--warn);border:1px solid rgba(230,126,34,0.3)}
+.badge-exec{background:rgba(245,166,35,0.12);color:var(--gold);border:1px solid rgba(245,166,35,0.3)}
+.badge-public{background:rgba(26,188,156,0.15);color:var(--teal);border:1px solid rgba(26,188,156,0.3)}
+.tile-status{font-size:10px;margin-top:4px;font-weight:700}
+.ts-ok{color:var(--green)}
+.ts-warn{color:var(--warn)}
+.ts-red{color:var(--red)}
+
+/* ── ROLE GATE BANNER ── */
+.role-banner{background:rgba(245,166,35,0.04);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;backdrop-filter:blur(10px)}
+.role-pill{font-size:10px;font-weight:800;padding:4px 12px;border-radius:20px;display:inline-block;letter-spacing:0.8px;text-transform:uppercase}
+.role-exec{background:rgba(245,166,35,0.12);color:var(--gold);border:1px solid rgba(245,166,35,0.3)}
+.role-team{background:rgba(52,152,219,0.12);color:var(--blue);border:1px solid rgba(52,152,219,0.3)}
+.role-public{background:rgba(112,112,160,0.12);color:var(--muted);border:1px solid rgba(112,112,160,0.2)}
+
+/* ── QUICK ACTIONS ── */
+.quick-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.qa-btn{background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.25);color:var(--gold);padding:8px 16px;border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;letter-spacing:0.3px;transition:background .15s,border-color .15s,transform .1s}
+.qa-btn:hover{background:rgba(245,166,35,0.15);border-color:rgba(245,166,35,0.4);transform:translateY(-1px)}
+.qa-btn.red{background:rgba(231,76,60,0.08);border-color:rgba(231,76,60,0.25);color:var(--red)}
+.qa-btn.red:hover{background:rgba(231,76,60,0.15)}
+.qa-btn.green{background:rgba(46,204,113,0.08);border-color:rgba(46,204,113,0.25);color:var(--green)}
+.qa-btn.green:hover{background:rgba(46,204,113,0.15)}
+
+/* ── SCHEDULE PREVIEW ── */
+.match-preview{background:rgba(10,10,20,0.8);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;transition:border-color .2s}
+.match-preview:hover{border-color:var(--border-h)}
+.mp-teams{flex:1;font-size:13px;font-weight:700;min-width:180px;color:var(--white)}
+.mp-meta{font-size:11px;color:var(--muted)}
+.mp-status{font-size:10px;font-weight:800;padding:3px 10px;border-radius:10px;letter-spacing:0.5px;text-transform:uppercase}
+.mps-confirmed{background:rgba(46,204,113,0.1);color:var(--green);border:1px solid rgba(46,204,113,0.2)}
+.mps-pending{background:rgba(230,126,34,0.1);color:var(--warn);border:1px solid rgba(230,126,34,0.2)}
+.mps-open{background:rgba(52,152,219,0.1);color:var(--blue);border:1px solid rgba(52,152,219,0.2)}
+
+/* ── FINES PREVIEW ── */
+.fine-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:12px;margin-bottom:6px;background:rgba(10,10,20,0.7);border:1px solid var(--border);font-size:12px;transition:border-color .2s}
+.fine-row:hover{border-color:var(--border-h)}
+.fine-team{font-weight:700;color:var(--white)}
+.fine-amount{color:var(--red);font-weight:800}
+.fine-status{font-size:10px;font-weight:800;padding:3px 9px;border-radius:8px;text-transform:uppercase;letter-spacing:0.5px}
+.fs-unpaid{background:rgba(231,76,60,0.1);color:var(--red);border:1px solid rgba(231,76,60,0.2)}
+.fs-paid{background:rgba(46,204,113,0.1);color:var(--green);border:1px solid rgba(46,204,113,0.2)}
+
+/* ── FOOTER ── */
+footer{background:rgba(0,0,0,0.5);border-top:1px solid var(--border);padding:16px;text-align:center;font-size:11px;color:var(--muted);margin-top:40px;backdrop-filter:blur(12px)}
+footer a{color:var(--gold);text-decoration:none}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:24px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92vw;color:#fff;backdrop-filter:blur(20px)}
+
+/* ── KEYFRAME FADE-IN ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.module-tile{animation:fadeUp .35s ease both}
+.module-tile:nth-child(1){animation-delay:.05s}.module-tile:nth-child(2){animation-delay:.1s}.module-tile:nth-child(3){animation-delay:.15s}.module-tile:nth-child(4){animation-delay:.2s}.module-tile:nth-child(5){animation-delay:.25s}.module-tile:nth-child(6){animation-delay:.3s}.module-tile:nth-child(7){animation-delay:.35s}.module-tile:nth-child(8){animation-delay:.4s}.module-tile:nth-child(9){animation-delay:.45s}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div class="brand-block">
+    <div class="brand-logo">🏀</div>
+    <div>
+      <div class="brand-name">BHBA</div>
+      <div class="brand-sub">Business House Basketball Association</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+    <div class="season-badge">⚡ 2026 Season</div>
+    <div class="login-area" id="login-area">
+      <div id="login-status">🔓 Public View</div>
+      <div id="login-role" style="margin-top:2px;color:var(--lgrey)">Login for full access</div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num" id="s-teams">0</div><div class="stat-lbl">Teams Registered</div><div class="stat-sub" id="s-teams-sub">—</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-matches">0</div><div class="stat-lbl">Matches Scheduled</div><div class="stat-sub" id="s-matches-sub">—</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-officials">0</div><div class="stat-lbl">Officials Active</div><div class="stat-sub" id="s-officials-sub">—</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-fines">$0</div><div class="stat-lbl">Outstanding Fines</div><div class="stat-sub" id="s-fines-sub">JMD</div></div>
+  <div class="stat-item"><div class="stat-num" id="s-players">0</div><div class="stat-lbl">Players Registered</div><div class="stat-sub" id="s-players-sub">—</div></div>
+</div>
+
+<!-- ALERTS -->
+<div class="alerts-zone" id="alerts-zone"></div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+  <!-- Role Banner -->
+  <div class="role-banner" id="role-banner">
+    <div>
+      <div id="role-disp" class="role-pill role-public">PUBLIC VIEW</div>
+    </div>
+    <div style="flex:1;font-size:11px;color:var(--lgrey)" id="role-desc">Some modules require BHBA Executive or Team access. <a href="https://sharable.link/tv98gsd4" style="color:var(--gold)">Sign in</a> for full access.</div>
+    <div class="quick-actions" id="quick-links">
+      <a href="https://sharable.link/tv98gsd4" class="qa-btn">🔐 Sign In</a>
+      <a href="https://sharable.link/iu8qcq76" class="qa-btn">📋 Fees &amp; Fines</a>
+    </div>
+  </div>
+
+  <!-- Core Operations Modules -->
+  <div class="section-hdr">
+    <div class="section-title">🏀 Core Operations</div>
+    <div style="font-size:11px;color:var(--lgrey)" id="ops-status"></div>
+  </div>
+  <div class="module-grid" id="module-grid">
+
+    <a href="https://sharable.link/yif1g8xf" class="module-tile" id="tile-teams">
+      <span class="tile-badge badge-exec">EXEC</span>
+      <div class="tile-icon">🏢</div>
+      <div class="tile-name">Team Registration</div>
+      <div class="tile-desc">Annual registration, LRC workflow, HR sign-off, audit trail</div>
+      <div class="tile-status ts-ok" id="ts-teams">— teams confirmed</div>
+    </a>
+
+    <a href="https://sharable.link/tv98gsd4" class="module-tile" id="tile-auth">
+      <div class="tile-icon">🔐</div>
+      <div class="tile-name">Authentication</div>
+      <div class="tile-desc">RBAC login, role management, user registry</div>
+      <div class="tile-status" id="ts-auth" style="color:var(--lgrey)">— users registered</div>
+    </a>
+
+    <a href="https://sharable.link/wqrpfy94" class="module-tile" id="tile-match">
+      <div class="tile-icon">📅</div>
+      <div class="tile-name">Match Schedule</div>
+      <div class="tile-desc">Schedule creation, game-day rosters, match forms, official confirmation</div>
+      <div class="tile-status ts-ok" id="ts-match">— matches scheduled</div>
+    </a>
+
+    <a href="https://sharable.link/ym2yl015" class="module-tile" id="tile-officials">
+      <span class="tile-badge badge-exec">EXEC</span>
+      <div class="tile-icon">🦺</div>
+      <div class="tile-name">Officials</div>
+      <div class="tile-desc">Referee &amp; table official registry, allocation, confirmation, ratings</div>
+      <div class="tile-status" id="ts-officials" style="color:var(--lgrey)">— officials registered</div>
+    </a>
+
+    <a href="https://sharable.link/z2d6e80a" class="module-tile" id="tile-score">
+      <div class="tile-icon">📊</div>
+      <div class="tile-name">Scoresheet</div>
+      <div class="tile-desc">FIBA 3x3 live scoring, foul tracking, timeout management</div>
+      <div class="tile-status ts-ok">FIBA 2026 Compliant</div>
+    </a>
+
+    <a href="https://sharable.link/wxpph92h" class="module-tile" id="tile-finance">
+      <span class="tile-badge badge-exec">EXEC</span>
+      <div class="tile-icon">💰</div>
+      <div class="tile-name">Finance</div>
+      <div class="tile-desc">Fees, fines, protests, payment tracking, double-entry ledger</div>
+      <div class="tile-status ts-warn" id="ts-finance">— outstanding fines</div>
+    </a>
+
+    <a href="https://sharable.link/ayxp2rs0" class="module-tile" id="tile-jerseys">
+      <div class="tile-icon">👕</div>
+      <div class="tile-name">Jersey Registry</div>
+      <div class="tile-desc">Jersey registration, CIELAB color clash detection, FIBA number validation</div>
+      <div class="tile-status ts-ok" id="ts-jerseys">— jerseys registered</div>
+    </a>
+
+    <a href="https://sharable.link/d2hlgdla" class="module-tile" id="tile-comms">
+      <span class="tile-badge badge-exec">EXEC</span>
+      <div class="tile-icon">📧</div>
+      <div class="tile-name">Communications</div>
+      <div class="tile-desc">Template repository, broadcast emails, alert log</div>
+      <div class="tile-status ts-ok">Templates ready</div>
+    </a>
+
+    <a href="https://sharable.link/iu8qcq76" class="module-tile public-tile" id="tile-fees">
+      <span class="tile-badge badge-public">PUBLIC</span>
+      <div class="tile-icon">📋</div>
+      <div class="tile-name">Fees &amp; Fines</div>
+      <div class="tile-desc">Official BHBA offences &amp; penalties schedule — public access</div>
+      <div class="tile-status" style="color:var(--teal)">2026 Season Active</div>
+    </a>
+
+  </div>
+
+  <!-- Upcoming Matches -->
+  <div class="section-hdr" style="margin-top:20px">
+    <div class="section-title">📅 Next 5 Matches</div>
+    <a href="https://sharable.link/wqrpfy94" style="font-size:11px;color:var(--gold);text-decoration:none">View all →</a>
+  </div>
+  <div id="match-preview-list"><div style="font-size:12px;color:var(--lgrey)">No matches scheduled yet.</div></div>
+
+  <!-- Outstanding Fines (exec only) -->
+  <div id="fines-section" style="display:none">
+    <div class="section-hdr" style="margin-top:20px">
+      <div class="section-title">🚨 Outstanding Fines</div>
+      <a href="https://sharable.link/wxpph92h" style="font-size:11px;color:var(--gold);text-decoration:none">Manage →</a>
+    </div>
+    <div id="fines-preview-list"></div>
+  </div>
+
+  <!-- BHBA Rules Quick Reference -->
+  <div class="section-hdr" style="margin-top:20px">
+    <div class="section-title">📖 Quick Reference</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">⚖ Game Rules</div>
+      <div style="font-size:11px;color:var(--lgrey);line-height:1.7">
+        2×15 min halves<br>15s shot clock (Art.12.2)<br>1 timeout/half (Art.15)<br>Foul-out: 4 fouls (Art.10.2)<br>OT: 2-min → sudden death<br>Max 2 NBL on court (Art.4.1c)
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">👥 Roster Limits</div>
+      <div style="font-size:11px;color:var(--lgrey);line-height:1.7">
+        Max 15 registered (season)<br>Max 8 game-day players<br>3 on court + 5 subs<br>Max 5 bench officials<br>Max 3 on bench at once<br>Max 2 NBL on court
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">💸 Registration Fees</div>
+      <div style="font-size:11px;color:var(--lgrey);line-height:1.7">
+        Team fee: $50,000<br>Per player: $5,000<br>Jersey fee: $10,000<br>Medical levy: $2,000<br>LRC filing: $5,000<br>All fines due before next game
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">⚡ Key Fines</div>
+      <div style="font-size:11px;color:var(--lgrey);line-height:1.7">
+        1st ejection: $10,000<br>2nd ejection: $15,000<br>3rd ejection: $20,000<br>Violence: $20,000<br>Ineligible player: $10,000+forfeit<br>See <a href="https://sharable.link/iu8qcq76" style="color:var(--gold)">full schedule</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div>Business House Basketball Association &copy; 2026 &middot; FIBA 3×3 Rules &middot; Jamaica</div>
+  <div style="margin-top:6px">
+    <a href="https://sharable.link/iu8qcq76">Fees &amp; Fines</a> &middot;
+    <a href="https://sharable.link/tv98gsd4">Portal Login</a> &middot;
+    <a href="https://sharable.link/z2d6e80a">Scoresheet</a>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// NBL TEAMS — Canonical list, seeded once, editable by approved exec
+// Source: Jamaica Basketball (JABA/WBA) 2001–2026
+// ═══════════════════════════════════════════════
+const NBL_TEAMS_SEED = [
+  'Urban Knights','Tivoli Wizards','St. George\'s Slayers','Majesty Gardens Legends',
+  'Upper Room Eagles','Running Rebels','Portmore Flames','Pembroke Hall Warriors',
+  'Rae Town Raptors','Spanish Town Spartans','Port Royal Bulls','Arnett Gardens Rockers',
+  'Jamaica Defence Force (JDF)','Blazing Panthers','Harbour View Bulls','Denham Town Wizards',
+  'Catherine Hall All-Stars','Granville Jaguars','Montego Bay Hoopers','Lucea Flames',
+  'Falmouth Flames','Falmouth Knighthawks','Sav-Elite Warriors','Holland Saints',
+  'Inner City Avalanche','Central Bulls','Swift Sons','Waterhouse Blazers',
+  'UTech Knights','Mico University College','G.C. Foster College Strikers','EXED Heaters',
+  'Real Lions','Delacree Park Hotsteppers','Portmore Vipers','Portmore Blazers',
+  'Spanish Town Meadows','Mega Mart Magics','Aqua Youths','North Street Heats',
+  'Norman Gardens Dragons','Braves Chiefs','Pure Playaz','Muschett Falcons',
+  'Montego Bay Boys\'s Club Warriors','Cornwall Courts Chargers','Cricket Club Knights',
+  'Portmore Raiders','Selassie Gardens','St. Thomas Giants','Clarendon Cougars',
+  'Manchester Bashers','Rocky Point Ballers','Boys Town','Bridgeport Vipers',
+  'Trelawny Tornadoes','St. James Sharpes','St. Ann Giants','Celtics'
+];
+
+// Seed NBL teams to localStorage once (persists, editable by exec)
+(function seedNBL(){
+  if(!localStorage.getItem('bhba_nbl_teams')){
+    localStorage.setItem('bhba_nbl_teams', JSON.stringify(NBL_TEAMS_SEED));
+  }
+})();
+
+// ═══════════════════════════════════════════════
+// STORAGE HELPERS
+// ═══════════════════════════════════════════════
+const S = {
+  teams:()=>JSON.parse(localStorage.getItem('bhba_teams_reg')||'[]'),
+  matches:()=>JSON.parse(localStorage.getItem('bhba_matches')||'[]'),
+  refs:()=>JSON.parse(localStorage.getItem('bhba_refs')||'[]'),
+  tos:()=>JSON.parse(localStorage.getItem('bhba_tos')||'[]'),
+  users:()=>JSON.parse(localStorage.getItem('bhba_users')||'[]'),
+  finance:()=>JSON.parse(localStorage.getItem('bhba_finance')||'[]'),
+  rosters:()=>JSON.parse(localStorage.getItem('bhba_rosters')||'[]'),
+  jerseys:()=>JSON.parse(localStorage.getItem('bhba_jerseys')||'[]'),
+  session:()=>{try{return JSON.parse(localStorage.getItem('bhba_session')||'null');}catch{return null;}},
+};
+
+// ═══════════════════════════════════════════════
+// AUTH & ROLE CHECK
+// ═══════════════════════════════════════════════
+const EXEC_ROLES=['bhba_president','bhba_vp','match_commissioner','bhba_executive','exec_senior','exec'];
+let currentUser=null, currentRole='public';
+
+function initAuth(){
+  const sess=S.session();
+  if(!sess)return;
+  const users=S.users();
+  const u=users.find(x=>x.id===sess.userId);
+  if(!u)return;
+  currentUser=u;
+  const isExec=u.roles&&u.roles.some(r=>EXEC_ROLES.includes(r.role)&&r.status==='approved');
+  const isTeam=u.roles&&u.roles.some(r=>r.role==='team'&&r.status==='approved');
+  currentRole=isExec?'exec':isTeam?'team':'public';
+  updateLoginUI(u,currentRole);
+}
+
+function updateLoginUI(u,role){
+  const la=document.getElementById('login-area');
+  const rd=document.getElementById('role-disp');
+  const rdesc=document.getElementById('role-desc');
+  const ql=document.getElementById('quick-links');
+  if(!u)return;
+  document.getElementById('login-status').innerHTML=`👤 <strong>${u.name||u.email}</strong>`;
+  document.getElementById('login-role').textContent=role==='exec'?'BHBA Executive':role==='team'?'Team Access':'Standard Access';
+
+  if(role==='exec'){
+    rd.textContent='BHBA EXECUTIVE';rd.className='role-pill role-exec';
+    rdesc.textContent='Full system access — all modules, reports, and administrative functions enabled.';
+    ql.innerHTML=`<a href="https://sharable.link/yif1g8xf" class="qa-btn green">✅ Confirm Registrations</a>
+      <a href="https://sharable.link/ym2yl015" class="qa-btn">🦺 Allocate Officials</a>
+      <a href="https://sharable.link/wxpph92h" class="qa-btn red">💰 Manage Fines</a>
+      <a href="https://sharable.link/d2hlgdla" class="qa-btn">📧 Communications</a>`;
+    document.getElementById('fines-section').style.display='';
+  } else if(role==='team'){
+    rd.textContent='TEAM ACCESS';rd.className='role-pill role-team';
+    rdesc.textContent='Team management access — registration, match forms, and jersey modules.';
+    ql.innerHTML=`<a href="https://sharable.link/yif1g8xf" class="qa-btn">🏢 My Registration</a>
+      <a href="https://sharable.link/wqrpfy94" class="qa-btn">📅 Match Forms</a>
+      <a href="https://sharable.link/ayxp2rs0" class="qa-btn">👕 Jerseys</a>`;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// LIVE STATS
+// ═══════════════════════════════════════════════
+function loadStats(){
+  const teams=S.teams().filter(t=>t.season==='2026');
+  const confirmed=teams.filter(t=>t.status==='confirmed').length;
+  document.getElementById('s-teams').textContent=teams.length;
+  document.getElementById('s-teams-sub').textContent=`${confirmed} confirmed`;
+  document.getElementById('ts-teams').textContent=`${confirmed} team(s) confirmed`;
+
+  const matches=S.matches();
+  const upcoming=matches.filter(m=>new Date(m.matchDate)>new Date()).length;
+  document.getElementById('s-matches').textContent=matches.length;
+  document.getElementById('s-matches-sub').textContent=`${upcoming} upcoming`;
+  document.getElementById('ts-match').textContent=`${matches.length} scheduled · ${upcoming} upcoming`;
+
+  const refs=S.refs().filter(r=>r.status==='active').length;
+  const tos=S.tos().filter(t=>t.status==='active').length;
+  document.getElementById('s-officials').textContent=refs+tos;
+  document.getElementById('s-officials-sub').textContent=`${refs} refs · ${tos} TOs`;
+  document.getElementById('ts-officials').textContent=`${refs} refs · ${tos} table officials`;
+
+  const finance=S.finance();
+  const outstanding=finance.filter(f=>f.type==='fine'&&f.status==='unpaid');
+  const totalOutstanding=outstanding.reduce((s,f)=>s+(f.amount||0),0);
+  document.getElementById('s-fines').textContent=`$${totalOutstanding.toLocaleString()}`;
+  document.getElementById('s-fines-sub').textContent=`${outstanding.length} unpaid fine(s)`;
+  document.getElementById('ts-finance').textContent=outstanding.length?`${outstanding.length} outstanding fine(s)`:'All clear';
+
+  const rosters=S.rosters();
+  const playerCount=rosters.reduce((s,r)=>s+(r.players?r.players.length:0),0);
+  document.getElementById('s-players').textContent=playerCount||S.users().filter(u=>u.roles&&u.roles.some(r=>r.role==='team')).length;
+  document.getElementById('s-players-sub').textContent='across all teams';
+
+  const jerseys=S.jerseys();
+  document.getElementById('ts-jerseys').textContent=`${jerseys.length} registered`;
+
+  const users=S.users();
+  document.getElementById('ts-auth').textContent=`${users.length} users registered`;
+}
+
+// ═══════════════════════════════════════════════
+// ALERTS
+// ═══════════════════════════════════════════════
+function loadAlerts(){
+  const az=document.getElementById('alerts-zone');
+  const alerts=[];
+
+  if(currentRole==='exec'){
+    // Teams with outstanding fines
+    const finance=S.finance();
+    const unpaid=finance.filter(f=>f.type==='fine'&&f.status==='unpaid');
+    if(unpaid.length){
+      const byTeam={};
+      unpaid.forEach(f=>{byTeam[f.teamName]=(byTeam[f.teamName]||0)+(f.amount||0);});
+      Object.entries(byTeam).forEach(([team,amt])=>{
+        alerts.push({type:'danger',msg:`🚨 <strong>${team}</strong> has JMD $${amt.toLocaleString()} in unpaid fines — <strong>No Pay, No Play</strong> applies`});
+      });
+    }
+
+    // Unconfirmed officials
+    const allocs=JSON.parse(localStorage.getItem('bhba_allocs')||'[]');
+    const refConfs=JSON.parse(localStorage.getItem('bhba_ref_confs')||'[]');
+    const toAllocs=JSON.parse(localStorage.getItem('bhba_to_allocs')||'[]');
+    const toConfs=JSON.parse(localStorage.getItem('bhba_to_confs')||'[]');
+    const unconfRef=allocs.filter(a=>!refConfs.find(c=>c.matchId===a.matchId&&['confirmed_primary','confirmed_alternate'].includes(c.status)));
+    const unconfTO=toAllocs.filter(a=>!toConfs.find(c=>c.matchId===a.matchId&&['confirmed_to','confirmed_backup'].includes(c.status)));
+    if(unconfRef.length)alerts.push({type:'warn',msg:`⚠ <strong>${unconfRef.length}</strong> match(es) have unconfirmed referees`});
+    if(unconfTO.length)alerts.push({type:'warn',msg:`⚠ <strong>${unconfTO.length}</strong> match(es) have unconfirmed table officials`});
+
+    // Teams pending exec review
+    const pending=S.teams().filter(t=>t.season==='2026'&&t.status==='submitted').length;
+    if(pending)alerts.push({type:'info',msg:`📋 <strong>${pending}</strong> team registration(s) awaiting executive confirmation`});
+  }
+
+  // General: upcoming matches in 48h
+  const soon=S.matches().filter(m=>{
+    const d=new Date(m.matchDate)-new Date();
+    return d>0&&d<48*3600000;
+  });
+  if(soon.length){
+    alerts.push({type:'info',msg:`🏀 <strong>${soon.length}</strong> match(es) scheduled within the next 48 hours`});
+  }
+
+  if(!alerts.length&&currentRole==='exec'){
+    alerts.push({type:'success',msg:'✅ All systems operational — no outstanding alerts'});
+  }
+
+  az.innerHTML=alerts.map(a=>`<div class="alert-item ${a.type}">${a.msg}</div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// MATCH PREVIEW
+// ═══════════════════════════════════════════════
+function loadMatchPreview(){
+  const el=document.getElementById('match-preview-list');
+  const matches=S.matches()
+    .filter(m=>new Date(m.matchDate)>new Date())
+    .sort((a,b)=>new Date(a.matchDate)-new Date(b.matchDate))
+    .slice(0,5);
+  if(!matches.length){el.innerHTML='<div style="font-size:12px;color:var(--lgrey)">No upcoming matches scheduled.</div>';return;}
+  const allocs=JSON.parse(localStorage.getItem('bhba_allocs')||'[]');
+  const confs=JSON.parse(localStorage.getItem('bhba_ref_confs')||'[]');
+  el.innerHTML=matches.map(m=>{
+    const alloc=allocs.find(a=>a.matchId===m.id);
+    const conf=confs.find(c=>c.matchId===m.id);
+    const confStatus=conf?conf.status:'unassigned';
+    const statusLabel=!alloc?'⚪ No Officials':['confirmed_primary','confirmed_alternate'].includes(confStatus)?'✅ Officials Confirmed':'⏳ Awaiting Confirmation';
+    const statusCls=!alloc?'mps-pending':['confirmed_primary','confirmed_alternate'].includes(confStatus)?'mps-confirmed':'mps-pending';
+    const dt=new Date(m.matchDate);
+    const formOpen=dt.getTime()-new Date().getTime()>30*60000&&new Date().getTime()>dt.getTime()-5*24*3600000;
+    return `<div class="match-preview">
+      <div class="mp-teams">${m.homeTeam} <span style="color:var(--gold)">vs</span> ${m.awayTeam}</div>
+      <div class="mp-meta">${m.gid||''} · ${dt.toLocaleDateString()} ${dt.toLocaleTimeString([],"1")} · ${m.venue||'TBC'}</div>
+      <span class="mp-status ${statusCls}">${statusLabel}</span>
+      ${formOpen?`<a href="https://sharable.link/wqrpfy94?match=${m.id}&tab=matchform" style="font-size:11px;color:var(--blue);text-decoration:none;white-space:nowrap">📝 Open Form →</a>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// FINES PREVIEW (exec only)
+// ═══════════════════════════════════════════════
+function loadFinesPreview(){
+  const el=document.getElementById('fines-preview-list');
+  if(!el)return;
+  const finance=S.finance().filter(f=>f.type==='fine'&&f.status==='unpaid').slice(0,6);
+  if(!finance.length){el.innerHTML='<div style="font-size:12px;color:var(--green)">✅ No outstanding fines</div>';return;}
+  el.innerHTML=finance.map(f=>`<div class="fine-row">
+    <div><div class="fine-team">${f.teamName||'Unknown Team'}</div><div style="font-size:10px;color:var(--lgrey)">${f.description||f.type} · ${new Date(f.createdAt).toLocaleDateString()}</div></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="fine-amount">$${(f.amount||0).toLocaleString()}</div>
+      <span class="fine-status fs-unpaid">UNPAID</span>
+    </div>
+  </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function toast(msg,t='g'){
+  const el=document.getElementById('toast');
+  el.style.background={g:'var(--green)',r:'var(--red)',w:'var(--warn)'}[t]||'#333';
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(window._tt);window._tt=setTimeout(()=>el.style.opacity='0',4000);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  initAuth();
+  loadStats();
+  loadAlerts();
+  loadMatchPreview();
+  if(currentRole==='exec')loadFinesPreview();
+});
+</script>
+</body>
+</html>
