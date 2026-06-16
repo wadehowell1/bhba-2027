@@ -77,12 +77,21 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgb
 .audit-action{color:var(--white)}
 .divider{border-top:1px dashed var(--border);margin:12px 0}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92vw;color:#fff}
+.home-link{display:inline-flex;align-items:center;gap:5px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.25);color:var(--gold);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:0.3px;transition:background .15s,border-color .15s,transform .1s}.home-link:hover{background:rgba(245,166,35,0.15);border-color:rgba(245,166,35,0.4);transform:translateY(-1px)}
+
+/* ── NAV CONTROLS (Home / Back / Forward) ── */
+.nav-controls{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.nav-ctrl-btn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:9px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);color:var(--gold);cursor:pointer;font-size:17px;text-decoration:none;transition:all .2s cubic-bezier(.4,0,.2,1);font-family:inherit;line-height:1;padding:0 9px;user-select:none}
+.nav-ctrl-btn:hover{background:rgba(245,166,35,0.18);border-color:rgba(245,166,35,0.5);transform:translateY(-1px);box-shadow:0 4px 12px rgba(245,166,35,0.15)}
+.nav-ctrl-btn:active{transform:scale(0.95)}
+.nav-ctrl-home{font-size:11px;font-weight:700;letter-spacing:0.4px;padding:0 13px;background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.35);gap:5px}
 </style>
 </head>
 <body>
 
 <div id="hdr">
-  <div><div class="brand">BHBA</div><div style="font-size:11px;color:var(--lgrey)">Team Registration · v1.0.0</div></div>
+  <div><div class="brand">BHBA</div>
+  <div class="nav-controls"><button class="nav-ctrl-btn" onclick="history.back()" title="Go back">&#8592;</button><button class="nav-ctrl-btn" onclick="history.forward()" title="Go forward">&#8594;</button><a href="bhba_portal.html" class="nav-ctrl-btn nav-ctrl-home">&#127968; Home</a></div><div style="font-size:11px;color:var(--lgrey)">Team Registration · v1.0.0</div></div>
   <div style="font-size:11px;color:var(--lgrey);text-align:right">2026 Season<br><span style="color:var(--gold)">Annual Re-Registration</span></div>
 </div>
 
