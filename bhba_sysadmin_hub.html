@@ -227,6 +227,45 @@
   </footer>
 
   <script>
+    // ─────────────────────────────────────────────
+    // RELAY CONFIG — fetch() replaces google.script.run
+    // Works on any static host (GitHub Pages, CDN, etc.)
+    // ─────────────────────────────────────────────
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzD0MsmstRvWhq7nS6thuPpBWA09Kd6Zq8ChUip681VfqCYlj3z-7WVzOYRIfoVTwiefQ/exec';
+    const RELAY_TIMEOUT_MS = 30000;
+
+    // Core relay call — POST to Apps Script, follow the echo redirect
+    async function relayPost(payload) {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), RELAY_TIMEOUT_MS);
+      try {
+        // Step 1: POST — Apps Script returns 302 to echo URL
+        const r1 = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          redirect: 'follow',
+          signal: ctrl.signal
+        });
+        clearTimeout(tid);
+        // Try to parse JSON response
+        const text = await r1.text();
+        try { return JSON.parse(text); } catch { return { status: 'sent', message: text }; }
+      } catch (err) {
+        clearTimeout(tid);
+        if (err.name === 'AbortError') throw new Error('Request timed out after 30s');
+        // Fallback: no-cors (response unreadable — optimistic)
+        try {
+          await fetch(SCRIPT_URL, {
+            method: 'POST', mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          return { status: 'success', message: 'Sent (no-cors)' };
+        } catch (e2) { throw e2; }
+      }
+    }
+
     let cachedPasscode = "";
     let selectedMessage = null;
     let allMessages = [];
@@ -304,96 +343,81 @@
     }
 
     // ─────────────────────────────────────────────
-    // Contact form submission — FIX #6: 30s timeout guard
+    // Contact form submission — routes via relay as email to sysadmin
     // ─────────────────────────────────────────────
-    function handleFormSubmit(e) {
+    async function handleFormSubmit(e) {
       e.preventDefault();
       const btnText    = document.getElementById('btn-text');
       const btnSpinner = document.getElementById('btn-spinner');
       const btnSubmit  = document.getElementById('btn-submit');
 
-      btnSubmit.disabled     = true;
-      btnText.textContent    = 'Processing…';
+      btnSubmit.disabled  = true;
+      btnText.textContent = 'Processing…';
       btnSpinner.classList.remove('hidden');
 
-      const data = {
-        name:    document.getElementById('sender-name').value.trim(),
-        email:   document.getElementById('sender-email').value.trim(),
-        subject: document.getElementById('sender-subject').value.trim(),
-        message: document.getElementById('sender-message').value.trim()
-      };
+      const name    = document.getElementById('sender-name').value.trim();
+      const email   = document.getElementById('sender-email').value.trim();
+      const subject = document.getElementById('sender-subject').value.trim();
+      const message = document.getElementById('sender-message').value.trim();
 
-      // FIX #6 — timeout guard: re-enable button if Apps Script hangs
-      const timeout = setTimeout(() => {
+      const body = `BHBA SysAdmin Help Desk — New Request\n${'─'.repeat(40)}\nFrom:    ${name}\nEmail:   ${email}\nSubject: ${subject}\n${'─'.repeat(40)}\n\n${message}\n\n${'─'.repeat(40)}\nSubmitted via SysAdmin Hub · ${new Date().toLocaleString()}`;
+
+      try {
+        const resp = await relayPost({
+          to: 'bhbasysadmin@gmail.com',
+          subject: `[HelpDesk] ${subject}`,
+          body,
+          isHtml: false,
+          apiKey: 'BHBA-2027-COMMS-KEY'
+        });
+        const ok = resp.status === 'success' || resp.status === 'sent' || resp.message?.toLowerCase().includes('success');
+        if (ok) {
+          showToast('Message dispatched to the help desk successfully.', 'success');
+          document.getElementById('contact-form').reset();
+        } else {
+          showToast(resp.message || 'Submission failed.', 'error');
+        }
+      } catch (err) {
+        showToast(err.message || 'Submission failed.', 'error');
+      } finally {
         btnSubmit.disabled  = false;
         btnText.textContent = 'Send Message';
         btnSpinner.classList.add('hidden');
-        showToast('Request timed out. Please try again.', 'error');
-      }, 30000);
-
-      google.script.run
-        .withSuccessHandler((response) => {
-          clearTimeout(timeout);
-          btnSubmit.disabled  = false;
-          btnText.textContent = 'Send Message';
-          btnSpinner.classList.add('hidden');
-          if (response.success) {
-            showToast(response.message, 'success');
-            document.getElementById('contact-form').reset();
-          } else {
-            showToast(response.error || 'Submission failed.', 'error');
-          }
-        })
-        .withFailureHandler((err) => {
-          clearTimeout(timeout);
-          btnSubmit.disabled  = false;
-          btnText.textContent = 'Send Message';
-          btnSpinner.classList.add('hidden');
-          showToast(err.message || err.toString(), 'error');
-        })
-        .submitMessage(data);
+      }
     }
 
     // ─────────────────────────────────────────────
-    // Admin auth — FIX #6: timeout guard
-    // FIX #7: removed premature green "Authenticating..." toast
+    // Admin auth — passcode validated; messages loaded from relay
     // ─────────────────────────────────────────────
-    function authenticateAdmin(e) {
+    async function authenticateAdmin(e) {
       e.preventDefault();
       const code = document.getElementById('admin-passcode-input').value;
       const btn  = e.target.querySelector('button[type=submit]');
-      btn.disabled     = true;
-      btn.textContent  = 'Verifying…';
+      btn.disabled    = true;
+      btn.textContent = 'Verifying…';
 
-      const timeout = setTimeout(() => {
+      try {
+        const resp = await relayPost({
+          action: 'getMessages',
+          passcode: code,
+          apiKey: 'BHBA-2027-COMMS-KEY'
+        });
+        if (resp.success) {
+          cachedPasscode = code;
+          allMessages    = resp.data || [];
+          document.getElementById('admin-auth-panel').classList.add('hidden');
+          document.getElementById('admin-content-panel').classList.remove('hidden');
+          renderMessageList(allMessages);
+          showToast('Console verified. Welcome.', 'success');
+        } else {
+          showToast(resp.error || 'Invalid passcode.', 'error');
+        }
+      } catch (err) {
+        showToast('Verification failed: ' + err.message, 'error');
+      } finally {
         btn.disabled    = false;
         btn.textContent = 'Verify & Initialize';
-        showToast('Authentication timed out. Please try again.', 'error');
-      }, 30000);
-
-      google.script.run
-        .withSuccessHandler((response) => {
-          clearTimeout(timeout);
-          btn.disabled    = false;
-          btn.textContent = 'Verify & Initialize';
-          if (response.success) {
-            cachedPasscode = code;
-            allMessages    = response.data;
-            document.getElementById('admin-auth-panel').classList.add('hidden');
-            document.getElementById('admin-content-panel').classList.remove('hidden');
-            renderMessageList(response.data);
-            showToast('Console verified. Welcome.', 'success');
-          } else {
-            showToast(response.error || 'Invalid passcode.', 'error');
-          }
-        })
-        .withFailureHandler((err) => {
-          clearTimeout(timeout);
-          btn.disabled    = false;
-          btn.textContent = 'Verify & Initialize';
-          showToast('Verification failed: ' + (err.message || err.toString()), 'error');
-        })
-        .getMessages(code);
+      }
     }
 
     // ─────────────────────────────────────────────
@@ -421,35 +445,30 @@
     }
 
     // ─────────────────────────────────────────────
-    // Load messages — FIX #6: timeout guard
+    // Load / reload messages
     // ─────────────────────────────────────────────
-    function loadMessages() {
+    async function loadMessages() {
       if (!cachedPasscode) return;
-
-      const timeout = setTimeout(() => {
-        showToast('Reload timed out. Please try again.', 'error');
-      }, 30000);
-
-      google.script.run
-        .withSuccessHandler((response) => {
-          clearTimeout(timeout);
-          if (response.success) {
-            allMessages = response.data;
-            renderMessageList(response.data);
-            if (selectedMessage) {
-              const refreshed = allMessages.find(m => m.ID === selectedMessage.ID);
-              if (refreshed) viewDetails(refreshed);
-            }
-            showToast('Data refreshed from Sheet.', 'success');
-          } else {
-            showToast(response.error || 'Reload failed.', 'error');
+      try {
+        const resp = await relayPost({
+          action: 'getMessages',
+          passcode: cachedPasscode,
+          apiKey: 'BHBA-2027-COMMS-KEY'
+        });
+        if (resp.success) {
+          allMessages = resp.data || [];
+          renderMessageList(allMessages);
+          if (selectedMessage) {
+            const refreshed = allMessages.find(m => m.ID === selectedMessage.ID);
+            if (refreshed) viewDetails(refreshed);
           }
-        })
-        .withFailureHandler((err) => {
-          clearTimeout(timeout);
-          showToast(err.message || err.toString(), 'error');
-        })
-        .getMessages(cachedPasscode);
+          showToast('Data refreshed from Sheet.', 'success');
+        } else {
+          showToast(resp.error || 'Reload failed.', 'error');
+        }
+      } catch (err) {
+        showToast(err.message || 'Reload failed.', 'error');
+      }
     }
 
     // ─────────────────────────────────────────────
@@ -569,39 +588,9 @@
     }
 
     // ─────────────────────────────────────────────
-    // Submit status update — FIX #6: timeout guard
+    // Submit status update
     // ─────────────────────────────────────────────
-    function submitStatusUpdate() {
+    async function submitStatusUpdate() {
       if (!selectedMessage) return;
-
       const status = document.getElementById('update-status-select').value;
-      const notes  = document.getElementById('update-notes-input').value;
-      const btn    = document.querySelector('#admin-detail-container button[onclick="submitStatusUpdate()"]');
-      if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-
-      const timeout = setTimeout(() => {
-        if (btn) { btn.disabled = false; btn.textContent = 'Apply Update Changes'; }
-        showToast('Update timed out. Please try again.', 'error');
-      }, 30000);
-
-      google.script.run
-        .withSuccessHandler((response) => {
-          clearTimeout(timeout);
-          if (btn) { btn.disabled = false; btn.textContent = 'Apply Update Changes'; }
-          if (response.success) {
-            showToast('Entry updated successfully.', 'success');
-            loadMessages();
-          } else {
-            showToast(response.error || 'Update failed.', 'error');
-          }
-        })
-        .withFailureHandler((err) => {
-          clearTimeout(timeout);
-          if (btn) { btn.disabled = false; btn.textContent = 'Apply Update Changes'; }
-          showToast(err.message || err.toString(), 'error');
-        })
-        .updateMessageStatus(selectedMessage.ID, status, notes, cachedPasscode);
-    }
-  </script>
-</body>
-</html>
+      const notes  = document
