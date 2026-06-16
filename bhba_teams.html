@@ -394,9 +394,9 @@ function loadTeamRegistration(){
     <div class="card">
       <div class="section-heading">🏀 Player Pool Summary</div>
       ${pCount>0
-        ?`<div class="alert alert-success">${pCount} player(s) registered in the match-day roster for ${teamName}. <a href="https://sharable.link/wqrpfy94" style="color:var(--gold)">Edit roster →</a></div>`
+        ?`<div class="alert alert-success">${pCount} player(s) registered in the match-day roster for ${teamName}. <a href="bhba_matchform.html" style="color:var(--gold)">Edit roster →</a></div>`
         :'<div class="alert alert-warn">No player roster found. Register players in the Match Day Form module under "Rosters". Players are shared across modules — you only register them once.</div>'}
-      ${jersey?`<div style="font-size:12px;margin-top:6px;color:var(--teal)">✓ Jersey registered. <a href="https://sharable.link/ayxp2rs0" style="color:var(--gold)">View/edit →</a></div>`
+      ${jersey?`<div style="font-size:12px;margin-top:6px;color:var(--teal)">✓ Jersey registered. <a href="bhba_jerseys.html" style="color:var(--gold)">View/edit →</a></div>`
         :'<div style="font-size:12px;margin-top:6px;color:var(--warn)">⚠ No jersey registered. Complete jersey registration in the Jersey Management module.</div>'}
     </div>
 
