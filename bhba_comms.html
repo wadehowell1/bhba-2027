@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BHBA Communications Template Repository</title>
+<!-- CLASSIFICATION: INTERNAL USE | v1.0.0 | 2026-06-12
+     Master communications template store for all BHBA modules.
+     Each template: ID, Title, Purpose, Header, Body, Close, Trigger, Category, Module, Version.
+     All BHBA automated email workflows reference this repository.
+     Pre-loaded: jersey clash templates + finance/fine templates. -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);--border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);--white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;--red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--teal:#1ABC9C;--purple:#9B59B6;--pending:#9B59B6}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.05) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.03) 0%,transparent 55%);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh}
+#hdr{background:linear-gradient(135deg,#04040c 0%,#0c0b18 60%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 24px rgba(0,0,0,0.6)}
+.brand{color:var(--gold);font-size:18px;font-weight:900}
+.nav-tabs{display:flex;gap:6px;padding:10px 14px;overflow-x:auto;background:rgba(0,0,0,0.5);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.nav-tab{background:rgba(12,12,22,0.8);border:1px solid var(--border);color:var(--lgrey);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s,color .15s}
+.nav-tab:hover{border-color:var(--border-h);color:var(--gold)}
+.nav-tab.active{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%);color:#000;border-color:var(--gold);box-shadow:0 2px 14px rgba(245,166,35,0.3)}
+.page{display:none;padding:14px;max-width:700px;margin:0 auto}
+.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s}.card:hover{border-color:var(--border-h);box-shadow:0 4px 20px rgba(245,166,35,0.06)}
+.card-title{color:var(--gold);font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.fg{margin-bottom:11px}
+.fg label{display:block;color:var(--lgrey);font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;background:#1a1a1a;border:1px solid var(--border);color:var(--white);padding:9px;border-radius:6px;font-size:13px}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--gold)}
+.fg textarea{resize:vertical;min-height:80px;font-family:'Segoe UI',Arial,sans-serif;line-height:1.5}
+/* Template card */
+.tpl-card{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.tpl-header{padding:12px;display:flex;justify-content:space-between;align-items:flex-start;cursor:pointer;border-bottom:1px solid var(--border)}
+.tpl-header:hover{background:rgba(255,255,255,.03)}
+.tpl-id{font-size:10px;font-family:monospace;color:var(--gold);margin-bottom:2px}
+.tpl-title{font-size:14px;font-weight:700;color:var(--white)}
+.tpl-cat{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;color:#fff;margin-top:4px;display:inline-block}
+.tpl-body{display:none;padding:12px}
+.tpl-body.open{display:block}
+.tpl-field{margin-bottom:10px}
+.tpl-field-label{color:var(--gold);font-size:10px;text-transform:uppercase;margin-bottom:3px;font-weight:700}
+.tpl-field-val{font-size:12px;color:var(--white);background:#111;padding:8px;border-radius:4px;white-space:pre-wrap;line-height:1.6}
+.tpl-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+/* Email preview */
+.email-preview{background:#fff;color:#222;border-radius:8px;padding:14px;font-size:12px;line-height:1.6;margin-top:10px}
+.ep-subject{font-weight:700;font-size:13px;border-bottom:1px solid #ddd;margin-bottom:8px;padding-bottom:6px}
+.ep-body{white-space:pre-wrap;color:#333}
+.ep-footer{margin-top:10px;padding-top:8px;border-top:1px solid #ddd;font-size:10px;color:#888}
+/* Buttons */
+.btn{border:none;padding:9px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;font-weight:800;width:100%;transition:opacity .15s,transform .1s}.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-red{background:var(--red);color:var(--white)}
+.btn-blue{background:var(--blue);color:var(--white)}
+.btn-warn{background:var(--warn);color:var(--white)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--lgrey)}
+/* Category colours */
+.cat-jersey{background:var(--blue)}
+.cat-finance{background:var(--warn)}
+.cat-registration{background:var(--green)}
+.cat-disciplinary{background:var(--red)}
+.cat-general{background:var(--lgrey)}
+.cat-protest{background:var(--purple)}
+/* Filter bar */
+.filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{background:#1a1a1a;border:1px solid var(--border);color:var(--lgrey);padding:5px 12px;border-radius:14px;cursor:pointer;font-size:11px;font-weight:700}
+.filter-btn.active{background:var(--gold);color:var(--black);border-color:var(--gold)}
+/* Stats */
+.stat-row{display:flex;gap:8px;margin-bottom:14px}
+.stat-box{flex:1;background:#1a1a1a;border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center}
+.stat-label{color:var(--lgrey);font-size:10px;text-transform:uppercase}
+.stat-val{font-size:18px;font-weight:900;color:var(--gold)}
+.alert{padding:10px;border-radius:6px;font-size:12px;margin-bottom:10px}
+.alert-info{background:rgba(41,128,185,.15);border:1px solid var(--blue);color:var(--blue)}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92vw;color:#fff}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div><div class="brand">BHBA</div><div style="font-size:11px;color:var(--lgrey)">Communications Template Repository · v1.0.0</div></div>
+  <div style="font-size:11px;color:var(--lgrey);text-align:right">2026 Season<br><span style="color:var(--gold)">Internal Use</span></div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="goPage('library')">📚 Template Library</div>
+  <div class="nav-tab" onclick="goPage('create')">➕ New Template</div>
+  <div class="nav-tab" onclick="goPage('guide')">📖 Template Guide</div>
+</div>
+
+<!-- ══════════ LIBRARY ══════════ -->
+<div class="page active" id="page-library">
+  <div class="stat-row" id="lib-stats"></div>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" onclick="filterTpl('all',this)">All</button>
+    <button class="filter-btn" onclick="filterTpl('jersey',this)">Jersey</button>
+    <button class="filter-btn" onclick="filterTpl('finance',this)">Finance</button>
+    <button class="filter-btn" onclick="filterTpl('registration',this)">Registration</button>
+    <button class="filter-btn" onclick="filterTpl('disciplinary',this)">Disciplinary</button>
+    <button class="filter-btn" onclick="filterTpl('protest',this)">Protest</button>
+    <button class="filter-btn" onclick="filterTpl('general',this)">General</button>
+  </div>
+
+  <div id="tpl-list"></div>
+</div>
+
+<!-- ══════════ CREATE/EDIT ══════════ -->
+<div class="page" id="page-create">
+  <div class="card">
+    <div class="card-title" id="create-card-title">➕ New Communication Template</div>
+    <div class="alert alert-info">All communications in BHBA must reference a stored template. Define the title, purpose, trigger condition, and all message sections before saving.</div>
+
+    <input type="hidden" id="edit-id">
+    <div class="fg"><label>Template ID <span style="color:var(--lgrey)">(auto-generated if blank)</span></label><input type="text" id="f-id" placeholder="e.g. TPL-JERSEY-BIBS" style="font-family:monospace"></div>
+    <div class="fg"><label>Template Title <span style="color:var(--red)">*</span></label><input type="text" id="f-title" placeholder="Short descriptive title"></div>
+    <div class="fg"><label>Category <span style="color:var(--red)">*</span></label>
+      <select id="f-category">
+        <option value="">— Select category —</option>
+        <option value="jersey">Jersey</option>
+        <option value="finance">Finance</option>
+        <option value="registration">Registration</option>
+        <option value="disciplinary">Disciplinary</option>
+        <option value="protest">Protest</option>
+        <option value="general">General</option>
+      </select>
+    </div>
+    <div class="fg"><label>Source Module</label><input type="text" id="f-module" placeholder="e.g. Jersey Management, Finance, Registration"></div>
+    <div class="fg"><label>Purpose <span style="color:var(--red)">*</span></label><textarea id="f-purpose" rows="2" placeholder="What is this template for? When and why is it used?"></textarea></div>
+    <div class="fg"><label>Trigger Condition <span style="color:var(--red)">*</span></label><textarea id="f-trigger" rows="2" placeholder="Under what conditions should this template be sent? (e.g. 'When clash analysis detects DeltaE < 20 and neither team has reversible jersey')"></textarea></div>
+
+    <div style="border-top:1px dashed var(--border);padding-top:12px;margin-top:4px">
+      <div style="color:var(--gold);font-size:12px;font-weight:700;margin-bottom:10px;text-transform:uppercase">Email Content</div>
+      <div class="fg"><label>Email Header / Subject Line <span style="color:var(--red)">*</span></label><input type="text" id="f-header" placeholder="e.g. URGENT — Jersey Colour Clash · [HOME_TEAM] vs [AWAY_TEAM]"></div>
+      <div style="font-size:11px;color:var(--lgrey);margin-bottom:8px">Available variables: [TEAM_NAME] [OPPONENT_NAME] [MATCH_DATE] [VENUE] [AMOUNT] [REF_NO] [PLAYER_NAME] [EXEC_NAME]</div>
+      <div class="fg"><label>Email Body <span style="color:var(--red)">*</span></label><textarea id="f-body" rows="8" placeholder="Full email body. Use [VARIABLE] placeholders for dynamic fields."></textarea></div>
+      <div class="fg"><label>Email Close / Sign-off</label><textarea id="f-close" rows="3" placeholder="e.g. This is an automated notification. For queries contact the Match Commissioner."></textarea></div>
+    </div>
+
+    <div style="border-top:1px dashed var(--border);padding-top:12px;margin-top:4px">
+      <div style="color:var(--gold);font-size:12px;font-weight:700;margin-bottom:10px;text-transform:uppercase">Preview</div>
+      <button class="btn btn-outline btn-sm" style="margin-bottom:8px;width:auto" onclick="previewTemplate()">👁 Preview Email</button>
+      <div id="create-preview"></div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="btn btn-gold" style="flex:2" onclick="saveTemplate()">💾 Save Template</button>
+      <button class="btn btn-outline btn-sm" style="flex:1" onclick="clearForm()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ GUIDE ══════════ -->
+<div class="page" id="page-guide">
+  <div class="card">
+    <div class="card-title">📖 BHBA Template Authoring Guide</div>
+    <div style="font-size:13px;line-height:1.8;color:var(--lgrey)">
+      <p style="color:var(--white);font-weight:700;margin-bottom:8px">Every BHBA automated communication must be backed by a stored template.</p>
+      <p style="margin-bottom:12px">Templates ensure consistency, auditability, and compliance across all BHBA communications — from fine notices to jersey clash alerts to registration confirmations.</p>
+
+      <p style="color:var(--gold);font-weight:700">Required Fields</p>
+      <ul style="margin:6px 0 12px 16px">
+        <li><strong style="color:var(--white)">Title</strong> — Unique, plain-language name. Used in dropdown lists.</li>
+        <li><strong style="color:var(--white)">Purpose</strong> — Why this template exists. Helps future admins understand its role.</li>
+        <li><strong style="color:var(--white)">Trigger</strong> — The system condition that activates this template. Be specific.</li>
+        <li><strong style="color:var(--white)">Header/Subject</strong> — Email subject line. Use [VARIABLE] placeholders.</li>
+        <li><strong style="color:var(--white)">Body</strong> — Full message body. Should include: greeting, context, required action, deadline if applicable.</li>
+        <li><strong style="color:var(--white)">Close</strong> — Signature block, legal disclaimer, or reply instruction.</li>
+      </ul>
+
+      <p style="color:var(--gold);font-weight:700">Variable Reference</p>
+      <table style="width:100%;font-size:11px;border-collapse:collapse;margin:6px 0 12px">
+        <tr style="background:var(--black)"><th style="padding:5px 8px;border:1px solid var(--border);color:var(--gold)">Variable</th><th style="padding:5px 8px;border:1px solid var(--border);color:var(--gold)">Replaced With</th></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[TEAM_NAME]</td><td style="padding:5px 8px;border:1px solid var(--border)">Home / target team name</td></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[OPPONENT_NAME]</td><td style="padding:5px 8px;border:1px solid var(--border)">Opposing team name</td></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[MATCH_DATE]</td><td style="padding:5px 8px;border:1px solid var(--border)">Scheduled match date</td></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[VENUE]</td><td style="padding:5px 8px;border:1px solid var(--border)">Match venue / court</td></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[AMOUNT]</td><td style="padding:5px 8px;border:1px solid var(--border)">Fine or fee amount in JMD</td></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[REF_NO]</td><td style="padding:5px 8px;border:1px solid var(--border)">Transaction or reference number</td></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[PLAYER_NAME]</td><td style="padding:5px 8px;border:1px solid var(--border)">Player's full name</td></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[EXEC_NAME]</td><td style="padding:5px 8px;border:1px solid var(--border)">BHBA Executive issuing the notice</td></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[DEADLINE]</td><td style="padding:5px 8px;border:1px solid var(--border)">Payment or response deadline date</td></tr>
+        <tr><td style="padding:5px 8px;border:1px solid var(--border);font-family:monospace;color:var(--teal)">[SEASON]</td><td style="padding:5px 8px;border:1px solid var(--border)">Competition season (e.g. 2026)</td></tr>
+      </table>
+
+      <p style="color:var(--gold);font-weight:700">Template IDs</p>
+      <p style="margin-bottom:12px">Use the format <span style="font-family:monospace;color:var(--teal)">TPL-[CATEGORY]-[DESCRIPTOR]</span> e.g. <span style="font-family:monospace;color:var(--teal)">TPL-JERSEY-BIBS</span>, <span style="font-family:monospace;color:var(--teal)">TPL-FINANCE-FINE-NOTICE</span>, <span style="font-family:monospace;color:var(--teal)">TPL-REG-WELCOME</span>.</p>
+
+      <p style="color:var(--gold);font-weight:700">Categories</p>
+      <ul style="margin:6px 0 0 16px">
+        <li><strong style="color:var(--blue)">jersey</strong> — Colour clash, bib requirements, reverse jersey notices</li>
+        <li><strong style="color:var(--warn)">finance</strong> — Fine notices, payment reminders, receipts</li>
+        <li><strong style="color:var(--green)">registration</strong> — Welcome, approval, rejection, renewal</li>
+        <li><strong style="color:var(--red)">disciplinary</strong> — Suspension notices, conduct warnings, ejection confirmations</li>
+        <li><strong style="color:var(--purple)">protest</strong> — Protest acknowledgement, hearing notice, ruling</li>
+        <li><strong style="color:var(--lgrey)">general</strong> — Announcements, schedule updates, general notices</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// PRE-LOADED TEMPLATES
+// ═══════════════════════════════════════════════════
+const SEED_TEMPLATES = [
+  {
+    id:'TPL-JERSEY-BIBS',
+    title:'Jersey Colour Clash — Bibs Required',
+    category:'jersey',
+    module:'Jersey Management',
+    version:'1.0',
+    purpose:'Notifies the HOME team that a jersey colour conflict exists with their scheduled opponent and they must supply and wear external player bibs for the fixture. This template is triggered when neither team holds a registered reversible jersey.',
+    trigger:'Automated: AI colour clash analysis returns ΔE < 20 for any colour combination between two scheduled opponents, AND neither team has a registered reversible jersey on file.',
+    header:'URGENT — BHBA Jersey Colour Clash · [TEAM_NAME] vs [OPPONENT_NAME] · External Bibs Required',
+    body:`Dear [TEAM_NAME] Team Management,
+
+Our BHBA Colour Management System has identified a jersey colour conflict between your team and your scheduled opponent, [OPPONENT_NAME], for your upcoming fixture.
+
+FIXTURE DETAILS:
+  Home Team:    [TEAM_NAME]
+  Away Team:    [OPPONENT_NAME]
+  Match Date:   [MATCH_DATE]
+  Venue:        [VENUE]
+
+COLOUR ANALYSIS RESULT:
+  Status: COLOUR CLASH DETECTED
+  Neither team holds a registered reversible jersey on file.
+
+REQUIRED ACTION — HOME TEAM ([TEAM_NAME]):
+As the designated HOME team, you are responsible for providing and wearing external player bibs for this fixture. BHBA bibs are available for collection at the administration desk no later than 30 minutes before scheduled tip-off.
+
+Failure to comply with this directive may result in:
+  • A match start delay charged to the home team
+  • An administrative fine under the BHBA Code of Conduct
+
+Please acknowledge receipt of this notice by return email to the BHBA administration office and confirm bib collection arrangements.`,
+    close:`This is an automated notification generated by the BHBA Colour Management System.
+For queries or to register a reversible jersey that may resolve future clashes, contact the Match Commissioner or BHBA Registrar.
+Reference: [REF_NO] | Season: [SEASON]`,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),createdBy:'SYSTEM',isSystem:true
+  },
+  {
+    id:'TPL-JERSEY-REVERSE',
+    title:'Jersey Colour Clash — Wear Reverse Side',
+    category:'jersey',
+    module:'Jersey Management',
+    version:'1.0',
+    purpose:'Notifies the team with a registered reversible jersey that they must wear the reverse side of their jersey for a specific fixture due to a colour conflict with their opponent. This is the preferred resolution when a reversible jersey is available as it avoids the need for external bibs.',
+    trigger:'Automated: AI colour clash analysis returns ΔE < 20 AND at least one team has a registered reversible jersey on file. The team WITH the reversible jersey receives this notice.',
+    header:'NOTICE — BHBA Jersey Colour Clash · [TEAM_NAME] vs [OPPONENT_NAME] · Wear Reverse Jersey',
+    body:`Dear [TEAM_NAME] Team Management,
+
+A jersey colour conflict has been identified between your team and your scheduled opponent for the following fixture.
+
+FIXTURE DETAILS:
+  Teams:        [TEAM_NAME] vs [OPPONENT_NAME]
+  Match Date:   [MATCH_DATE]
+  Venue:        [VENUE]
+
+COLOUR ANALYSIS RESULT:
+  Status: COLOUR CLASH DETECTED
+  Resolution: Your team ([TEAM_NAME]) has a registered reversible jersey on file.
+
+REQUIRED ACTION:
+All players on [TEAM_NAME] must wear their jerseys on the REVERSE SIDE for this fixture. This mandatory requirement ensures clear visual distinction between competing teams and maintains the integrity of the game.
+
+IMPORTANT:
+  • Inform your team captain and all players of this requirement immediately
+  • Ensure all 8 registered game-day players are wearing the REVERSE side before warm-up
+  • The table official will confirm jersey compliance before tip-off
+  • Non-compliance may result in a game delay and administrative fine
+
+Please acknowledge receipt of this notice and confirm team compliance by return email.`,
+    close:`This is an automated notification generated by the BHBA Colour Management System.
+If you believe this notice was sent in error or if your jersey registration details are incorrect, contact the BHBA Registrar promptly.
+Reference: [REF_NO] | Season: [SEASON]`,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),createdBy:'SYSTEM',isSystem:true
+  },
+  {
+    id:'TPL-FINANCE-FINE-NOTICE',
+    title:'Fine Levied — Payment Notice',
+    category:'finance',
+    module:'Financial Management',
+    version:'1.0',
+    purpose:'Formally notifies a team or player that a fine has been levied against their BHBA account. Includes fine details, payment deadline, and instructions on how to initiate a protest if the team wishes to contest the fine.',
+    trigger:'Manual: BHBA Executive posts a fine entry in the Financial Management module. System generates this notice for the affected team/player.',
+    header:'BHBA Fine Notice — [TEAM_NAME] · [REF_NO] · Payment Required',
+    body:`Dear [TEAM_NAME] Management,
+
+The BHBA Finance Office has issued the following fine against your team account. Please review the details and ensure payment is made within the stipulated timeframe.
+
+FINE DETAILS:
+  Reference:    [REF_NO]
+  Description:  [INFRACTION_DESCRIPTION]
+  Match:        [MATCH_DATE] — [VENUE]
+  Amount:       JMD $[AMOUNT]
+  Levied By:    [EXEC_NAME]
+  Issue Date:   [ISSUE_DATE]
+
+PAYMENT DEADLINE: [DEADLINE] (14 days from issue date)
+
+PAYMENT INSTRUCTIONS:
+Payment must be made by wire transfer or manager's cheque payable to the Business House Basketball Association. Submit proof of payment to the BHBA administration office to receive a payment confirmation reference.
+
+NO PAY NO PLAY POLICY:
+Outstanding fines must be cleared before your team is permitted to take the court. If payment is not received by the deadline above, your team will be barred from scheduled fixtures until the balance is settled.
+
+RIGHT TO PROTEST:
+If you believe this fine was levied in error, you may lodge a formal protest within 7 days of making payment. Refer to the BHBA Protest Procedure for instructions. A non-refundable protest filing fee of JMD $3,000 applies.`,
+    close:`For payment queries or to discuss this notice, contact the BHBA Finance Office.
+This notice forms part of the official BHBA financial record and may be cited in disciplinary proceedings.
+Reference: [REF_NO] | Season: [SEASON]`,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),createdBy:'SYSTEM',isSystem:true
+  },
+  {
+    id:'TPL-PROTEST-ACKNOWLEDGED',
+    title:'Protest Lodged — Acknowledgement',
+    category:'protest',
+    module:'Financial Management',
+    version:'1.0',
+    purpose:'Acknowledges receipt of a formal protest lodged by a team against a levied fine. Confirms that the protest has been registered, the filing fee has been noted, and advises of the hearing process and timeline.',
+    trigger:'Automated: Team submits a protest in the Financial Management module. Protest filing fee is auto-posted. This acknowledgement is generated immediately upon lodgement.',
+    header:'BHBA Protest Acknowledgement — [TEAM_NAME] · Protest Ref: [REF_NO]',
+    body:`Dear [TEAM_NAME] Management,
+
+Your formal protest against fine [ORIGINAL_REF] has been received and registered by the BHBA administration office.
+
+PROTEST DETAILS:
+  Protest Reference:  [REF_NO]
+  Original Fine:      [ORIGINAL_REF] — JMD $[AMOUNT]
+  Grounds Submitted:  [GROUNDS_SUMMARY]
+  Filing Fee Paid:    JMD $3,000 (non-refundable)
+  Date Registered:    [ISSUE_DATE]
+
+WHAT HAPPENS NEXT:
+  1. The Match Commissioner will convene a hearing panel within 14 days.
+  2. Both parties may be invited to present evidence and submissions.
+  3. A ruling will be issued in writing and communicated to all parties.
+  4. Rulings are final and binding under BHBA competition rules.
+
+POSSIBLE OUTCOMES:
+  • UPHELD — The original fine stands. No refund is issued.
+  • OVERTURNED — The fine is reversed. A full refund of the original fine amount will be processed. The protest filing fee is non-refundable regardless of outcome.
+
+The original fine remains on your account during the protest process. The No Pay No Play rule applies until the fine is settled or overturned.`,
+    close:`For queries regarding your protest, contact the Match Commissioner directly.
+BHBA protest proceedings are confidential and governed by the BHBA Competition Rules 2026.
+Reference: [REF_NO] | Season: [SEASON]`,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),createdBy:'SYSTEM',isSystem:true
+  },
+  {
+    id:'TPL-PROTEST-OVERTURNED',
+    title:'Protest Ruling — Fine Overturned',
+    category:'protest',
+    module:'Financial Management',
+    version:'1.0',
+    purpose:'Notifies the team that their protest has been heard and the fine has been overturned by the BHBA panel. Confirms the refund amount, explains the contra accounting entry posted, and provides the final account balance.',
+    trigger:'Manual: BHBA Executive records a protest ruling of OVERTURNED in the Financial Management module. A contra entry is posted automatically and this notice is generated.',
+    header:'BHBA Protest Ruling — Fine OVERTURNED · [TEAM_NAME] · Refund Authorised',
+    body:`Dear [TEAM_NAME] Management,
+
+The BHBA has concluded its review of your protest against fine [ORIGINAL_REF]. We are writing to inform you of the panel's ruling.
+
+HEARING DETAILS:
+  Protest Reference:  [REF_NO]
+  Original Fine:      [ORIGINAL_REF] — JMD $[AMOUNT]
+  Panel Members:      [EXEC_NAME]
+  Ruling Date:        [MATCH_DATE]
+
+RULING: OVERTURNED
+
+The panel has found in your favour. The original fine of JMD $[AMOUNT] has been reversed in full. A contra entry has been posted to your BHBA account and the refund will be processed within 10 business days.
+
+REFUND DETAILS:
+  Refund Amount:  JMD $[AMOUNT]
+  Method:         Wire transfer to registered account
+  Timeline:       10 business days from ruling date
+
+IMPORTANT NOTE:
+The protest filing fee of JMD $3,000 is non-refundable as stated in the BHBA protest procedures. Your account balance will reflect the net position of the original fine and the contra reversal, resulting in a zero net impact from this matter.`,
+    close:`This ruling is final and binding. No further appeals are permitted on this matter under BHBA Competition Rules 2026.
+Reference: [REF_NO] | Season: [SEASON]`,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),createdBy:'SYSTEM',isSystem:true
+  },
+  {
+    id:'TPL-PROTEST-UPHELD',
+    title:'Protest Ruling — Fine Upheld',
+    category:'protest',
+    module:'Financial Management',
+    version:'1.0',
+    purpose:'Notifies the team that their protest has been heard and the original fine has been upheld by the BHBA panel. Confirms the fine stands, no refund will be issued, and reiterates the No Pay No Play obligation.',
+    trigger:'Manual: BHBA Executive records a protest ruling of UPHELD in the Financial Management module.',
+    header:'BHBA Protest Ruling — Fine UPHELD · [TEAM_NAME] · No Refund',
+    body:`Dear [TEAM_NAME] Management,
+
+The BHBA has concluded its review of your protest against fine [ORIGINAL_REF]. We are writing to inform you of the panel's ruling.
+
+HEARING DETAILS:
+  Protest Reference:  [REF_NO]
+  Original Fine:      [ORIGINAL_REF] — JMD $[AMOUNT]
+  Panel Members:      [EXEC_NAME]
+  Ruling Date:        [MATCH_DATE]
+
+RULING: UPHELD
+
+After careful consideration of all evidence and submissions, the panel has upheld the original fine. The fine of JMD $[AMOUNT] remains on your account and no refund will be issued.
+
+OUTSTANDING BALANCE:
+Your current account balance includes this fine. Please ensure all outstanding amounts are settled promptly to maintain your team's eligibility under the BHBA No Pay No Play policy.
+
+The protest filing fee of JMD $3,000 is non-refundable as stated in the BHBA protest procedures.`,
+    close:`This ruling is final and binding. No further appeals are permitted on this matter under BHBA Competition Rules 2026.
+For payment arrangements, contact the BHBA Finance Office.
+Reference: [REF_NO] | Season: [SEASON]`,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),createdBy:'SYSTEM',isSystem:true
+  },
+  {
+    id:'TPL-REG-WELCOME',
+    title:'Member Registration — Welcome',
+    category:'registration',
+    module:'Member Registration',
+    version:'1.0',
+    purpose:'Welcomes a newly registered BHBA member. Confirms their account has been created, their primary role, and outlines the next steps to become fully active on the platform.',
+    trigger:'Automated: New member completes registration on the BHBA Member Portal. Triggered upon account creation.',
+    header:'Welcome to BHBA — Account Created · [TEAM_NAME]',
+    body:`Dear [PLAYER_NAME],
+
+Welcome to the Business House Basketball Association [SEASON] season. Your BHBA member account has been successfully created.
+
+YOUR ACCOUNT DETAILS:
+  Name:         [PLAYER_NAME]
+  Email (Login ID): [EMAIL]
+  Primary Role: [ROLE]
+  Organisation: [ORGANISATION]
+  Season:       [SEASON]
+
+NEXT STEPS:
+  1. Log in to the BHBA Member Portal to review your profile.
+  2. If you are a team player or official, ensure your team registration is complete.
+  3. Request any additional role attachments that apply to you — these require executive approval.
+  4. Ensure all registration fees are paid before your team's first fixture.
+
+IMPORTANT:
+Your email address is your unique login ID and cannot be changed. Keep your credentials secure.`,
+    close:`For assistance, contact the BHBA Registrar.
+This is an automated notification from the BHBA Member Portal.
+Reference: [REF_NO] | Season: [SEASON]`,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),createdBy:'SYSTEM',isSystem:true
+  },
+  {
+    id:'TPL-DISCIPLINARY-SUSPENSION',
+    title:'Disciplinary Notice — Game Suspension',
+    category:'disciplinary',
+    module:'Disciplinary',
+    version:'1.0',
+    purpose:'Formally notifies a player and their team of a game suspension resulting from an ejection, unsportsmanlike conduct, or other disciplinary infraction. Specifies the number of games suspended, the fine amount, and reinstatement conditions.',
+    trigger:'Manual: BHBA Disciplinary Officer or Match Commissioner issues a suspension following a disciplinary hearing or in-game ejection.',
+    header:'BHBA Disciplinary Notice — Suspension · [PLAYER_NAME] · [TEAM_NAME]',
+    body:`Dear [PLAYER_NAME] and [TEAM_NAME] Management,
+
+This notice is to formally advise that a disciplinary action has been imposed following a review of an incident during the BHBA [SEASON] season.
+
+PLAYER:         [PLAYER_NAME]
+TEAM:           [TEAM_NAME]
+INFRACTION:     [INFRACTION_DESCRIPTION]
+MATCH:          [MATCH_DATE] — [VENUE]
+
+DISCIPLINARY RULING:
+  Suspension:  [SUSPENSION_GAMES] game(s), effective immediately
+  Fine:        JMD $[AMOUNT]
+  Levied By:   [EXEC_NAME]
+  Reference:   [REF_NO]
+
+SUSPENSION PERIOD:
+[PLAYER_NAME] is suspended from participating in the next [SUSPENSION_GAMES] scheduled BHBA fixture(s). The player may not dress, sit on the bench, or participate in any official capacity during the suspension period.
+
+REINSTATEMENT CONDITIONS:
+  1. The applicable fine must be paid in full before reinstatement.
+  2. Reinstatement is automatic upon completion of the suspension period and payment of the fine.
+
+TEAM LIABILITY:
+If [TEAM_NAME] fields [PLAYER_NAME] during the suspension period, the team will forfeit the fixture and face an additional team fine under the Ineligible Player rule.`,
+    close:`This notice forms part of the official BHBA disciplinary record.
+The player has the right to appeal this decision within 7 days per BHBA Competition Rules 2026.
+Reference: [REF_NO] | Season: [SEASON]`,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),createdBy:'SYSTEM',isSystem:true
+  }
+];
+
+// ═══════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════
+function getTemplates(){
+  const stored=JSON.parse(localStorage.getItem('bhba_templates')||'null');
+  if(!stored){
+    localStorage.setItem('bhba_templates',JSON.stringify(SEED_TEMPLATES));
+    return SEED_TEMPLATES;
+  }
+  // Merge seed templates that don't exist yet
+  const merged=[...stored];
+  SEED_TEMPLATES.forEach(s=>{if(!merged.find(t=>t.id===s.id))merged.push(s);});
+  return merged;
+}
+function saveTemplates(t){localStorage.setItem('bhba_templates',JSON.stringify(t));}
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+let activeFilter='all';
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`page-${p}`).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>{
+    const pages=['library','create','guide'];
+    t.classList.toggle('active',pages[i]===p);
+  });
+  if(p==='library')renderLibrary();
+}
+function filterTpl(cat,btn){
+  activeFilter=cat;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLibrary();
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER LIBRARY
+// ═══════════════════════════════════════════════════
+function renderLibrary(){
+  const templates=getTemplates();
+  const filtered=activeFilter==='all'?templates:templates.filter(t=>t.category===activeFilter);
+  const stats=document.getElementById('lib-stats');
+  const cats=['jersey','finance','registration','disciplinary','protest','general'];
+  stats.innerHTML=`<div class="stat-box"><div class="stat-label">Total Templates</div><div class="stat-val">${templates.length}</div></div>`
+    +cats.map(c=>{const n=templates.filter(t=>t.category===c).length;return n?`<div class="stat-box"><div class="stat-label" style="text-transform:capitalize">${c}</div><div class="stat-val" style="font-size:16px">${n}</div></div>`:''}).join('');
+  const el=document.getElementById('tpl-list');
+  if(!filtered.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No templates in this category.</div>';return;}
+  el.innerHTML=filtered.map(t=>renderTplCard(t)).join('');
+}
+
+function renderTplCard(t){
+  return `<div class="tpl-card" id="tplc-${t.id}">
+    <div class="tpl-header" onclick="toggleTpl('${t.id}')">
+      <div>
+        <div class="tpl-id">${t.id}${t.isSystem?' · SYSTEM':''}  · v${t.version||'1.0'}</div>
+        <div class="tpl-title">${t.title}</div>
+        <span class="tpl-cat cat-${t.category}">${t.category.toUpperCase()}</span>
+        ${t.module?`<span style="font-size:10px;color:var(--lgrey);margin-left:6px">${t.module}</span>`:''}
+      </div>
+      <div style="font-size:18px;color:var(--lgrey)">▼</div>
+    </div>
+    <div class="tpl-body" id="tplb-${t.id}">
+      <div class="tpl-field"><div class="tpl-field-label">Purpose</div><div class="tpl-field-val">${t.purpose}</div></div>
+      <div class="tpl-field"><div class="tpl-field-label">Trigger Condition</div><div class="tpl-field-val">${t.trigger}</div></div>
+      <div class="tpl-field"><div class="tpl-field-label">Email Header / Subject</div><div class="tpl-field-val">${t.header}</div></div>
+      <div class="tpl-field"><div class="tpl-field-label">Email Body</div><div class="tpl-field-val">${t.body}</div></div>
+      <div class="tpl-field"><div class="tpl-field-label">Email Close / Sign-off</div><div class="tpl-field-val">${t.close}</div></div>
+      <div class="tpl-actions">
+        ${!t.isSystem?`<button class="btn btn-sm btn-blue" onclick="editTemplate('${t.id}')">✏ Edit</button>
+        <button class="btn btn-sm btn-red" onclick="deleteTemplate('${t.id}')">🗑 Delete</button>`:'<span style="font-size:11px;color:var(--lgrey)">System template — read only</span>'}
+        <button class="btn btn-sm btn-outline" onclick="duplicateTemplate('${t.id}')">⧉ Duplicate</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleTpl(id){
+  const body=document.getElementById(`tplb-${id}`);
+  body.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════
+// CRUD
+// ═══════════════════════════════════════════════════
+function saveTemplate(){
+  const id=document.getElementById('f-id').value.trim()||'TPL-'+document.getElementById('f-category').value.toUpperCase()+'-'+Date.now().toString(36).toUpperCase();
+  const title=document.getElementById('f-title').value.trim();
+  const category=document.getElementById('f-category').value;
+  const purpose=document.getElementById('f-purpose').value.trim();
+  const trigger=document.getElementById('f-trigger').value.trim();
+  const header=document.getElementById('f-header').value.trim();
+  const body=document.getElementById('f-body').value.trim();
+  const close=document.getElementById('f-close').value.trim();
+  const module=document.getElementById('f-module').value.trim();
+  const editId=document.getElementById('edit-id').value;
+
+  if(!title||!category||!purpose||!trigger||!header||!body){toast('Fill all required fields (*)','r');return;}
+
+  const templates=getTemplates();
+  const entry={id,title,category,module,purpose,trigger,header,body,close,version:'1.0',
+    createdAt:editId?templates.find(t=>t.id===editId)?.createdAt||new Date().toISOString():new Date().toISOString(),
+    updatedAt:new Date().toISOString(),createdBy:'Admin',isSystem:false};
+  const existing=templates.findIndex(t=>t.id===editId||t.id===id);
+  if(existing>=0)templates[existing]=entry;else templates.push(entry);
+  saveTemplates(templates);
+  toast(`Template ${id} saved`,'g');
+  clearForm();goPage('library');
+}
+
+function editTemplate(id){
+  const t=getTemplates().find(x=>x.id===id);if(!t)return;
+  document.getElementById('edit-id').value=t.id;
+  document.getElementById('f-id').value=t.id;
+  document.getElementById('f-title').value=t.title;
+  document.getElementById('f-category').value=t.category;
+  document.getElementById('f-module').value=t.module||'';
+  document.getElementById('f-purpose').value=t.purpose;
+  document.getElementById('f-trigger').value=t.trigger;
+  document.getElementById('f-header').value=t.header;
+  document.getElementById('f-body').value=t.body;
+  document.getElementById('f-close').value=t.close;
+  document.getElementById('create-card-title').textContent='✏ Edit Template';
+  goPage('create');window.scrollTo(0,0);
+}
+function deleteTemplate(id){
+  if(!confirm(`Delete template ${id}?`))return;
+  const t=getTemplates().filter(x=>x.id!==id);saveTemplates(t);
+  toast(`Template ${id} deleted`,'w');renderLibrary();
+}
+function duplicateTemplate(id){
+  const t=getTemplates().find(x=>x.id===id);if(!t)return;
+  const copy={...t,id:t.id+'-COPY',title:t.title+' (Copy)',isSystem:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+  const templates=getTemplates();templates.push(copy);saveTemplates(templates);
+  toast(`Duplicated as ${copy.id}`,'g');renderLibrary();
+}
+function clearForm(){
+  ['f-id','f-title','f-purpose','f-trigger','f-header','f-body','f-close','f-module'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-category').value='';document.getElementById('edit-id').value='';
+  document.getElementById('create-card-title').textContent='➕ New Communication Template';
+  document.getElementById('create-preview').innerHTML='';
+}
+function previewTemplate(){
+  const header=document.getElementById('f-header').value;
+  const body=document.getElementById('f-body').value;
+  const close=document.getElementById('f-close').value;
+  if(!header&&!body){toast('Fill in header and body to preview','w');return;}
+  document.getElementById('create-preview').innerHTML=`<div class="email-preview">
+    <div class="ep-subject">${header||'[Subject]'}</div>
+    <div class="ep-body">${body||'[Body]'}</div>
+    <div class="ep-footer">${close||'[Close]'}</div>
+  </div>`;
+}
+
+// Toast
+let tTimer;
+function toast(msg,t='g'){
+  const el=document.getElementById('toast');const c={g:'var(--green)',r:'var(--red)',w:'var(--warn)'};
+  el.style.background=c[t]||'#333';el.textContent=msg;el.style.opacity='1';
+  clearTimeout(tTimer);tTimer=setTimeout(()=>el.style.opacity='0',4000);
+}
+renderLibrary();
+</script>
+</body>
+</html>
