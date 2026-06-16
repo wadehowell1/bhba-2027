@@ -75,6 +75,28 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgb
 .alert-info{background:rgba(41,128,185,.15);border:1px solid var(--blue);color:var(--blue)}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92vw;color:#fff}
 .home-link{display:inline-flex;align-items:center;gap:5px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.25);color:var(--gold);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:0.3px;transition:background .15s,border-color .15s,transform .1s}.home-link:hover{background:rgba(245,166,35,0.15);border-color:rgba(245,166,35,0.4);transform:translateY(-1px)}
+/* ── SEND TAB ── */
+.var-block{background:#111;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px}
+.var-block-title{color:var(--gold);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.var-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.var-label{color:var(--lgrey);font-size:11px;font-family:monospace;min-width:130px;flex-shrink:0}
+.var-input{flex:1;background:#1a1a1a;border:1px solid var(--border);color:var(--white);padding:7px 9px;border-radius:5px;font-size:12px}
+.var-input:focus{outline:none;border-color:var(--gold)}
+.send-preview{background:#fff;color:#222;border-radius:8px;padding:16px;font-size:12px;line-height:1.7;margin-top:12px;max-height:380px;overflow-y:auto}
+.send-preview .sp-from{font-size:10px;color:#888;margin-bottom:4px}
+.send-preview .sp-subject{font-weight:700;font-size:13px;border-bottom:1px solid #ddd;margin-bottom:10px;padding-bottom:6px}
+.send-preview .sp-body{white-space:pre-wrap;color:#222}
+.send-preview .sp-footer{margin-top:10px;padding-top:8px;border-top:1px solid #ddd;font-size:10px;color:#888}
+.log-row{display:flex;align-items:flex-start;gap:10px;padding:8px;border-bottom:1px solid var(--border);font-size:11px}
+.log-row:last-child{border-bottom:none}
+.log-ts{color:var(--lgrey);min-width:90px;flex-shrink:0;font-family:monospace}
+.log-to{color:var(--gold);min-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log-subj{color:var(--white);flex:1}
+.log-status{padding:2px 8px;border-radius:8px;font-weight:700;font-size:10px;flex-shrink:0}
+.log-ok{background:rgba(46,204,113,.15);color:var(--green)}
+.log-err{background:rgba(231,76,60,.15);color:var(--red)}
+.send-spinner{display:none;width:16px;height:16px;border:2px solid rgba(245,166,35,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── NAV CONTROLS (Home / Back / Forward) ── */
 .nav-controls{display:flex;align-items:center;gap:4px;flex-shrink:0}
@@ -96,6 +118,7 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgb
   <div class="nav-tab active" onclick="goPage('library')">📚 Template Library</div>
   <div class="nav-tab" onclick="goPage('create')">➕ New Template</div>
   <div class="nav-tab" onclick="goPage('guide')">📖 Template Guide</div>
+  <div class="nav-tab" onclick="goPage('send')">📤 Send Email</div>
 </div>
 
 <!-- ══════════ LIBRARY ══════════ -->
@@ -205,6 +228,69 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgb
         <li><strong style="color:var(--purple)">protest</strong> — Protest acknowledgement, hearing notice, ruling</li>
         <li><strong style="color:var(--lgrey)">general</strong> — Announcements, schedule updates, general notices</li>
       </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SEND EMAIL ══════════ -->
+<div class="page" id="page-send">
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📤 Send Email via BHBA Comms</div>
+    <div class="alert alert-info" style="margin-bottom:14px">Select a template, fill in the variables, choose recipients, then send. Emails are dispatched from <strong>bhbasysadmin@gmail.com</strong> via the BHBA relay.</div>
+
+    <!-- Template selector -->
+    <div class="fg"><label>Template <span style="color:var(--red)">*</span></label>
+      <select id="send-tpl-sel" onchange="onSendTplChange()">
+        <option value="">— Select a template —</option>
+      </select>
+    </div>
+
+    <!-- Variable substitution -->
+    <div id="send-var-wrap" style="display:none">
+      <div class="var-block">
+        <div class="var-block-title">📝 Variable Values</div>
+        <div id="send-var-fields"></div>
+      </div>
+    </div>
+
+    <!-- Recipient -->
+    <div class="fg"><label>To (Recipients) <span style="color:var(--red)">*</span></label>
+      <input type="text" id="send-to" placeholder="email@example.com, another@example.com" oninput="updateSendPreview()">
+      <div style="font-size:10px;color:var(--lgrey);margin-top:3px">Comma-separated for multiple recipients</div>
+    </div>
+
+    <!-- HTML toggle -->
+    <div class="fg" style="display:flex;align-items:center;gap:10px;flex-direction:row">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none">
+        <input type="checkbox" id="send-html" onchange="updateSendPreview()" style="accent-color:var(--gold);width:14px;height:14px">
+        <span style="font-size:12px;color:var(--lgrey)">Send as HTML email</span>
+      </label>
+    </div>
+
+    <!-- Send button -->
+    <button class="btn btn-gold" style="width:100%;margin-top:4px" onclick="sendEmail()" id="send-btn">📤 Send Email</button>
+    <div class="send-spinner" id="send-spinner"></div>
+  </div>
+
+  <!-- Live preview -->
+  <div class="card" id="send-preview-card" style="margin-bottom:16px;display:none">
+    <div class="card-title">👁 Live Preview</div>
+    <div class="send-preview" id="send-preview-panel">
+      <div class="sp-from">From: bhbasysadmin@gmail.com</div>
+      <div class="sp-subject" id="sp-subject">—</div>
+      <div class="sp-body" id="sp-body">Select a template above to preview.</div>
+      <div class="sp-footer">BHBA 2026 Season · Sent via BHBA Comms Engine</div>
+    </div>
+  </div>
+
+  <!-- Delivery log -->
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>📋 Delivery Log</span>
+      <button class="btn btn-outline btn-sm" style="width:auto;padding:4px 12px;font-size:10px" onclick="clearSendLog()">Clear Log</button>
+    </div>
+    <div id="send-log-wrap">
+      <div style="color:var(--lgrey);font-size:12px;padding:12px 0;text-align:center">No emails sent this session.</div>
     </div>
   </div>
 </div>
@@ -519,15 +605,22 @@ function saveTemplates(t){localStorage.setItem('bhba_templates',JSON.stringify(t
 // ═══════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// APPS SCRIPT RELAY
+// ═══════════════════════════════════════════════════
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxYHy-D9FWtFVnEGbl5Bm6xLMDqVd5tfacEhDTDdmUsVPMuOtF3xDurIOXsimFxfSwvgg/exec';
+const BHBA_API_KEY='BHBA-2027-COMMS-KEY';
+
 let activeFilter='all';
 function goPage(p){
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.getElementById(`page-${p}`).classList.add('active');
   document.querySelectorAll('.nav-tab').forEach((t,i)=>{
-    const pages=['library','create','guide'];
+    const pages=['library','create','guide','send'];
     t.classList.toggle('active',pages[i]===p);
   });
   if(p==='library')renderLibrary();
+  if(p==='send'){populateSendTplDropdown();loadSendLog();}
 }
 function filterTpl(cat,btn){
   activeFilter=cat;
@@ -561,107 +654,4 @@ function renderTplCard(t){
         ${t.module?`<span style="font-size:10px;color:var(--lgrey);margin-left:6px">${t.module}</span>`:''}
       </div>
       <div style="font-size:18px;color:var(--lgrey)">▼</div>
-    </div>
-    <div class="tpl-body" id="tplb-${t.id}">
-      <div class="tpl-field"><div class="tpl-field-label">Purpose</div><div class="tpl-field-val">${t.purpose}</div></div>
-      <div class="tpl-field"><div class="tpl-field-label">Trigger Condition</div><div class="tpl-field-val">${t.trigger}</div></div>
-      <div class="tpl-field"><div class="tpl-field-label">Email Header / Subject</div><div class="tpl-field-val">${t.header}</div></div>
-      <div class="tpl-field"><div class="tpl-field-label">Email Body</div><div class="tpl-field-val">${t.body}</div></div>
-      <div class="tpl-field"><div class="tpl-field-label">Email Close / Sign-off</div><div class="tpl-field-val">${t.close}</div></div>
-      <div class="tpl-actions">
-        ${!t.isSystem?`<button class="btn btn-sm btn-blue" onclick="editTemplate('${t.id}')">✏ Edit</button>
-        <button class="btn btn-sm btn-red" onclick="deleteTemplate('${t.id}')">🗑 Delete</button>`:'<span style="font-size:11px;color:var(--lgrey)">System template — read only</span>'}
-        <button class="btn btn-sm btn-outline" onclick="duplicateTemplate('${t.id}')">⧉ Duplicate</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-function toggleTpl(id){
-  const body=document.getElementById(`tplb-${id}`);
-  body.classList.toggle('open');
-}
-
-// ═══════════════════════════════════════════════════
-// CRUD
-// ═══════════════════════════════════════════════════
-function saveTemplate(){
-  const id=document.getElementById('f-id').value.trim()||'TPL-'+document.getElementById('f-category').value.toUpperCase()+'-'+Date.now().toString(36).toUpperCase();
-  const title=document.getElementById('f-title').value.trim();
-  const category=document.getElementById('f-category').value;
-  const purpose=document.getElementById('f-purpose').value.trim();
-  const trigger=document.getElementById('f-trigger').value.trim();
-  const header=document.getElementById('f-header').value.trim();
-  const body=document.getElementById('f-body').value.trim();
-  const close=document.getElementById('f-close').value.trim();
-  const module=document.getElementById('f-module').value.trim();
-  const editId=document.getElementById('edit-id').value;
-
-  if(!title||!category||!purpose||!trigger||!header||!body){toast('Fill all required fields (*)','r');return;}
-
-  const templates=getTemplates();
-  const entry={id,title,category,module,purpose,trigger,header,body,close,version:'1.0',
-    createdAt:editId?templates.find(t=>t.id===editId)?.createdAt||new Date().toISOString():new Date().toISOString(),
-    updatedAt:new Date().toISOString(),createdBy:'Admin',isSystem:false};
-  const existing=templates.findIndex(t=>t.id===editId||t.id===id);
-  if(existing>=0)templates[existing]=entry;else templates.push(entry);
-  saveTemplates(templates);
-  toast(`Template ${id} saved`,'g');
-  clearForm();goPage('library');
-}
-
-function editTemplate(id){
-  const t=getTemplates().find(x=>x.id===id);if(!t)return;
-  document.getElementById('edit-id').value=t.id;
-  document.getElementById('f-id').value=t.id;
-  document.getElementById('f-title').value=t.title;
-  document.getElementById('f-category').value=t.category;
-  document.getElementById('f-module').value=t.module||'';
-  document.getElementById('f-purpose').value=t.purpose;
-  document.getElementById('f-trigger').value=t.trigger;
-  document.getElementById('f-header').value=t.header;
-  document.getElementById('f-body').value=t.body;
-  document.getElementById('f-close').value=t.close;
-  document.getElementById('create-card-title').textContent='✏ Edit Template';
-  goPage('create');window.scrollTo(0,0);
-}
-function deleteTemplate(id){
-  if(!confirm(`Delete template ${id}?`))return;
-  const t=getTemplates().filter(x=>x.id!==id);saveTemplates(t);
-  toast(`Template ${id} deleted`,'w');renderLibrary();
-}
-function duplicateTemplate(id){
-  const t=getTemplates().find(x=>x.id===id);if(!t)return;
-  const copy={...t,id:t.id+'-COPY',title:t.title+' (Copy)',isSystem:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
-  const templates=getTemplates();templates.push(copy);saveTemplates(templates);
-  toast(`Duplicated as ${copy.id}`,'g');renderLibrary();
-}
-function clearForm(){
-  ['f-id','f-title','f-purpose','f-trigger','f-header','f-body','f-close','f-module'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-category').value='';document.getElementById('edit-id').value='';
-  document.getElementById('create-card-title').textContent='➕ New Communication Template';
-  document.getElementById('create-preview').innerHTML='';
-}
-function previewTemplate(){
-  const header=document.getElementById('f-header').value;
-  const body=document.getElementById('f-body').value;
-  const close=document.getElementById('f-close').value;
-  if(!header&&!body){toast('Fill in header and body to preview','w');return;}
-  document.getElementById('create-preview').innerHTML=`<div class="email-preview">
-    <div class="ep-subject">${header||'[Subject]'}</div>
-    <div class="ep-body">${body||'[Body]'}</div>
-    <div class="ep-footer">${close||'[Close]'}</div>
-  </div>`;
-}
-
-// Toast
-let tTimer;
-function toast(msg,t='g'){
-  const el=document.getElementById('toast');const c={g:'var(--green)',r:'var(--red)',w:'var(--warn)'};
-  el.style.background=c[t]||'#333';el.textContent=msg;el.style.opacity='1';
-  clearTimeout(tTimer);tTimer=setTimeout(()=>el.style.opacity='0',4000);
-}
-renderLibrary();
-</script>
-</body>
-</html>
+    </div
