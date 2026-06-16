@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BHBA Team Registration</title>
+<!-- CLASSIFICATION: INTERNAL USE | v1.0.0 | 2026-06-12
+     Team Registration — Annual re-registration, Save/Submit workflow,
+     BHBA Executive confirmation, Late Registration Change (LRC) workflow.
+     Shared: writes bhba_teams_reg, reads bhba_rosters, bhba_jerseys, bhba_users. -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);--border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);--white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;--red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--teal:#1ABC9C;--purple:#9B59B6;--pending:#9B59B6}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.05) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.03) 0%,transparent 55%);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh}
+#hdr{background:linear-gradient(135deg,#04040c 0%,#0c0b18 60%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 24px rgba(0,0,0,0.6)}
+.brand{color:var(--gold);font-size:18px;font-weight:900}
+.nav-tabs{display:flex;gap:6px;padding:10px 14px;overflow-x:auto;background:rgba(0,0,0,0.5);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.nav-tab{background:rgba(12,12,22,0.8);border:1px solid var(--border);color:var(--lgrey);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s,color .15s}
+.nav-tab:hover{border-color:var(--border-h);color:var(--gold)}
+.nav-tab.active{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%);color:#000;border-color:var(--gold);box-shadow:0 2px 14px rgba(245,166,35,0.3)}
+.page{display:none;padding:12px;max-width:720px;margin:0 auto}
+.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s}.card:hover{border-color:var(--border-h);box-shadow:0 4px 20px rgba(245,166,35,0.06)}
+.card-title{color:var(--gold);font-size:14px;font-weight:700;margin-bottom:12px}
+.fg{margin-bottom:10px}
+.fg label{display:block;color:var(--lgrey);font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;background:#1a1a1a;border:1px solid var(--border);color:var(--white);padding:9px;border-radius:6px;font-size:13px}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--gold)}
+.fg-row{display:flex;gap:8px}
+.fg-row .fg{flex:1}
+/* Buttons */
+.btn{border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;transition:opacity .15s}
+.btn:active{opacity:.8}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;font-weight:800;transition:opacity .15s,transform .1s}.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-warn{background:var(--warn);color:#fff}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--lgrey)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-block{width:100%}
+/* Status badges */
+.status-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;display:inline-block}
+.sb-draft{background:#333;color:var(--lgrey)}
+.sb-submitted{background:rgba(41,128,185,.2);color:var(--blue)}
+.sb-returned{background:rgba(230,126,34,.2);color:var(--warn)}
+.sb-confirmed{background:rgba(39,174,96,.2);color:var(--green)}
+.sb-lrc_pending{background:rgba(142,68,173,.2);color:var(--purple)}
+.sb-lrc_approved{background:rgba(26,188,156,.2);color:var(--teal)}
+/* Team list items */
+.team-item{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
+.ti-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap;gap:4px}
+.ti-name{font-size:14px;font-weight:700}
+.ti-meta{font-size:11px;color:var(--lgrey);margin-bottom:6px}
+/* Registration form sections */
+.form-section{margin-bottom:14px}
+.section-heading{color:var(--teal);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+/* Prior year banner */
+.prior-year-banner{background:rgba(212,160,23,.08);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px}
+/* Confirmation panel */
+.exec-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.exec-action-row .btn{flex:1;min-width:100px;font-size:12px;padding:8px 10px}
+/* LRC (Late Registration Change) */
+.lrc-item{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
+/* Alerts */
+.alert{padding:10px 12px;border-radius:6px;font-size:12px;margin-bottom:10px;line-height:1.5}
+.alert-warn{background:rgba(230,126,34,.15);border:1px solid var(--warn);color:var(--warn)}
+.alert-info{background:rgba(41,128,185,.15);border:1px solid var(--blue);color:var(--blue)}
+.alert-success{background:rgba(39,174,96,.15);border:1px solid var(--green);color:var(--green)}
+.alert-red{background:rgba(192,57,43,.15);border:1px solid var(--red);color:var(--red)}
+.alert-gold{background:rgba(212,160,23,.1);border:1px solid var(--gold);color:var(--gold)}
+/* Audit trail */
+.audit-row{font-size:11px;color:var(--lgrey);padding:4px 0;border-bottom:1px dashed var(--border)}
+.audit-row:last-child{border-bottom:none}
+.audit-actor{color:var(--teal);font-weight:700}
+.audit-action{color:var(--white)}
+.divider{border-top:1px dashed var(--border);margin:12px 0}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92vw;color:#fff}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div><div class="brand">BHBA</div><div style="font-size:11px;color:var(--lgrey)">Team Registration · v1.0.0</div></div>
+  <div style="font-size:11px;color:var(--lgrey);text-align:right">2026 Season<br><span style="color:var(--gold)">Annual Re-Registration</span></div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="goPage('register')">📋 Register</div>
+  <div class="nav-tab" onclick="goPage('teams')">🏢 All Teams</div>
+  <div class="nav-tab" onclick="goPage('exec')">✅ Executive Review</div>
+  <div class="nav-tab" onclick="goPage('lrc')">🔄 Late Changes (LRC)</div>
+  <div class="nav-tab" onclick="goPage('audit')">📜 Audit Trail</div>
+</div>
+
+<!-- ══════════ REGISTER ══════════ -->
+<div class="page active" id="page-register">
+  <div class="card">
+    <div class="card-title">📋 Team Registration — 2026 Season</div>
+    <div class="alert alert-info">Select your team to begin or continue registration. If your team registered last year, prior information is pre-filled for review and confirmation.</div>
+    <div class="fg-row">
+      <div class="fg"><label>Team</label>
+        <select id="reg-team" onchange="loadTeamRegistration()">
+          <option value="">— Select your team —</option>
+        </select>
+      </div>
+      <div class="fg"><label>Season</label>
+        <select id="reg-season" onchange="loadTeamRegistration()">
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="reg-form-body"></div>
+</div>
+
+<!-- ══════════ ALL TEAMS ══════════ -->
+<div class="page" id="page-teams">
+  <div class="card">
+    <div class="card-title">🏢 Registered Teams — 2026</div>
+    <div class="fg"><label>Filter by Status</label>
+      <select id="teams-filter" onchange="renderTeamsList()">
+        <option value="">All statuses</option>
+        <option value="draft">Draft</option>
+        <option value="submitted">Submitted</option>
+        <option value="returned">Returned</option>
+        <option value="confirmed">Confirmed</option>
+      </select>
+    </div>
+  </div>
+  <div id="teams-list"></div>
+</div>
+
+<!-- ══════════ EXECUTIVE REVIEW ══════════ -->
+<div class="page" id="page-exec">
+  <div class="card">
+    <div class="card-title">✅ BHBA Executive — Registration Review</div>
+    <div class="alert alert-info">Review submitted team registrations. Confirm, return for editing, or edit directly. Confirmed registrations are locked for the team.</div>
+    <div class="fg-row">
+      <div class="fg"><label>Reviewing Executive</label>
+        <select id="exec-reviewer">
+          <option value="">— Select your role —</option>
+        </select>
+      </div>
+      <div class="fg"><label>Filter</label>
+        <select id="exec-filter" onchange="renderExecPanel()">
+          <option value="submitted">Submitted (awaiting review)</option>
+          <option value="returned">Returned</option>
+          <option value="">All</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="exec-panel"></div>
+</div>
+
+<!-- ══════════ LRC ══════════ -->
+<div class="page" id="page-lrc">
+  <div class="card">
+    <div class="card-title">🔄 Late Registration Change (LRC)</div>
+    <div class="alert alert-warn">Once a registration is confirmed, all changes must go through the LRC workflow. The team submits a change request, BHBA Exec reviews, and either approves or rejects. A $5,000 LRC filing fee applies per request.</div>
+    <div class="fg"><label>Team</label>
+      <select id="lrc-team" onchange="loadLRCForm()">
+        <option value="">— Select confirmed team —</option>
+      </select>
+    </div>
+  </div>
+  <div id="lrc-form-body"></div>
+  <div class="card" style="margin-top:8px">
+    <div class="card-title">📋 LRC History</div>
+    <div id="lrc-history"></div>
+  </div>
+</div>
+
+<!-- ══════════ AUDIT TRAIL ══════════ -->
+<div class="page" id="page-audit">
+  <div class="card">
+    <div class="card-title">📜 Registration Audit Trail</div>
+    <div class="alert alert-info">All registration actions are timestamped and immutable. This log is the system of record for compliance and dispute resolution.</div>
+    <div class="fg"><label>Filter by Team</label>
+      <select id="audit-team" onchange="renderAuditTrail()">
+        <option value="">All teams</option>
+      </select>
+    </div>
+  </div>
+  <div id="audit-list"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════════════
+const REG_KEY='bhba_teams_reg';
+const LRC_KEY='bhba_lrc';
+const AUDIT_KEY='bhba_reg_audit';
+
+const S={
+  regs:()=>JSON.parse(localStorage.getItem(REG_KEY)||'[]'),
+  saveRegs:r=>localStorage.setItem(REG_KEY,JSON.stringify(r)),
+  lrcs:()=>JSON.parse(localStorage.getItem(LRC_KEY)||'[]'),
+  saveLRCs:l=>localStorage.setItem(LRC_KEY,JSON.stringify(l)),
+  audit:()=>JSON.parse(localStorage.getItem(AUDIT_KEY)||'[]'),
+  saveAudit:a=>localStorage.setItem(AUDIT_KEY,JSON.stringify(a)),
+  teams:()=>JSON.parse(localStorage.getItem('bhba_teams')||'[]'),
+  users:()=>JSON.parse(localStorage.getItem('bhba_users')||'[]'),
+  rosters:()=>JSON.parse(localStorage.getItem('bhba_rosters')||'[]'),
+  jerseys:()=>JSON.parse(localStorage.getItem('bhba_jerseys')||'[]'),
+};
+
+const SEASONS=['2025','2026','2027'];
+const CURRENT_SEASON='2026';
+const PRIOR_SEASON='2025';
+
+// ════════════════════════════════════════════════════
+// AUDIT HELPER
+// ════════════════════════════════════════════════════
+function logAudit(teamName,season,actor,action,detail=''){
+  const audit=S.audit();
+  audit.push({id:'AUD-'+Date.now(),teamName,season,actor,action,detail,ts:new Date().toISOString()});
+  S.saveAudit(audit);
+}
+
+// ════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`page-${p}`).classList.add('active');
+  const pgs=['register','teams','exec','lrc','audit'];
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',pgs[i]===p));
+  if(p==='register'){populateTeamSelect('reg-team');if(document.getElementById('reg-team').value)loadTeamRegistration();}
+  if(p==='teams')renderTeamsList();
+  if(p==='exec'){populateExecReviewerSelect();renderExecPanel();}
+  if(p==='lrc'){populateLRCTeamSelect();renderLRCHistory();}
+  if(p==='audit'){populateAuditTeamFilter();renderAuditTrail();}
+}
+
+function populateTeamSelect(elId){
+  const sel=document.getElementById(elId);const cur=sel.value;
+  sel.innerHTML='<option value="">— Select team —</option>';
+  const teams=S.teams();
+  (teams.length?teams:BHBA_TEAMS).forEach(t=>sel.appendChild(new Option(t,t)));
+  if(cur)sel.value=cur;
+}
+
+function populateExecReviewerSelect(){
+  const sel=document.getElementById('exec-reviewer');const cur=sel.value;
+  sel.innerHTML='<option value="">— Select your role —</option>';
+  const execRoles=['bhba_president','bhba_vp','match_commissioner','bhba_executive'];
+  const users=S.users();
+  const added=new Set();
+  users.forEach(u=>{
+    if(u.roles?.some(r=>execRoles.includes(r.role)&&r.status==='approved')&&!added.has(u.email)){
+      sel.appendChild(new Option(`${u.name||u.email} (${u.roles.find(r=>execRoles.includes(r.role))?.role.replace('_',' ')})`,u.email));
+      added.add(u.email);
+    }
+  });
+  // Fallback exec names
+  if(added.size===0){
+    ['BHBA President','BHBA Vice President','Match Commissioner','BHBA Executive'].forEach(n=>sel.appendChild(new Option(n,n)));
+  }
+  if(cur)sel.value=cur;
+}
+
+// ════════════════════════════════════════════════════
+// STATUS HELPERS
+// ════════════════════════════════════════════════════
+const STATUS_LABEL={draft:'Draft',submitted:'Submitted — Awaiting Exec Review',
+  returned:'Returned for Editing',confirmed:'✅ Confirmed',
+  lrc_pending:'LRC Pending Approval',lrc_approved:'LRC Approved'};
+const STATUS_CLS={draft:'sb-draft',submitted:'sb-submitted',returned:'sb-returned',
+  confirmed:'sb-confirmed',lrc_pending:'sb-lrc_pending',lrc_approved:'sb-lrc_approved'};
+
+function getTeamReg(teamName,season){
+  return S.regs().find(r=>r.teamName===teamName&&r.season===season)||null;
+}
+
+function canTeamEdit(reg){
+  if(!reg)return true;  // new registration
+  return['draft','returned'].includes(reg.status);
+}
+
+// ════════════════════════════════════════════════════
+// REGISTRATION FORM
+// ════════════════════════════════════════════════════
+function loadTeamRegistration(){
+  const teamName=document.getElementById('reg-team').value;
+  const season=document.getElementById('reg-season').value;
+  const el=document.getElementById('reg-form-body');
+  if(!teamName){el.innerHTML='';return;}
+
+  const reg=getTeamReg(teamName,season);
+  const priorReg=getTeamReg(teamName,String(parseInt(season)-1));
+  const editable=canTeamEdit(reg);
+
+  let bannerHtml='';
+  if(priorReg&&!reg){
+    bannerHtml=`<div class="prior-year-banner">
+      ⭐ Prior registration found (${parseInt(season)-1} Season). Your details have been pre-filled below.
+      Review, update if needed, then <strong>Save</strong> as draft or <strong>Submit</strong> to BHBA.
+    </div>`;
+  }
+  if(reg){
+    bannerHtml=`<div class="alert ${reg.status==='confirmed'?'alert-success':reg.status==='returned'?'alert-warn':'alert-info'}">
+      Status: <strong>${STATUS_LABEL[reg.status]||reg.status}</strong>
+      ${reg.returnNote?`<div style="margin-top:4px">Return note: ${reg.returnNote}</div>`:''}
+      ${reg.confirmedAt?`<div style="margin-top:4px;font-size:11px">Confirmed by ${reg.confirmedBy} on ${new Date(reg.confirmedAt).toLocaleString()}</div>`:''}
+    </div>`;
+  }
+
+  // Pull prior or current data
+  const data=reg||priorReg||{};
+  const roster=S.rosters().find(r=>r.teamName===teamName);
+  const jersey=S.jerseys().find(j=>j.team===teamName);
+  const pCount=roster?.players?.length||0;
+
+  el.innerHTML=`${bannerHtml}
+  <form id="reg-form" onsubmit="return false">
+
+    <!-- ── Company Details ── -->
+    <div class="card">
+      <div class="section-heading">🏢 Company Details</div>
+      <div class="fg-row">
+        <div class="fg"><label>Company Legal Name</label>
+          <input type="text" id="rf-company" value="${esc(data.company||teamName)}" ${editable?'':'disabled'} placeholder="Legal registered name"></div>
+        <div class="fg"><label>Trading Name / Team Name</label>
+          <input type="text" id="rf-tradename" value="${esc(data.tradeName||teamName)}" ${editable?'':'disabled'}></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>Company TRN / Registration #</label>
+          <input type="text" id="rf-trn" value="${esc(data.trn||'')}" ${editable?'':'disabled'} placeholder="TRN or company number"></div>
+        <div class="fg"><label>Industry Sector</label>
+          <select id="rf-sector" ${editable?'':'disabled'}>
+            <option value="">— Select —</option>
+            ${['Financial Services','Insurance','Government / Public Sector','Technology','Legal / Consulting','Entertainment / Events','Retail / Wholesale','Energy / Utilities','Healthcare','Construction / Engineering'].map(s=>`<option value="${s}" ${data.sector===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>Company Address</label>
+          <input type="text" id="rf-address" value="${esc(data.address||'')}" ${editable?'':'disabled'} placeholder="Street address"></div>
+        <div class="fg"><label>Parish</label>
+          <select id="rf-parish" ${editable?'':'disabled'}>
+            <option value="">— Select —</option>
+            ${['Kingston','St. Andrew','St. Thomas','Portland','St. Mary','St. Ann','Trelawny','St. James','Hanover','Westmoreland','St. Elizabeth','Manchester','Clarendon','St. Catherine'].map(p=>`<option value="${p}" ${data.parish===p?'selected':''}>${p}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Authorised Contacts ── -->
+    <div class="card">
+      <div class="section-heading">👤 Authorised Contacts</div>
+      <div class="alert alert-warn" style="margin-bottom:10px">Registration requires signature authorisation from HR Manager or General Manager plus official company stamp (Rule 5.1 — Corporate Validation).</div>
+      <div class="fg-row">
+        <div class="fg"><label>HR Manager / GM Name</label>
+          <input type="text" id="rf-auth-name" value="${esc(data.authName||'')}" ${editable?'':'disabled'} placeholder="Authorising official"></div>
+        <div class="fg"><label>Title / Position</label>
+          <input type="text" id="rf-auth-title" value="${esc(data.authTitle||'')}" ${editable?'':'disabled'} placeholder="HR Manager / General Manager"></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>Email</label>
+          <input type="email" id="rf-auth-email" value="${esc(data.authEmail||'')}" ${editable?'':'disabled'}></div>
+        <div class="fg"><label>Phone</label>
+          <input type="text" id="rf-auth-phone" value="${esc(data.authPhone||'')}" ${editable?'':'disabled'} placeholder="+1 876 ..."></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>Team Manager Name</label>
+          <input type="text" id="rf-manager" value="${esc(data.manager||'')}" ${editable?'':'disabled'}></div>
+        <div class="fg"><label>Team Manager Email</label>
+          <input type="email" id="rf-manager-email" value="${esc(data.managerEmail||'')}" ${editable?'':'disabled'}></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>Team Captain Name</label>
+          <input type="text" id="rf-captain" value="${esc(data.captain||'')}" ${editable?'':'disabled'}></div>
+        <div class="fg"><label>Team Captain Phone</label>
+          <input type="text" id="rf-captain-phone" value="${esc(data.captainPhone||'')}" ${editable?'':'disabled'}></div>
+      </div>
+      <div class="fg">
+        <label>Company Stamp / Letter of Authorisation Uploaded?</label>
+        <select id="rf-stamp" ${editable?'':'disabled'}>
+          <option value="">— Select —</option>
+          <option value="yes" ${data.stampConfirmed==='yes'?'selected':''}>✅ Yes — document attached or will be delivered to BHBA office</option>
+          <option value="pending" ${data.stampConfirmed==='pending'?'selected':''}>⏳ Pending — to be submitted</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ── Roster Summary ── -->
+    <div class="card">
+      <div class="section-heading">🏀 Player Pool Summary</div>
+      ${pCount>0
+        ?`<div class="alert alert-success">${pCount} player(s) registered in the match-day roster for ${teamName}. <a href="https://sharable.link/wqrpfy94" style="color:var(--gold)">Edit roster →</a></div>`
+        :'<div class="alert alert-warn">No player roster found. Register players in the Match Day Form module under "Rosters". Players are shared across modules — you only register them once.</div>'}
+      ${jersey?`<div style="font-size:12px;margin-top:6px;color:var(--teal)">✓ Jersey registered. <a href="https://sharable.link/ayxp2rs0" style="color:var(--gold)">View/edit →</a></div>`
+        :'<div style="font-size:12px;margin-top:6px;color:var(--warn)">⚠ No jersey registered. Complete jersey registration in the Jersey Management module.</div>'}
+    </div>
+
+    <!-- ── Fees ── -->
+    <div class="card">
+      <div class="section-heading">💵 Registration Fees</div>
+      <div style="font-size:12px;margin-bottom:8px">Fees as at 2026 season:</div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse">
+        <tr><td style="padding:4px 0;color:var(--lgrey)">Team Registration Fee</td><td style="text-align:right;font-weight:700">JMD $50,000</td></tr>
+        <tr><td style="padding:4px 0;color:var(--lgrey)">Per Player Registration</td><td style="text-align:right;font-weight:700">JMD $5,000</td></tr>
+        <tr><td style="padding:4px 0;color:var(--lgrey)">Jersey Deposit</td><td style="text-align:right;font-weight:700">JMD $10,000</td></tr>
+        <tr><td style="padding:4px 0;color:var(--lgrey)">Player Medical Levy (each)</td><td style="text-align:right;font-weight:700">JMD $2,000</td></tr>
+        <tr style="border-top:1px solid var(--border)"><td style="padding:6px 0;color:var(--gold);font-weight:700">Estimated Total (10 players)</td><td style="text-align:right;font-weight:700;color:var(--gold)">JMD $140,000</td></tr>
+      </table>
+      <div class="alert alert-warn" style="margin-top:10px">No Pay, No Play — payment must be cleared at the BHBA administration office before the team may participate in any match.</div>
+      <div class="fg" style="margin-top:8px">
+        <label>Payment Status</label>
+        <select id="rf-payment" ${editable?'':'disabled'}>
+          <option value="">— Select —</option>
+          <option value="unpaid" ${data.payment==='unpaid'?'selected':''}>Unpaid</option>
+          <option value="partial" ${data.payment==='partial'?'selected':''}>Partially Paid</option>
+          <option value="paid" ${data.payment==='paid'?'selected':''}>Fully Paid — wire transfer / manager's cheque cleared</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ── Notes ── -->
+    <div class="card">
+      <div class="section-heading">📝 Additional Notes</div>
+      <div class="fg">
+        <textarea id="rf-notes" rows="3" placeholder="Any additional information for BHBA executives…" ${editable?'':'disabled'}>${esc(data.notes||'')}</textarea>
+      </div>
+    </div>
+
+    ${editable?`
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="saveRegistration('${teamName}','${season}','draft')">
+        💾 Save as Draft<br><span style="font-size:10px;font-weight:400">You can continue editing</span>
+      </button>
+      <button class="btn btn-gold" style="flex:1" onclick="submitRegistration('${teamName}','${season}')">
+        ✅ Submit to BHBA<br><span style="font-size:10px;font-weight:400">Locks form pending exec review</span>
+      </button>
+    </div>`
+    :reg?.status==='confirmed'?`
+    <div class="alert alert-success">✅ Registration confirmed. Use the Late Registration Change (LRC) tab to request any amendments.</div>
+    <button class="btn btn-warn btn-block" onclick="goPage('lrc');document.getElementById('lrc-team').value='${teamName}';loadLRCForm()">🔄 Request a Late Registration Change</button>`:''}
+  </form>`;
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+function collectFormData(){
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  return{
+    company:g('rf-company'),tradeName:g('rf-tradename'),trn:g('rf-trn'),
+    sector:g('rf-sector'),address:g('rf-address'),parish:g('rf-parish'),
+    authName:g('rf-auth-name'),authTitle:g('rf-auth-title'),
+    authEmail:g('rf-auth-email'),authPhone:g('rf-auth-phone'),
+    stampConfirmed:g('rf-stamp'),
+    manager:g('rf-manager'),managerEmail:g('rf-manager-email'),
+    captain:g('rf-captain'),captainPhone:g('rf-captain-phone'),
+    payment:g('rf-payment'),notes:g('rf-notes'),
+  };
+}
+
+function validateRegistration(data){
+  const required=[['company','Company name'],['authName','Authorising official name'],['authEmail','Authorising official email'],['manager','Team manager name']];
+  for(const [k,label] of required){
+    if(!data[k]){toast(`${label} is required`,'r');return false;}
+  }
+  if(!data.stampConfirmed){toast('Confirm company stamp / authorisation status','r');return false;}
+  return true;
+}
+
+function saveRegistration(teamName,season,status){
+  const data=collectFormData();if(!data)return;
+  const regs=S.regs().filter(r=>!(r.teamName===teamName&&r.season===season));
+  const existing=getTeamReg(teamName,season);
+  const now=new Date().toISOString();
+  const newReg={
+    ...existing,...data,teamName,season,status,
+    updatedAt:now,...(!existing?{createdAt:now}:{})
+  };
+  regs.push(newReg);S.saveRegs(regs);
+  logAudit(teamName,season,'Team',`Saved as ${status}`,`Status: ${status}`);
+  toast(status==='draft'?'Registration saved as draft ✓':'Registration saved','g');
+  loadTeamRegistration();renderTeamsList();
+}
+
+function submitRegistration(teamName,season){
+  const data=collectFormData();
+  if(!validateRegistration(data)){return;}
+  if(!confirm(`Submit registration for ${teamName} (${season} season)? You will not be able to edit it until BHBA Exec reviews.`))return;
+  const regs=S.regs().filter(r=>!(r.teamName===teamName&&r.season===season));
+  const existing=getTeamReg(teamName,season)||{};
+  const now=new Date().toISOString();
+  regs.push({...existing,...data,teamName,season,status:'submitted',submittedAt:now,updatedAt:now,...(!existing.createdAt?{createdAt:now}:{})});
+  S.saveRegs(regs);
+  logAudit(teamName,season,'Team','Submitted for executive review','Awaiting BHBA confirmation');
+  toast(`✅ Registration submitted for ${teamName}. Awaiting BHBA executive review.`,'g');
+  loadTeamRegistration();renderTeamsList();
+}
+
+// ════════════════════════════════════════════════════
+// ALL TEAMS LIST
+// ════════════════════════════════════════════════════
+function renderTeamsList(){
+  const el=document.getElementById('teams-list');
+  const filter=document.getElementById('teams-filter').value;
+  const season=CURRENT_SEASON;
+  const allTeams=S.teams().length?S.teams():BHBA_TEAMS;
+  const items=allTeams.map(name=>{
+    const reg=getTeamReg(name,season);
+    const status=reg?.status||'not_started';
+    if(filter&&status!==filter)return'';
+    const cls=STATUS_CLS[status]||'sb-draft';
+    const label=status==='not_started'?'Not started':STATUS_LABEL[status]||status;
+    const cls2=status==='not_started'?'sb-draft':cls;
+    return`<div class="team-item">
+      <div class="ti-header">
+        <div class="ti-name">${name}</div>
+        <span class="status-badge ${cls2}">${label}</span>
+      </div>
+      <div class="ti-meta">
+        ${reg?`Last updated: ${new Date(reg.updatedAt||reg.createdAt).toLocaleString()} · ${reg.manager||'Manager not set'}`:'No registration started for 2026'}
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-gold" onclick="goPage('register');document.getElementById('reg-team').value='${name}';loadTeamRegistration()">
+          ${reg?'View / Edit':'Start Registration'}
+        </button>
+        ${reg?.status==='confirmed'?`<button class="btn btn-sm btn-warn" onclick="goPage('lrc');document.getElementById('lrc-team').value='${name}';loadLRCForm()">LRC</button>`:''}
+      </div>
+    </div>`;
+  }).filter(Boolean);
+  el.innerHTML=items.length?items.join(''):'<div style="color:var(--lgrey);font-size:12px">No teams match this filter.</div>';
+}
+
+// ════════════════════════════════════════════════════
+// EXECUTIVE REVIEW PANEL
+// ════════════════════════════════════════════════════
+function renderExecPanel(){
+  const el=document.getElementById('exec-panel');
+  const filter=document.getElementById('exec-filter').value;
+  const season=CURRENT_SEASON;
+  const regs=S.regs().filter(r=>r.season===season&&(!filter||r.status===filter));
+  if(!regs.length){el.innerHTML=`<div class="alert alert-info">No registrations with status "${filter||'any'}" found.</div>`;return;}
+  el.innerHTML=regs.map(reg=>`<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+      <div>
+        <div style="font-size:14px;font-weight:700">${reg.teamName}</div>
+        <div style="font-size:11px;color:var(--lgrey)">${reg.season} · Submitted ${reg.submittedAt?new Date(reg.submittedAt).toLocaleString():'—'}</div>
+      </div>
+      <span class="status-badge ${STATUS_CLS[reg.status]||'sb-draft'}">${STATUS_LABEL[reg.status]||reg.status}</span>
+    </div>
+
+    <div style="display:flex;gap:6px;margin-bottom:10px;font-size:12px;flex-wrap:wrap">
+      <span>🏢 ${reg.company||'—'}</span>&nbsp;·&nbsp;
+      <span>👤 Manager: ${reg.manager||'—'}</span>&nbsp;·&nbsp;
+      <span>🏀 Captain: ${reg.captain||'—'}</span>&nbsp;·&nbsp;
+      <span>💵 Payment: ${reg.payment||'—'}</span>&nbsp;·&nbsp;
+      <span>📋 Stamp: ${reg.stampConfirmed||'—'}</span>
+    </div>
+
+    ${reg.authName?`<div style="font-size:12px;color:var(--teal);margin-bottom:8px">Authorised by: ${reg.authName} (${reg.authTitle||'—'}) · ${reg.authEmail||'—'}</div>`:''}
+    ${reg.notes?`<div style="font-size:12px;color:var(--lgrey);margin-bottom:8px">Notes: ${reg.notes}</div>`:''}
+
+    ${reg.status==='submitted'||reg.status==='returned'?`
+    <div style="margin-bottom:8px">
+      <div class="fg" style="margin-bottom:6px">
+        <label>Return Note (if returning to team)</label>
+        <textarea id="ret-note-${reg.teamName}" rows="2" placeholder="Explain what needs to be corrected or updated…" style="background:#111;border:1px solid var(--border);color:#fff;padding:7px;border-radius:6px;width:100%;font-size:12px"></textarea>
+      </div>
+    </div>
+    <div class="exec-action-row">
+      <button class="btn btn-green btn-sm" onclick="execAction('${reg.teamName}','${season}','confirm')">✅ Confirm Registration</button>
+      <button class="btn btn-warn btn-sm" onclick="execAction('${reg.teamName}','${season}','return')">↩ Return to Team</button>
+      <button class="btn btn-blue btn-sm" onclick="goPage('register');document.getElementById('reg-team').value='${reg.teamName}';loadTeamRegistration()">✏ Edit Directly</button>
+    </div>`:''}
+    ${reg.status==='confirmed'?'<div class="alert alert-success" style="margin-top:8px">✅ Confirmed registration. Any amendments require an LRC.</div>':''}
+  </div>`).join('');
+}
+
+function execAction(teamName,season,action){
+  const reviewer=document.getElementById('exec-reviewer').value;
+  if(!reviewer){toast('Select your executive role/name','r');return;}
+  if(action==='confirm'&&!confirm(`Confirm registration for ${teamName}? This locks the registration.`))return;
+  const regs=S.regs();
+  const reg=regs.find(r=>r.teamName===teamName&&r.season===season);
+  if(!reg)return;
+  const now=new Date().toISOString();
+
+  if(action==='confirm'){
+    reg.status='confirmed';reg.confirmedBy=reviewer;reg.confirmedAt=now;reg.updatedAt=now;
+    logAudit(teamName,season,reviewer,'Registration confirmed','Registration locked. Team must use LRC for any changes.');
+    toast(`✅ ${teamName} registration confirmed`,'g');
+  } else if(action==='return'){
+    const note=document.getElementById(`ret-note-${teamName}`)?.value.trim();
+    if(!note){toast('Add a return note explaining what the team needs to fix','r');return;}
+    reg.status='returned';reg.returnNote=note;reg.returnedBy=reviewer;reg.returnedAt=now;reg.updatedAt=now;
+    logAudit(teamName,season,reviewer,'Returned to team',note);
+    toast(`Registration returned to ${teamName} for editing`,'w');
+  }
+  S.saveRegs(regs);renderExecPanel();renderTeamsList();
+}
+
+// ════════════════════════════════════════════════════
+// LRC (Late Registration Change)
+// ════════════════════════════════════════════════════
+function populateLRCTeamSelect(){
+  const sel=document.getElementById('lrc-team');const cur=sel.value;
+  sel.innerHTML='<option value="">— Select confirmed team —</option>';
+  S.regs().filter(r=>r.season===CURRENT_SEASON&&r.status==='confirmed').forEach(r=>sel.appendChild(new Option(r.teamName,r.teamName)));
+  if(cur)sel.value=cur;
+}
+
+function loadLRCForm(){
+  const teamName=document.getElementById('lrc-team').value;
+  const el=document.getElementById('lrc-form-body');
+  if(!teamName){el.innerHTML='';return;}
+  el.innerHTML=`<div class="card">
+    <div class="card-title">🔄 New Late Registration Change — ${teamName}</div>
+    <div class="alert alert-warn">A non-refundable LRC filing fee of JMD $5,000 will be posted to your team account upon submission.</div>
+    <div class="fg"><label>Field to Change</label>
+      <select id="lrc-field">
+        <option value="">— Select the field you want to change —</option>
+        <option value="Team Manager">Team Manager</option>
+        <option value="Team Captain">Team Captain</option>
+        <option value="HR Manager / GM Authorisation">HR Manager / GM Authorisation</option>
+        <option value="Player Roster (add/remove)">Player Roster (add/remove)</option>
+        <option value="Company Contact Details">Company Contact Details</option>
+        <option value="Payment Method">Payment Method</option>
+        <option value="Other">Other — describe below</option>
+      </select>
+    </div>
+    <div class="fg"><label>Current Value</label>
+      <input type="text" id="lrc-current" placeholder="What it currently says"></div>
+    <div class="fg"><label>Proposed Change</label>
+      <textarea id="lrc-proposed" rows="3" placeholder="Describe the change requested…"></textarea>
+    </div>
+    <div class="fg"><label>Reason / Justification</label>
+      <textarea id="lrc-reason" rows="2" placeholder="Why is this change needed?"></textarea>
+    </div>
+    <div class="fg"><label>Requested By (Name)</label>
+      <input type="text" id="lrc-requester" placeholder="Your name"></div>
+    <button class="btn btn-warn btn-block" onclick="submitLRC('${teamName}')">📨 Submit LRC Request (+JMD $5,000 filing fee)</button>
+  </div>`;
+}
+
+function submitLRC(teamName){
+  const field=document.getElementById('lrc-field').value;
+  const current=document.getElementById('lrc-current').value.trim();
+  const proposed=document.getElementById('lrc-proposed').value.trim();
+  const reason=document.getElementById('lrc-reason').value.trim();
+  const requester=document.getElementById('lrc-requester').value.trim();
+  if(!field||!proposed||!requester){toast('Select field, proposed change, and your name','r');return;}
+  const lrcId='LRC-'+Date.now();
+  const lrcs=S.lrcs();
+  lrcs.push({id:lrcId,teamName,season:CURRENT_SEASON,field,currentValue:current,
+    proposed,reason,requestedBy:requester,status:'pending',filingFee:5000,
+    submittedAt:new Date().toISOString()});
+  S.saveLRCs(lrcs);
+  logAudit(teamName,CURRENT_SEASON,requester,`LRC submitted: ${field}`,`Proposed: ${proposed}`);
+  toast(`LRC submitted (${lrcId}). Filing fee of JMD $5,000 posted to your account.`,'g');
+  loadLRCForm();renderLRCHistory();
+}
+
+function renderLRCHistory(){
+  const el=document.getElementById('lrc-history');
+  const teamFilter=document.getElementById('lrc-team').value;
+  const lrcs=S.lrcs().filter(l=>!teamFilter||l.teamName===teamFilter);
+  if(!lrcs.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No LRC requests found.</div>';return;}
+  const reviewer=document.getElementById('exec-reviewer')?.value||'';
+  el.innerHTML=lrcs.map(l=>{
+    const statusColor={pending:' var(--warn)',approved:'var(--green)',rejected:'var(--red)'}[l.status]||'var(--lgrey)';
+    return`<div class="lrc-item">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:4px">
+        <div style="font-size:13px;font-weight:700">${l.id} — ${l.teamName}</div>
+        <span style="font-size:10px;font-weight:700;color:${statusColor}">${l.status.toUpperCase()}</span>
+      </div>
+      <div style="font-size:11px;color:var(--lgrey);margin-bottom:4px">${l.season} · Submitted ${new Date(l.submittedAt).toLocaleString()} by ${l.requestedBy}</div>
+      <div style="font-size:12px;margin-bottom:2px"><strong>Field:</strong> ${l.field}</div>
+      ${l.currentValue?`<div style="font-size:12px;margin-bottom:2px;color:var(--lgrey)"><strong>Current:</strong> ${l.currentValue}</div>`:''}
+      <div style="font-size:12px;margin-bottom:4px"><strong>Proposed:</strong> ${l.proposed}</div>
+      ${l.reason?`<div style="font-size:11px;color:var(--lgrey)"><strong>Reason:</strong> ${l.reason}</div>`:''}
+      ${l.status==='pending'?`<div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn btn-sm btn-green" onclick="decideLRC('${l.id}','approved')">✅ Approve</button>
+        <button class="btn btn-sm btn-red" onclick="decideLRC('${l.id}','rejected')">✗ Reject</button>
+      </div>`:''}
+      ${l.status!=='pending'?`<div style="font-size:11px;color:var(--lgrey);margin-top:4px">${l.status==='approved'?'✅':'✗'} ${l.decidedBy} on ${new Date(l.decidedAt).toLocaleString()}${l.decisionNote?' — '+l.decisionNote:''}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function decideLRC(lrcId,decision){
+  const reviewer=document.getElementById('exec-reviewer')?.value;
+  if(!reviewer){toast('Select your executive role in the Executive Review tab first','r');return;}
+  const lrcs=S.lrcs();const l=lrcs.find(x=>x.id===lrcId);if(!l)return;
+  const note=prompt(`${decision==='approved'?'Approval':'Rejection'} note (optional):`)||'';
+  l.status=decision;l.decidedBy=reviewer;l.decidedAt=new Date().toISOString();l.decisionNote=note;
+  S.saveLRCs(lrcs);
+  logAudit(l.teamName,l.season,reviewer,`LRC ${decision}: ${l.field}`,note||'');
+  if(decision==='approved'){
+    // Apply the change to the registration
+    const regs=S.regs();const reg=regs.find(r=>r.teamName===l.teamName&&r.season===l.season);
+    if(reg){reg.status='lrc_approved';reg.updatedAt=new Date().toISOString();S.saveRegs(regs);}
+  }
+  toast(`LRC ${decision} ✓`,'g');renderLRCHistory();renderTeamsList();
+}
+
+// ════════════════════════════════════════════════════
+// AUDIT TRAIL
+// ════════════════════════════════════════════════════
+function populateAuditTeamFilter(){
+  const sel=document.getElementById('audit-team');const cur=sel.value;
+  sel.innerHTML='<option value="">All teams</option>';
+  [...new Set(S.audit().map(a=>a.teamName))].sort().forEach(t=>sel.appendChild(new Option(t,t)));
+  if(cur)sel.value=cur;
+}
+
+function renderAuditTrail(){
+  const el=document.getElementById('audit-list');
+  const filter=document.getElementById('audit-team').value;
+  const entries=[...S.audit()].reverse().filter(a=>!filter||a.teamName===filter);
+  if(!entries.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No audit entries yet.</div>';return;}
+  el.innerHTML='<div class="card">'+entries.map(a=>`
+    <div class="audit-row">
+      <span style="color:var(--lgrey);margin-right:6px">${new Date(a.ts).toLocaleString()}</span>
+      <span class="audit-actor">${a.actor}</span>
+      <span style="color:var(--lgrey)"> on </span>
+      <span style="color:var(--gold)">${a.teamName} (${a.season})</span>
+      <span style="color:var(--lgrey)"> → </span>
+      <span class="audit-action">${a.action}</span>
+      ${a.detail?`<div style="font-size:10px;color:var(--lgrey);padding-left:4px;margin-top:2px">${a.detail}</div>`:''}
+    </div>`).join('')+'</div>';
+}
+
+// ════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════
+function toast(msg,t='g'){
+  const el=document.getElementById('toast');
+  el.style.background={g:'var(--green)',r:'var(--red)',w:'var(--warn)'}[t]||'#333';
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(window._tT);window._tT=setTimeout(()=>el.style.opacity='0',4000);
+}
+
+// ════════════════════════════════════════════════════
+// CANONICAL TEAM LIST (source of truth for all modules)
+// ════════════════════════════════════════════════════
+const BHBA_TEAMS=[
+  'BANK OF JAMAICA','ATL AUTOMOTIVE GROUP','JAMAICA CONSTABULARY FORCE',
+  'BRITISH CARIBBEAN INSURANCE CO.','JAMAICA RACING COMMISSION','CARIMED GROUP',
+  'KPMG JAMAICA','CIVIL AVIATION AUTHORITY','NCB FINANCIAL LTD.','JAMAICA FIRE BRIGADE',
+  'NATIONAL HOUSING TRUST','JAMAICA MONEY MARKET BROKERS','SAGICOR GROUP A',
+  'LORING CONSULTING ENGINEERS','SAGICOR GROUP B','MAIN EVENTS ENTERTAINMENT GROUP',
+  'SUPREME VENTURES','NATIONAL LAND AGENCY','SCOTIABANK','UNICOMER COURTS'
+];
+
+// Write canonical team list to shared storage for all modules
+(function initTeams(){
+  if(!localStorage.getItem('bhba_teams')){
+    localStorage.setItem('bhba_teams',JSON.stringify(BHBA_TEAMS));
+  }
+  // Seed 2025 confirmed registrations so re-registration flow has prior data
+  if(!localStorage.getItem('bhba_reg_seeded')){
+    const ts=new Date(2025,10,1).toISOString();
+    const seed2025=BHBA_TEAMS.map(t=>({
+      teamName:t,season:'2025',status:'confirmed',
+      company:t,tradeName:t,sector:'',address:'Kingston, Jamaica',parish:'Kingston',
+      authName:'(2025 Contact — Please update)',authTitle:'HR Manager',
+      authEmail:'',authPhone:'',stampConfirmed:'yes',
+      manager:'',managerEmail:'',captain:'',captainPhone:'',
+      payment:'paid',notes:'Carried forward from 2025 season for re-registration reference.',
+      createdAt:ts,updatedAt:ts,confirmedBy:'System',confirmedAt:ts
+    }));
+    const existing=S.regs();
+    const merged=[...existing,...seed2025.filter(s=>!existing.find(e=>e.teamName===s.teamName&&e.season===s.season))];
+    S.saveRegs(merged);
+    localStorage.setItem('bhba_reg_seeded','1');
+  }
+  populateTeamSelect('reg-team');
+  renderTeamsList();
+})();
+</script>
+</body>
+</html>
