@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BHBA Jersey Management — Registration & Colour Clash Detection</title>
+<!-- CLASSIFICATION: INTERNAL USE | v1.0.0 | 2026-06-12
+     Jersey registration, perceptual colour clash detection (CIELAB Delta E),
+     reversible jersey workflow, automated email trigger generation.
+     File uploads stored as base64 in localStorage (demo). Production: Azure Blob / CDN. -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);--border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);--white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;--red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--teal:#1ABC9C;--purple:#9B59B6;--pending:#9B59B6}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.05) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.03) 0%,transparent 55%);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh}
+#hdr{background:linear-gradient(135deg,#04040c 0%,#0c0b18 60%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 24px rgba(0,0,0,0.6)}
+.brand{color:var(--gold);font-size:18px;font-weight:900}
+.nav-tabs{display:flex;gap:6px;padding:10px 14px;overflow-x:auto;background:rgba(0,0,0,0.5);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.nav-tab{background:rgba(12,12,22,0.8);border:1px solid var(--border);color:var(--lgrey);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s,color .15s}
+.nav-tab:hover{border-color:var(--border-h);color:var(--gold)}
+.nav-tab.active{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%);color:#000;border-color:var(--gold);box-shadow:0 2px 14px rgba(245,166,35,0.3)}
+.page{display:none;padding:14px;max-width:640px;margin:0 auto}
+.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s}.card:hover{border-color:var(--border-h);box-shadow:0 4px 20px rgba(245,166,35,0.06)}
+.card-title{color:var(--gold);font-size:14px;font-weight:700;margin-bottom:12px}
+.fg{margin-bottom:11px}
+.fg label{display:block;color:var(--lgrey);font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input[type=text],.fg input[type=email],.fg select{width:100%;background:#1a1a1a;border:1px solid var(--border);color:var(--white);padding:9px;border-radius:6px;font-size:13px}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--gold)}
+/* Colour Grid */
+.colour-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.colour-field{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:10px}
+.colour-field label{font-size:11px;color:var(--lgrey);text-transform:uppercase;margin-bottom:6px;display:block}
+.colour-row{display:flex;align-items:center;gap:8px}
+.colour-swatch{width:36px;height:36px;border-radius:6px;border:2px solid var(--border);cursor:pointer;flex-shrink:0}
+.colour-hex{flex:1;background:#111;border:1px solid var(--border);color:var(--white);padding:6px 8px;border-radius:4px;font-size:12px;font-family:monospace}
+input[type=color]{width:36px;height:36px;padding:0;border:none;background:none;cursor:pointer;border-radius:4px;overflow:hidden}
+/* Upload Zone */
+.upload-zone{border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--gold)}
+.upload-zone .upload-icon{font-size:32px;margin-bottom:8px}
+.upload-zone p{color:var(--lgrey);font-size:12px}
+.upload-zone .upload-hint{color:var(--lgrey);font-size:10px;margin-top:4px}
+.file-list{margin-top:8px}
+.file-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#1a1a1a;border-radius:6px;margin-bottom:4px;border:1px solid var(--border)}
+.file-item .fi-icon{font-size:18px}
+.file-item .fi-name{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-item .fi-size{font-size:10px;color:var(--lgrey)}
+.file-item .fi-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px}
+/* Toggle */
+.toggle-row{display:flex;align-items:center;gap:10px;padding:10px;background:#1a1a1a;border-radius:6px;margin-bottom:12px}
+.toggle-lbl{flex:1;font-size:13px}
+.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:12px;cursor:pointer;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:var(--white);border-radius:50%;transition:.2s}
+.toggle-switch input:checked + .toggle-slider{background:var(--gold)}
+.toggle-switch input:checked + .toggle-slider:before{transform:translateX(20px)}
+/* Buttons */
+.btn{border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;font-weight:800;width:100%;transition:opacity .15s,transform .1s}.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-red{background:var(--red);color:var(--white)}
+.btn-blue{background:var(--blue);color:var(--white)}
+.btn-warn{background:var(--warn);color:var(--white)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--lgrey)}
+/* Jersey Card (gallery) */
+.jersey-card{background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+.jersey-card .jc-team{font-size:15px;font-weight:700;color:var(--white);margin-bottom:6px}
+.jersey-card .jc-status{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;display:inline-block;margin-bottom:8px}
+.status-complete{background:var(--green);color:#fff}
+.status-incomplete{background:var(--red);color:#fff}
+.colour-strip{display:flex;gap:4px;margin-bottom:8px}
+.cs-swatch{flex:1;height:28px;border-radius:4px;border:1px solid var(--border)}
+.cs-label{font-size:9px;color:var(--lgrey);text-align:center;margin-top:2px}
+.jersey-thumb{max-width:100%;max-height:120px;border-radius:4px;border:1px solid var(--border);object-fit:contain;background:#111}
+/* Clash Results */
+.clash-card{border-radius:8px;padding:12px;margin-bottom:10px;border:2px solid}
+.clash-high{background:rgba(192,57,43,.1);border-color:var(--red)}
+.clash-medium{background:rgba(230,126,34,.1);border-color:var(--warn)}
+.clash-none{background:rgba(39,174,96,.1);border-color:var(--green)}
+.clash-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.clash-teams{font-weight:700;font-size:14px}
+.clash-badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;color:#fff}
+.cb-high{background:var(--red)}
+.cb-medium{background:var(--warn)}
+.cb-none{background:var(--green)}
+.clash-colours{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.clash-colour-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--lgrey)}
+.mini-swatch{width:16px;height:16px;border-radius:3px;border:1px solid var(--border);flex-shrink:0}
+.clash-action{background:#1a1a1a;border-radius:6px;padding:8px;font-size:12px;margin-top:8px}
+.clash-action .ca-title{color:var(--gold);font-weight:700;margin-bottom:4px;font-size:11px;text-transform:uppercase}
+/* Email preview */
+.email-preview{background:#fff;color:#222;border-radius:8px;padding:14px;font-size:12px;line-height:1.6;margin-top:10px}
+.email-preview .ep-subject{font-weight:700;font-size:13px;border-bottom:1px solid #ddd;margin-bottom:8px;padding-bottom:6px;color:#111}
+.email-preview .ep-body{white-space:pre-line;color:#333}
+.email-preview .ep-footer{margin-top:10px;padding-top:8px;border-top:1px solid #ddd;font-size:10px;color:#888}
+/* Completion badge */
+.req-list{list-style:none;font-size:12px}
+.req-list li{padding:3px 0;color:var(--lgrey)}
+.req-list li.done{color:var(--green)}
+.req-list li.done::before{content:'✓ '}
+.req-list li.missing{color:var(--red)}
+.req-list li.missing::before{content:'✗ '}
+/* Alert */
+.alert{padding:10px;border-radius:6px;font-size:12px;margin-bottom:10px}
+.alert-warn{background:rgba(230,126,34,.15);border:1px solid var(--warn);color:var(--warn)}
+.alert-info{background:rgba(41,128,185,.15);border:1px solid var(--blue);color:var(--blue)}
+.alert-success{background:rgba(39,174,96,.15);border:1px solid var(--green);color:var(--green)}
+.section-divider{margin:12px 0;border-top:1px dashed var(--border);padding-top:12px}
+.section-label{color:var(--gold);font-size:12px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92vw;color:#fff}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div><div class="brand">BHBA</div><div style="font-size:11px;color:var(--lgrey)">Jersey Management · v1.0.0</div></div>
+  <div style="font-size:11px;color:var(--lgrey);text-align:right">2026 Season<br><span style="color:var(--gold)">Internal Use</span></div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="goPage('register')">🏀 Register Jersey</div>
+  <div class="nav-tab" onclick="goPage('gallery')">👕 Jersey Gallery</div>
+  <div class="nav-tab" onclick="goPage('clash')">🎨 Colour Clash AI</div>
+  <div class="nav-tab" onclick="goPage('emails')">📧 Email Log</div>
+</div>
+
+<!-- ══════════ REGISTER ══════════ -->
+<div class="page active" id="page-register">
+  <div class="card">
+    <div class="card-title">🏀 Team Jersey Registration</div>
+    <div class="alert alert-warn">Jersey design upload is MANDATORY. Registration is incomplete without at least one design file. Accepted: JPEG, PNG, PDF, AI, PSD.</div>
+
+    <div class="fg"><label>Team Name</label>
+      <select id="reg-team-sel" onchange="loadTeamJersey()">
+        <option value="">— Select team or type new name —</option>
+      </select>
+    </div>
+    <div class="fg"><label>Or enter new team name</label><input type="text" id="reg-team-new" placeholder="New team name (if not listed)"></div>
+    <div class="fg"><label>Team Contact Email</label><input type="text" id="reg-email" placeholder="manager@company.jm"></div>
+    <div class="fg"><label>Season / Year</label>
+      <select id="reg-season"><option value="2026">2026</option><option value="2027">2027</option></select>
+    </div>
+
+    <!-- Primary Colours -->
+    <div class="section-label">Primary Jersey Colours</div>
+    <div class="colour-grid" id="primary-colours">
+      <div class="colour-field"><label>Primary Colour</label><div class="colour-row"><input type="color" id="c-primary" value="#1A237E" oninput="syncHex('primary')"><input type="text" class="colour-hex" id="h-primary" value="#1A237E" maxlength="7" oninput="syncColor('primary')"></div></div>
+      <div class="colour-field"><label>Secondary Colour</label><div class="colour-row"><input type="color" id="c-secondary" value="#FFFFFF" oninput="syncHex('secondary')"><input type="text" class="colour-hex" id="h-secondary" value="#FFFFFF" maxlength="7" oninput="syncColor('secondary')"></div></div>
+      <div class="colour-field"><label>Minor Colour 1</label><div class="colour-row"><input type="color" id="c-minor1" value="#D4A017" oninput="syncHex('minor1')"><input type="text" class="colour-hex" id="h-minor1" value="#D4A017" maxlength="7" oninput="syncColor('minor1')"></div></div>
+      <div class="colour-field"><label>Minor Colour 2</label><div class="colour-row"><input type="color" id="c-minor2" value="#111111" oninput="syncHex('minor2')"><input type="text" class="colour-hex" id="h-minor2" value="#111111" maxlength="7" oninput="syncColor('minor2')"></div></div>
+    </div>
+
+    <!-- Live preview strip -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--lgrey);margin-bottom:4px">Colour Preview</div>
+      <div id="primary-preview-strip" style="display:flex;height:32px;border-radius:6px;overflow:hidden;border:1px solid var(--border)"></div>
+    </div>
+
+    <!-- Reversible toggle -->
+    <div class="toggle-row">
+      <div class="toggle-lbl">
+        <div style="font-weight:700">Reversible Jersey</div>
+        <div style="font-size:11px;color:var(--lgrey)">Does your jersey have a reverse side with different colours?</div>
+      </div>
+      <label class="toggle-switch"><input type="checkbox" id="rev-toggle" onchange="toggleReversible()"><span class="toggle-slider"></span></label>
+    </div>
+
+    <!-- Reverse Colours (hidden until toggle) -->
+    <div id="reverse-section" style="display:none">
+      <div class="section-divider"></div>
+      <div class="section-label">🔄 Reverse Side Colours</div>
+      <div class="colour-grid" id="reverse-colours">
+        <div class="colour-field"><label>Rev. Primary</label><div class="colour-row"><input type="color" id="c-rev-primary" value="#C0392B" oninput="syncHex('rev-primary')"><input type="text" class="colour-hex" id="h-rev-primary" value="#C0392B" maxlength="7" oninput="syncColor('rev-primary')"></div></div>
+        <div class="colour-field"><label>Rev. Secondary</label><div class="colour-row"><input type="color" id="c-rev-secondary" value="#FFFFFF" oninput="syncHex('rev-secondary')"><input type="text" class="colour-hex" id="h-rev-secondary" value="#FFFFFF" maxlength="7" oninput="syncColor('rev-secondary')"></div></div>
+        <div class="colour-field"><label>Rev. Minor 1</label><div class="colour-row"><input type="color" id="c-rev-minor1" value="#F39C12" oninput="syncHex('rev-minor1')"><input type="text" class="colour-hex" id="h-rev-minor1" value="#F39C12" maxlength="7" oninput="syncColor('rev-minor1')"></div></div>
+        <div class="colour-field"><label>Rev. Minor 2</label><div class="colour-row"><input type="color" id="c-rev-minor2" value="#ECF0F1" oninput="syncHex('rev-minor2')"><input type="text" class="colour-hex" id="h-rev-minor2" value="#ECF0F1" maxlength="7" oninput="syncColor('rev-minor2')"></div></div>
+      </div>
+      <div id="reverse-preview-strip" style="display:flex;height:32px;border-radius:6px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px"></div>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="section-divider"></div>
+    <div class="section-label">📎 Jersey Design Files <span style="color:var(--red)">*Required</span></div>
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      <div class="upload-icon">📁</div>
+      <p>Click to upload or drag & drop design files</p>
+      <div class="upload-hint">Accepted formats: JPEG · PNG · PDF · AI · PSD · Max 10 MB per file</div>
+    </div>
+    <input type="file" id="file-input" multiple accept=".jpg,.jpeg,.png,.pdf,.ai,.psd,image/jpeg,image/png,application/pdf" style="display:none" onchange="handleFileSelect(event)">
+    <div class="file-list" id="file-list"></div>
+
+    <!-- Registration completeness -->
+    <div class="section-divider"></div>
+    <div class="card-title">✅ Registration Checklist</div>
+    <ul class="req-list" id="reg-checklist">
+      <li id="chk-team" class="missing">Team name</li>
+      <li id="chk-email" class="missing">Contact email</li>
+      <li id="chk-colours" class="missing">4 primary colours selected</li>
+      <li id="chk-files" class="missing">At least 1 jersey design file uploaded</li>
+      <li id="chk-reversible" class="done">Reversible jersey: N/A</li>
+    </ul>
+
+    <div style="margin-top:12px">
+      <button class="btn btn-gold" onclick="saveJersey()">💾 Save Jersey Registration</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ GALLERY ══════════ -->
+<div class="page" id="page-gallery">
+  <div class="card">
+    <div class="card-title">👕 Team Jersey Gallery</div>
+    <div id="gallery-body"><div style="color:var(--lgrey);font-size:12px">No jerseys registered yet.</div></div>
+  </div>
+</div>
+
+<!-- ══════════ CLASH ANALYSIS ══════════ -->
+<div class="page" id="page-clash">
+  <div class="card">
+    <div class="card-title">🎨 AI Colour Clash Analysis</div>
+    <div class="alert alert-info">Perceptual colour analysis using CIELAB Delta E — the international standard for measuring how different two colours appear to the human eye. Delta E &lt;10 = definite clash · 10–20 = likely clash · &gt;20 = safe.</div>
+    <button class="btn btn-gold" onclick="runClashAnalysis()" style="margin-bottom:4px">▶ Run AI Colour Analysis</button>
+    <div style="font-size:11px;color:var(--lgrey);margin-bottom:10px">Compares all registered team colour combinations. Generates email triggers for clashes.</div>
+    <div id="clash-results"></div>
+  </div>
+</div>
+
+<!-- ══════════ EMAIL LOG ══════════ -->
+<div class="page" id="page-emails">
+  <div class="card">
+    <div class="card-title">📧 Email Trigger Log</div>
+    <div class="alert alert-info">Auto-generated email triggers from colour clash analysis. These are queued for delivery when match schedules are assigned. Templates sourced from BHBA Comms Repository.</div>
+    <div id="email-log-body"><div style="color:var(--lgrey);font-size:12px">No email triggers generated yet. Run clash analysis first.</div></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// COLOUR SCIENCE — CIELAB Delta E
+// Perceptual colour distance: Delta E < 10 = definite clash
+// ═══════════════════════════════════════════════════
+function hexToRgb(hex){
+  hex=hex.replace(/^#/,'');
+  if(hex.length===3)hex=hex.split('').map(c=>c+c).join('');
+  const n=parseInt(hex,16);
+  return{r:(n>>16)&255,g:(n>>8)&255,b:n&255};
+}
+function rgbToLab(r,g,b){
+  // Linearise sRGB
+  let R=r/255,G=g/255,B=b/255;
+  R=R>0.04045?Math.pow((R+0.055)/1.055,2.4):R/12.92;
+  G=G>0.04045?Math.pow((G+0.055)/1.055,2.4):G/12.92;
+  B=B>0.04045?Math.pow((B+0.055)/1.055,2.4):B/12.92;
+  // D65 XYZ
+  let X=R*0.4124564+G*0.3575761+B*0.1804375;
+  let Y=R*0.2126729+G*0.7151522+B*0.0721750;
+  let Z=R*0.0193339+G*0.1191920+B*0.9503041;
+  // Normalise D65 white
+  X/=0.95047;Z/=1.08883;
+  // XYZ → Lab
+  function f(t){return t>0.008856?Math.cbrt(t):(7.787*t+16/116);}
+  const fx=f(X),fy=f(Y),fz=f(Z);
+  return[116*fy-16,500*(fx-fy),200*(fy-fz)];
+}
+function deltaE(hex1,hex2){
+  if(!hex1||!hex2)return 100;
+  const c1=hexToRgb(hex1),c2=hexToRgb(hex2);
+  const l1=rgbToLab(c1.r,c1.g,c1.b),l2=rgbToLab(c2.r,c2.g,c2.b);
+  return Math.sqrt(Math.pow(l1[0]-l2[0],2)+Math.pow(l1[1]-l2[1],2)+Math.pow(l1[2]-l2[2],2));
+}
+// Compare two teams: minimum Delta E across all primary-to-primary colour combos
+function teamClashScore(j1,j2){
+  const keys=['primary','secondary','minor1','minor2'];
+  let minDE=100;
+  // Primary vs primary is most important (weighted)
+  const ppDE=deltaE(j1.colours.primary,j2.colours.primary);
+  if(ppDE<minDE)minDE=ppDE;
+  // Also compare secondary combos
+  keys.forEach(k=>{
+    keys.forEach(k2=>{
+      const d=deltaE(j1.colours[k],j2.colours[k2]);
+      if(d<minDE)minDE=d;
+    });
+  });
+  return{minDE,ppDE};
+}
+
+// ═══════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════
+function getJerseys(){return JSON.parse(localStorage.getItem('bhba_jerseys')||'[]');}
+function saveJerseys(j){localStorage.setItem('bhba_jerseys',JSON.stringify(j));}
+function getEmailLog(){return JSON.parse(localStorage.getItem('bhba_jersey_emails')||'[]');}
+function saveEmailLog(e){localStorage.setItem('bhba_jersey_emails',JSON.stringify(e));}
+
+// ═══════════════════════════════════════════════════
+// COLOUR SYNC (picker ↔ hex input)
+// ═══════════════════════════════════════════════════
+function syncHex(id){
+  const v=document.getElementById(`c-${id}`).value;
+  document.getElementById(`h-${id}`).value=v.toUpperCase();
+  updatePreviews();updateChecklist();
+}
+function syncColor(id){
+  let v=document.getElementById(`h-${id}`).value.trim();
+  if(!v.startsWith('#'))v='#'+v;
+  if(/^#[0-9A-Fa-f]{6}$/.test(v)){
+    document.getElementById(`c-${id}`).value=v;
+    updatePreviews();
+  }
+  updateChecklist();
+}
+const COLOUR_KEYS=['primary','secondary','minor1','minor2'];
+const REV_KEYS=['rev-primary','rev-secondary','rev-minor1','rev-minor2'];
+function getHex(id){return document.getElementById(`h-${id}`).value.trim();}
+
+function updatePreviews(){
+  const strip=document.getElementById('primary-preview-strip');
+  strip.innerHTML=COLOUR_KEYS.map(k=>`<div style="flex:1;background:${getHex(k)};position:relative"><div style="position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:8px;background:rgba(0,0,0,.4);color:#fff;padding:1px">${k.charAt(0).toUpperCase()+k.slice(1)}</div></div>`).join('');
+  if(document.getElementById('reverse-section').style.display!=='none'){
+    const rstrip=document.getElementById('reverse-preview-strip');
+    rstrip.innerHTML=REV_KEYS.map(k=>`<div style="flex:1;background:${getHex(k)};position:relative"><div style="position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:8px;background:rgba(0,0,0,.4);color:#fff;padding:1px">${k.replace('rev-','').charAt(0).toUpperCase()+k.replace('rev-','').slice(1)}</div></div>`).join('');
+  }
+}
+updatePreviews();
+
+function toggleReversible(){
+  const on=document.getElementById('rev-toggle').checked;
+  document.getElementById('reverse-section').style.display=on?'block':'none';
+  updateChecklist();
+}
+
+// ═══════════════════════════════════════════════════
+// FILE UPLOAD
+// ═══════════════════════════════════════════════════
+const ALLOWED_EXT=['.jpg','.jpeg','.png','.pdf','.ai','.psd'];
+const ALLOWED_MIME=['image/jpeg','image/png','application/pdf'];
+let uploadedFiles=[];
+
+function getFileIcon(name){
+  const ext=name.toLowerCase().split('.').pop();
+  const icons={jpg:'🖼',jpeg:'🖼',png:'🖼',pdf:'📄',ai:'🎨',psd:'🎨'};
+  return icons[ext]||'📎';
+}
+function isAllowed(f){
+  const ext='.'+f.name.toLowerCase().split('.').pop();
+  return ALLOWED_EXT.includes(ext);
+}
+function handleDragOver(e){e.preventDefault();document.getElementById('upload-zone').classList.add('drag-over');}
+function handleDragLeave(){document.getElementById('upload-zone').classList.remove('drag-over');}
+function handleDrop(e){e.preventDefault();document.getElementById('upload-zone').classList.remove('drag-over');processFiles(e.dataTransfer.files);}
+function handleFileSelect(e){processFiles(e.target.files);}
+
+function processFiles(fileList){
+  Array.from(fileList).forEach(f=>{
+    if(!isAllowed(f)){toast(`${f.name}: unsupported format. Use JPEG, PNG, PDF, AI, or PSD.`,'r');return;}
+    if(f.size>10*1024*1024){toast(`${f.name}: file exceeds 10 MB limit.`,'w');return;}
+    if(uploadedFiles.some(u=>u.name===f.name)){toast(`${f.name}: already uploaded.`,'w');return;}
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      uploadedFiles.push({name:f.name,size:f.size,type:f.type,dataUrl:ev.target.result});
+      renderFileList();updateChecklist();
+    };
+    reader.readAsDataURL(f);
+  });
+}
+function removeFile(i){uploadedFiles.splice(i,1);renderFileList();updateChecklist();}
+function renderFileList(){
+  const el=document.getElementById('file-list');
+  el.innerHTML=uploadedFiles.map((f,i)=>`
+    <div class="file-item">
+      <span class="fi-icon">${getFileIcon(f.name)}</span>
+      <span class="fi-name">${f.name}</span>
+      <span class="fi-size">${(f.size/1024).toFixed(0)} KB</span>
+      <button class="fi-del" onclick="removeFile(${i})">✕</button>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// CHECKLIST & VALIDATION
+// ═══════════════════════════════════════════════════
+function updateChecklist(){
+  const team=getActiveTeamName();
+  const email=document.getElementById('reg-email').value.trim();
+  const hasColours=COLOUR_KEYS.every(k=>/^#[0-9A-Fa-f]{6}$/.test(getHex(k)));
+  const hasFiles=uploadedFiles.length>0;
+  const isReversible=document.getElementById('rev-toggle').checked;
+  const hasRevColours=!isReversible||REV_KEYS.every(k=>/^#[0-9A-Fa-f]{6}$/.test(getHex(k)));
+
+  setChk('chk-team',!!team);
+  setChk('chk-email',!!email&&email.includes('@'));
+  setChk('chk-colours',hasColours);
+  setChk('chk-files',hasFiles);
+  if(isReversible){setChk('chk-reversible',hasRevColours,'Reverse colours complete');}
+  else{document.getElementById('chk-reversible').className='done';document.getElementById('chk-reversible').textContent='Reversible jersey: N/A';}
+}
+function setChk(id,ok,customLabel){
+  const el=document.getElementById(id);
+  el.className=ok?'done':'missing';
+  if(!customLabel){const labels={
+    'chk-team':'Team name','chk-email':'Contact email',
+    'chk-colours':'4 primary colours selected','chk-files':'At least 1 jersey design file uploaded',
+    'chk-reversible':'Reversible jersey: N/A'
+  };el.textContent=labels[id];}
+  else{el.textContent=customLabel;}
+}
+function getActiveTeamName(){
+  const sel=document.getElementById('reg-team-sel').value.trim();
+  const txt=document.getElementById('reg-team-new').value.trim();
+  return txt||sel||'';
+}
+
+// ═══════════════════════════════════════════════════
+// SAVE JERSEY
+// ═══════════════════════════════════════════════════
+function saveJersey(){
+  const team=getActiveTeamName();
+  const email=document.getElementById('reg-email').value.trim();
+  const isReversible=document.getElementById('rev-toggle').checked;
+  const season=document.getElementById('reg-season').value;
+
+  if(!team){toast('Enter or select a team name','w');return;}
+  if(!email||!email.includes('@')){toast('Enter a valid contact email','w');return;}
+  if(!uploadedFiles.length){toast('At least one jersey design file is required','r');return;}
+
+  const colours={
+    primary:getHex('primary'),secondary:getHex('secondary'),
+    minor1:getHex('minor1'),minor2:getHex('minor2')
+  };
+  const reverseColours=isReversible?{
+    primary:getHex('rev-primary'),secondary:getHex('rev-secondary'),
+    minor1:getHex('rev-minor1'),minor2:getHex('rev-minor2')
+  }:null;
+
+  const jerseys=getJerseys();
+  const existing=jerseys.findIndex(j=>j.team===team&&j.season===season);
+  const entry={
+    id:'jer_'+Date.now(),team,email,season,isReversible,
+    colours,reverseColours,
+    files:uploadedFiles.map(f=>({name:f.name,size:f.size,type:f.type,dataUrl:f.dataUrl})),
+    registeredAt:new Date().toISOString(),
+    complete:true
+  };
+  if(existing>=0)jerseys[existing]=entry;else jerseys.push(entry);
+  saveJerseys(jerseys);
+
+  toast(`Jersey registered for ${team} (${season}) ✓`,'g');
+  renderGallery();
+  populateTeamSelects();
+  uploadedFiles=[];renderFileList();updateChecklist();
+}
+
+// ═══════════════════════════════════════════════════
+// GALLERY
+// ═══════════════════════════════════════════════════
+function renderGallery(){
+  const jerseys=getJerseys();
+  const el=document.getElementById('gallery-body');
+  if(!jerseys.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No jerseys registered yet.</div>';return;}
+  el.innerHTML=jerseys.map(j=>{
+    const thumb=j.files.find(f=>/\.(jpg|jpeg|png)$/i.test(f.name));
+    const colours=j.colours;
+    return `<div class="jersey-card">
+      <div class="jc-team">${j.team} <span style="font-size:11px;color:var(--lgrey)">· ${j.season}</span></div>
+      <span class="jc-status ${j.complete?'status-complete':'status-incomplete'}">${j.complete?'✓ Complete':'⚠ Incomplete'}</span>
+      <div class="colour-strip">
+        ${Object.entries(colours).map(([k,v])=>`<div><div class="cs-swatch" style="background:${v}" title="${v}"></div><div class="cs-label">${k.charAt(0).toUpperCase()+k.slice(1)}</div></div>`).join('')}
+      </div>
+      ${j.isReversible&&j.reverseColours?`<div style="font-size:11px;color:var(--teal);margin-bottom:4px">🔄 Reversible — Reverse side:</div><div class="colour-strip">${Object.entries(j.reverseColours).map(([k,v])=>`<div><div class="cs-swatch" style="background:${v}" title="${v}"></div><div class="cs-label">${k.charAt(0).toUpperCase()+k.slice(1)}</div></div>`).join('')}</div>`:''}
+      ${thumb?`<img class="jersey-thumb" src="${thumb.dataUrl}" alt="${j.team} jersey">`:'<div style="font-size:11px;color:var(--lgrey)">📄 ${j.files.length} file(s) uploaded (non-image)</div>'}
+      <div style="font-size:10px;color:var(--lgrey);margin-top:6px">Files: ${j.files.map(f=>f.name).join(', ')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// CLASH ANALYSIS
+// ═══════════════════════════════════════════════════
+function runClashAnalysis(){
+  const jerseys=getJerseys();
+  const el=document.getElementById('clash-results');
+  if(jerseys.length<2){el.innerHTML='<div class="alert alert-warn">Register at least 2 teams to run clash analysis.</div>';return;}
+
+  el.innerHTML='<div style="color:var(--lgrey);font-size:12px;padding:8px">🔍 Running AI colour analysis...</div>';
+  setTimeout(()=>{
+    const results=[];
+    const emailTriggers=[];
+
+    for(let i=0;i<jerseys.length;i++){
+      for(let j=i+1;j<jerseys.length;j++){
+        const j1=jerseys[i],j2=jerseys[j];
+        const{minDE,ppDE}=teamClashScore(j1,j2);
+        const level=minDE<10?'high':minDE<20?'medium':'none';
+        if(level!=='none'){
+          // Determine reversible situation
+          const j1rev=j1.isReversible&&!!j1.reverseColours;
+          const j2rev=j2.isReversible&&!!j2.reverseColours;
+          let action,templateId;
+          if(j1rev||j2rev){
+            action=`REVERSE JERSEY: ${j1rev?j1.team:j2.team} should wear REVERSE side.`;
+            templateId='TPL-JERSEY-REVERSE';
+          } else {
+            action='NO REVERSIBLE JERSEY — Home team must provide external BIBS to visiting team.';
+            templateId='TPL-JERSEY-BIBS';
+          }
+          const trigger={
+            pair:`${j1.team} vs ${j2.team}`,
+            minDE:minDE.toFixed(1),ppDE:ppDE.toFixed(1),
+            level,j1,j2,j1rev,j2rev,action,templateId,
+            generatedAt:new Date().toISOString()
+          };
+          results.push(trigger);
+          emailTriggers.push(buildEmailTrigger(trigger));
+        } else {
+          results.push({pair:`${j1.team} vs ${j2.team}`,minDE:minDE.toFixed(1),ppDE:ppDE.toFixed(1),level:'none',j1,j2});
+        }
+      }
+    }
+
+    if(emailTriggers.length){
+      const existing=getEmailLog();
+      emailTriggers.forEach(et=>{if(!existing.some(e=>e.id===et.id))existing.push(et);});
+      saveEmailLog(existing);
+    }
+
+    el.innerHTML=results.map(r=>renderClashCard(r)).join('');
+    toast(`Analysis complete — ${results.filter(r=>r.level!=='none').length} clash(es) detected.`,results.filter(r=>r.level!=='none').length>0?'w':'g');
+  },600);
+}
+
+function renderClashCard(r){
+  const levelLabel={high:'HIGH CLASH',medium:'MEDIUM CLASH',none:'NO CLASH'};
+  const levelClass={high:'clash-high',medium:'clash-medium',none:'clash-none'};
+  const badgeClass={high:'cb-high',medium:'cb-medium',none:'cb-none'};
+  const colourComparison=`
+    <div class="clash-colours">
+      <span style="font-size:11px;color:var(--lgrey);margin-right:4px">${r.j1.team}:</span>
+      ${Object.values(r.j1.colours).map(c=>`<span class="clash-colour-item"><span class="mini-swatch" style="background:${c}"></span>${c}</span>`).join('')}
+    </div>
+    <div class="clash-colours">
+      <span style="font-size:11px;color:var(--lgrey);margin-right:4px">${r.j2.team}:</span>
+      ${Object.values(r.j2.colours).map(c=>`<span class="clash-colour-item"><span class="mini-swatch" style="background:${c}"></span>${c}</span>`).join('')}
+    </div>`;
+  let actionBlock='';
+  if(r.level!=='none'){
+    const emailPreview=buildEmailTrigger(r);
+    actionBlock=`<div class="clash-action">
+      <div class="ca-title">Required Action</div>
+      <div style="color:var(--white)">${r.action}</div>
+      <div style="font-size:10px;color:var(--lgrey);margin-top:4px">Template: ${r.templateId} · Auto-queued to email log</div>
+      <details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;color:var(--gold)">Preview email →</summary>
+        <div class="email-preview">
+          <div class="ep-subject">${emailPreview.subject}</div>
+          <div class="ep-body">${emailPreview.body}</div>
+          <div class="ep-footer">${emailPreview.footer}</div>
+        </div>
+      </details>
+    </div>`;
+  }
+  return `<div class="clash-card ${levelClass[r.level]}">
+    <div class="clash-header">
+      <div class="clash-teams">${r.pair}</div>
+      <span class="clash-badge ${badgeClass[r.level]}">${levelLabel[r.level]}</span>
+    </div>
+    <div style="font-size:11px;color:var(--lgrey);margin-bottom:8px">
+      Primary-vs-Primary ΔE: <strong style="color:${r.ppDE<10?'var(--red)':r.ppDE<20?'var(--warn)':'var(--green)'}">${r.ppDE}</strong>
+      &nbsp;·&nbsp; Closest match ΔE: <strong>${r.minDE}</strong>
+      ${r.level!=='none'?`&nbsp;·&nbsp; <span style="color:${r.j1rev||r.j2rev?'var(--teal)':'var(--warn)'}">${r.j1rev||r.j2rev?'🔄 Reversible available':'⚠ No reversible jersey'}</span>`:''}
+    </div>
+    ${colourComparison}
+    ${actionBlock}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// EMAIL TEMPLATE BUILDER
+// Source templates: TPL-JERSEY-BIBS, TPL-JERSEY-REVERSE
+// Full templates stored in bhba_comms.html repository
+// ═══════════════════════════════════════════════════
+function buildEmailTrigger(r){
+  const date='[MATCH DATE]';const venue='[VENUE]';
+  const home=r.j1.team,away=r.j2.team;
+  const emailId=`EM-${r.j1.team.replace(/\s/g,'').substring(0,4).toUpperCase()}-${r.j2.team.replace(/\s/g,'').substring(0,4).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+
+  if(r.templateId==='TPL-JERSEY-BIBS'){
+    return {
+      id:emailId,templateId:'TPL-JERSEY-BIBS',pair:r.pair,
+      to:`${home} (${r.j1.email||'[email]'})`,
+      subject:`URGENT — BHBA Jersey Colour Clash · ${home} vs ${away} · Bibs Required`,
+      body:`Dear ${home} Team Management,\n\nOur BHBA colour analysis system has identified a jersey colour conflict between your team and your scheduled opponent, ${away}.\n\nFIXTURE DETAILS:\n  Teams: ${home} vs ${away}\n  Date: ${date}\n  Venue: ${venue}\n\nCOLOUR ANALYSIS RESULT:\n  Status: HIGH COLOUR CLASH (ΔE = ${r.minDE})\n  Neither team holds a reversible jersey on record.\n\nREQUIRED ACTION — HOME TEAM (${home}):\nAs the HOME team, you are required to source and distribute external player bibs to your team before tip-off. BHBA bibs may be collected from the administration desk no later than 30 minutes prior to the scheduled match time.\n\nFailure to comply with this directive may result in a match delay and may attract an administrative fine under the BHBA Code of Conduct.\n\nPlease acknowledge receipt of this notice by return email.`,
+      footer:`This is an automated notification generated by the BHBA Colour Management System.\nTemplate: TPL-JERSEY-BIBS | Ref: ${emailId} | Generated: ${new Date().toLocaleDateString()}\nFor queries contact the Match Commissioner.`,
+      generatedAt:new Date().toISOString(),level:r.level,status:'queued'
+    };
+  } else {
+    const revTeam=r.j1rev?home:away;const revEmail=r.j1rev?r.j1.email:r.j2.email;
+    return {
+      id:emailId,templateId:'TPL-JERSEY-REVERSE',pair:r.pair,
+      to:`${revTeam} (${revEmail||'[email]'})`,
+      subject:`NOTICE — BHBA Jersey Colour Clash · ${home} vs ${away} · Wear Reverse Jersey`,
+      body:`Dear ${revTeam} Team Management,\n\nA jersey colour conflict has been identified between your team and your scheduled opponent for the following fixture.\n\nFIXTURE DETAILS:\n  Teams: ${home} vs ${away}\n  Date: ${date}\n  Venue: ${venue}\n\nCOLOUR ANALYSIS RESULT:\n  Status: COLOUR CLASH DETECTED (ΔE = ${r.minDE})\n  Resolution: Your team (${revTeam}) holds a registered reversible jersey.\n\nREQUIRED ACTION:\nAll players on ${revTeam} must wear their jerseys on the REVERSE SIDE for this fixture. This is mandatory to ensure clear visual distinction between competing teams.\n\nPlease ensure your team captain and manager are informed of this requirement well in advance of match day.\n\nKindly confirm receipt and compliance by return email to the BHBA administration office.`,
+      footer:`This is an automated notification generated by the BHBA Colour Management System.\nTemplate: TPL-JERSEY-REVERSE | Ref: ${emailId} | Generated: ${new Date().toLocaleDateString()}\nFor queries contact the Match Commissioner.`,
+      generatedAt:new Date().toISOString(),level:r.level,status:'queued'
+    };
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// EMAIL LOG
+// ═══════════════════════════════════════════════════
+function renderEmailLog(){
+  const log=getEmailLog();const el=document.getElementById('email-log-body');
+  if(!log.length){el.innerHTML='<div style="color:var(--lgrey);font-size:12px">No email triggers generated yet. Run clash analysis first.</div>';return;}
+  el.innerHTML=[...log].reverse().map(e=>`
+    <div class="jersey-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div class="jc-team">${e.pair}</div><div style="font-size:11px;color:var(--lgrey)">${e.id}</div></div>
+        <span class="jc-status ${e.status==='queued'?'':''}" style="background:var(--blue);color:#fff;padding:2px 8px;border-radius:8px;font-size:10px">${e.status.toUpperCase()}</span>
+      </div>
+      <div style="font-size:11px;color:var(--lgrey);margin:4px 0">To: ${e.to}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:4px">${e.subject}</div>
+      <div style="font-size:10px;color:var(--lgrey)">Template: ${e.templateId} · Generated: ${new Date(e.generatedAt).toLocaleDateString()}</div>
+      <details style="margin-top:6px"><summary style="cursor:pointer;font-size:11px;color:var(--gold)">View full email →</summary>
+        <div class="email-preview"><div class="ep-subject">${e.subject}</div><div class="ep-body">${e.body}</div><div class="ep-footer">${e.footer}</div></div>
+      </details>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// INIT & NAVIGATION
+// ═══════════════════════════════════════════════════
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`page-${p}`).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>{
+    const pages=['register','gallery','clash','emails'];
+    t.classList.toggle('active',pages[i]===p);
+  });
+  if(p==='gallery')renderGallery();
+  if(p==='emails')renderEmailLog();
+}
+function loadTeamJersey(){
+  const team=document.getElementById('reg-team-sel').value;if(!team)return;
+  const jerseys=getJerseys();const j=jerseys.find(x=>x.team===team);if(!j)return;
+  document.getElementById('reg-email').value=j.email||'';
+  COLOUR_KEYS.forEach(k=>{document.getElementById(`c-${k}`).value=j.colours[k];document.getElementById(`h-${k}`).value=j.colours[k];});
+  document.getElementById('rev-toggle').checked=j.isReversible;toggleReversible();
+  if(j.isReversible&&j.reverseColours)REV_KEYS.forEach(k=>{const kk=k.replace('rev-','');document.getElementById(`c-${k}`).value=j.reverseColours[kk];document.getElementById(`h-${k}`).value=j.reverseColours[kk];});
+  uploadedFiles=j.files||[];renderFileList();updatePreviews();updateChecklist();
+}
+function populateTeamSelects(){
+  const jerseys=getJerseys();const teams=[...new Set(jerseys.map(j=>j.team))];
+  const sel=document.getElementById('reg-team-sel');const cur=sel.value;
+  sel.innerHTML='<option value="">— Select team or type new name —</option>';
+  teams.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});
+  if(cur)sel.value=cur;
+}
+// Toast
+let tTimer;
+function toast(msg,t='g'){
+  const el=document.getElementById('toast');const c={g:'var(--green)',r:'var(--red)',w:'var(--warn)'};
+  el.style.background=c[t]||'#333';el.textContent=msg;el.style.opacity='1';
+  clearTimeout(tTimer);tTimer=setTimeout(()=>el.style.opacity='0',4000);
+}
+populateTeamSelects();updateChecklist();
+</script>
+</body>
+</html>
