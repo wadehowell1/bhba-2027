@@ -1,6 +1,7 @@
 # Ticker Under Research
 
-> Set through the System Preferences UI, or edit the block below.
+> Generated from `config/preferences.json` at 2026-08-26 10:50 UTC. Edit through the System Preferences UI —
+> hand edits here are overwritten on the next sync.
 > One primary ticker moves through stages 2–10 at a time.
 
 ## Primary
@@ -24,11 +25,12 @@ GOOGL
 What the Market Scanner looks for:
 
 - Relative volume above **2.0×** the 20-day average
-- Price move of **±5%** or more on the day
+- Price move of **±5.0%** or more on the day
 - New 52-week high or low
-- Universe: **S&P 500**
-- Minimum average daily dollar volume: **$10M**
+- Universe: **sp500**
+- Minimum average daily dollar volume: **$10,000,000**
 - Exclude: tickers with earnings inside **2** days (event risk, not signal)
+- Shortlist capped at **10**
 
 ---
 *Research only. All downstream positions are simulated.*
