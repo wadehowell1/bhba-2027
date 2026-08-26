@@ -1,6 +1,6 @@
 # Ticker Under Research
 
-> Generated from `config/preferences.json` at 2026-08-26 10:50 UTC. Edit through the System Preferences UI —
+> Generated from `config/preferences.json` at 2026-08-26 11:06 UTC. Edit through the System Preferences UI —
 > hand edits here are overwritten on the next sync.
 > One primary ticker moves through stages 2–10 at a time.
 

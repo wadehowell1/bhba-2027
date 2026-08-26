@@ -2,7 +2,7 @@
 
 The Risk Manager enforces these. It **rejects** any idea that breaks one and says which.
 
-> Generated from `config/preferences.json` at 2026-08-26 10:50 UTC. Edit through the System Preferences UI
+> Generated from `config/preferences.json` at 2026-08-26 11:06 UTC. Edit through the System Preferences UI
 > (`python3 tools/serve_ui.py`) — hand edits here are overwritten on the next sync.
 > All positions and limits are **SIMULATED**.
 

@@ -32,7 +32,7 @@ Then continue at the first unchecked stage below. Do not redo checked stages.
       `.claude/agents/*.md` — one per agent, prompts from the guide, wired to `fund/`.
 - [x] **S3 — Tool layer**
       `tools/` — market data, SEC EDGAR, news, backtest engine, preference loader, pipeline runner.
-- [ ] **S4 — System Preferences UI**
+- [x] **S4 — System Preferences UI**
       `ui/index.html` control panel + `tools/serve_ui.py` config server reading/writing
       `config/preferences.json`.
 - [ ] **S5 — Ship**

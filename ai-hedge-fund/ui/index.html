@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fund Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   Instrument — a calibration sheet, not a trading terminal.
+   Every numeric setting is drawn against its permitted band.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --paper:#E6E9E3; --paper-2:#F3F5F1; --paper-3:#DCE0D9;
+  --ink:#141C18; --ink-2:#59635C; --ink-3:#8C948D;
+  --rule:#C6CCC3; --rule-2:#B2BAAF;
+  --verdigris:#1C6B58; --verdigris-soft:#D5E6DF;
+  --oxide:#A63A22; --oxide-soft:#F1DCD6;
+  --brass:#8A6A1F; --brass-soft:#EFE6CE;
+  --petrol:#0E2A31; --petrol-2:#163A43; --petrol-ink:#D9E4E2;
+  --focus:#1C6B58;
+  --shadow:0 1px 2px rgba(20,28,24,.06),0 6px 20px -12px rgba(20,28,24,.28);
+  --r:3px;
+}
+:root:not([data-theme="light"]){ @media (prefers-color-scheme:dark){
+  --paper:#101815; --paper-2:#18211D; --paper-3:#0B120F;
+  --ink:#DFE6E0; --ink-2:#9BA69E; --ink-3:#6C766F;
+  --rule:#26312C; --rule-2:#334039;
+  --verdigris:#4FBFA0; --verdigris-soft:#12302A;
+  --oxide:#E27A5F; --oxide-soft:#331914;
+  --brass:#D2A94E; --brass-soft:#2C2413;
+  --petrol:#08181C; --petrol-2:#0E272D; --petrol-ink:#CFDCDA;
+  --focus:#4FBFA0;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px -12px rgba(0,0,0,.7);
+}}
+:root[data-theme="dark"]{
+  --paper:#101815; --paper-2:#18211D; --paper-3:#0B120F;
+  --ink:#DFE6E0; --ink-2:#9BA69E; --ink-3:#6C766F;
+  --rule:#26312C; --rule-2:#334039;
+  --verdigris:#4FBFA0; --verdigris-soft:#12302A;
+  --oxide:#E27A5F; --oxide-soft:#331914;
+  --brass:#D2A94E; --brass-soft:#2C2413;
+  --petrol:#08181C; --petrol-2:#0E272D; --petrol-ink:#CFDCDA;
+  --focus:#4FBFA0;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px -12px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:Archivo,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.5;
+  font-variant-numeric:tabular-nums;
+}
+.mono{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* ── shell ─────────────────────────────────────────────── */
+.shell{display:grid; grid-template-columns:216px minmax(0,1fr); min-height:100vh}
+
+.rail{
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  border-right:1px solid var(--rule); background:var(--paper-3);
+  padding:22px 0 24px; display:flex; flex-direction:column;
+}
+.brand{padding:0 20px 20px; border-bottom:1px solid var(--rule)}
+.brand h1{
+  margin:0; font-size:15px; font-weight:700; letter-spacing:-.02em; line-height:1.2;
+}
+.brand .sub{
+  margin-top:5px; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:500;
+}
+nav{padding:12px 10px; display:flex; flex-direction:column; gap:1px; flex:1}
+nav a{
+  display:flex; align-items:center; gap:9px; padding:7px 10px; border-radius:var(--r);
+  text-decoration:none; color:var(--ink-2); font-size:12px; font-weight:500;
+  letter-spacing:.05em; text-transform:uppercase; transition:background .12s,color .12s;
+}
+nav a:hover{background:var(--paper-2); color:var(--ink)}
+nav a.on{background:var(--paper-2); color:var(--ink)}
+nav a .idx{
+  font-family:"Spline Sans Mono",monospace; font-size:10px; color:var(--ink-3);
+  min-width:14px;
+}
+nav a .dot{
+  margin-left:auto; width:5px; height:5px; border-radius:50%; background:var(--brass);
+  opacity:0; transition:opacity .15s;
+}
+nav a.dirty .dot{opacity:1}
+nav .sep{height:1px; background:var(--rule); margin:10px 10px}
+nav a.locked{color:var(--ink-3)}
+nav a.locked .idx{color:var(--oxide)}
+.rail-foot{padding:14px 20px 0; border-top:1px solid var(--rule); font-size:11px; color:var(--ink-3)}
+.rail-foot code{font-family:"Spline Sans Mono",monospace; font-size:10.5px; word-break:break-all}
+
+/* ── top bar ───────────────────────────────────────────── */
+.top{
+  position:sticky; top:0; z-index:20; background:var(--paper);
+  border-bottom:1px solid var(--rule);
+  display:flex; align-items:center; gap:14px; padding:11px 26px; min-height:56px;
+}
+.conn{display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--ink-2)}
+.conn .led{width:6px; height:6px; border-radius:50%; background:var(--verdigris)}
+.conn.off .led{background:var(--brass)}
+.spacer{flex:1}
+.count{font-size:11.5px; color:var(--ink-2)}
+.count b{color:var(--brass); font-weight:600}
+
+button{
+  font:inherit; font-size:12.5px; font-weight:500; cursor:pointer;
+  border:1px solid var(--rule-2); background:var(--paper-2); color:var(--ink);
+  padding:6px 13px; border-radius:var(--r); transition:background .12s,border-color .12s;
+}
+button:hover:not(:disabled){background:var(--paper-3); border-color:var(--ink-3)}
+button:disabled{opacity:.42; cursor:not-allowed}
+button.primary{background:var(--verdigris); border-color:var(--verdigris); color:#fff}
+button.primary:hover:not(:disabled){filter:brightness(1.08); background:var(--verdigris)}
+:root[data-theme="dark"] button.primary,
+:root:not([data-theme="light"]) button.primary{color:#06120F}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) button.primary{color:#fff}}
+button.ghost{background:transparent; border-color:transparent; color:var(--ink-2)}
+button.ghost:hover:not(:disabled){background:var(--paper-3); color:var(--ink)}
+
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--focus); outline-offset:2px; border-radius:var(--r);
+}
+
+/* ── main ──────────────────────────────────────────────── */
+main{padding:0 26px 96px; max-width:960px}
+section{padding:34px 0 8px; border-bottom:1px solid var(--rule); scroll-margin-top:70px}
+section:last-of-type{border-bottom:none}
+.sec-head{display:flex; align-items:baseline; gap:12px; margin-bottom:6px}
+.sec-head .n{
+  font-family:"Spline Sans Mono",monospace; font-size:11px; color:var(--ink-3);
+  letter-spacing:.06em;
+}
+.sec-head h2{margin:0; font-size:19px; font-weight:600; letter-spacing:-.02em}
+.sec-note{margin:0 0 22px; color:var(--ink-2); font-size:13px; max-width:62ch}
+
+/* ── field ─────────────────────────────────────────────── */
+.field{padding:15px 0; border-top:1px solid var(--rule)}
+.field:first-of-type{border-top:none}
+.f-top{display:flex; align-items:baseline; gap:12px; margin-bottom:9px}
+.f-label{font-size:13.5px; font-weight:500; flex:1}
+.f-val{display:flex; align-items:center; gap:5px}
+.f-val input{
+  width:102px; text-align:right; font-family:"Spline Sans Mono",monospace;
+  font-size:13px; font-weight:500; padding:4px 7px;
+  border:1px solid var(--rule-2); border-radius:var(--r);
+  background:var(--paper-2); color:var(--ink);
+}
+.f-val .unit{font-family:"Spline Sans Mono",monospace; font-size:11.5px; color:var(--ink-3); width:16px}
+.f-hint{margin:9px 0 0; font-size:12px; color:var(--ink-2); max-width:64ch}
+.f-hint.warn{color:var(--oxide)}
+
+/* ── the limit gauge — the signature ───────────────────── */
+.gauge{position:relative; height:30px; cursor:pointer; touch-action:none}
+.gauge .track{
+  position:absolute; top:9px; left:0; right:0; height:9px;
+  background:var(--paper-3); border:1px solid var(--rule-2); border-radius:2px; overflow:hidden;
+}
+.gauge .safe{
+  position:absolute; top:0; bottom:0; background:var(--verdigris-soft);
+  border-right:1px solid var(--verdigris);
+}
+.gauge .forbid{
+  position:absolute; top:0; bottom:0;
+  background:repeating-linear-gradient(-45deg,
+    var(--oxide) 0 1.5px, transparent 1.5px 6px), var(--oxide-soft);
+  border-left:1.5px solid var(--oxide);
+}
+.gauge .deft{
+  position:absolute; top:4px; width:1px; height:19px; background:var(--ink-3); opacity:.5;
+}
+.gauge .knob{
+  position:absolute; top:2px; width:4px; height:24px; margin-left:-2px;
+  background:var(--ink); border-radius:1px; box-shadow:0 0 0 2px var(--paper);
+  transition:left .16s cubic-bezier(.22,1,.36,1);
+}
+.gauge .knob::after{
+  content:""; position:absolute; left:-8px; top:-4px; width:20px; height:32px;
+}
+.gauge.over .knob{background:var(--oxide)}
+.g-scale{
+  position:relative; height:14px; margin-top:1px;
+  font-family:"Spline Sans Mono",monospace; font-size:10px; color:var(--ink-3);
+}
+.g-scale .lo{position:absolute; left:0}
+.g-scale .hi{position:absolute; right:0}
+.g-scale .cap{
+  position:absolute; color:var(--oxide); white-space:nowrap; transform:translateX(-50%);
+}
+.g-scale .cap:empty{display:none}
+
+/* ── text + select + tags ──────────────────────────────── */
+input[type=text],select,textarea{
+  font:inherit; font-size:13px; padding:6px 9px; color:var(--ink);
+  border:1px solid var(--rule-2); border-radius:var(--r); background:var(--paper-2);
+}
+input[type=text]{font-family:"Spline Sans Mono",monospace; letter-spacing:.04em}
+.ticker-in{width:130px; text-transform:uppercase; font-size:15px; font-weight:600}
+.tags{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.tag{
+  display:inline-flex; align-items:center; gap:6px; padding:3px 5px 3px 9px;
+  background:var(--paper-2); border:1px solid var(--rule-2); border-radius:var(--r);
+  font-family:"Spline Sans Mono",monospace; font-size:12px; font-weight:500;
+}
+.tag button{
+  border:none; background:none; padding:0 3px; color:var(--ink-3);
+  font-size:14px; line-height:1; cursor:pointer;
+}
+.tag button:hover{color:var(--oxide); background:none}
+.tags input{
+  width:96px; font-family:"Spline Sans Mono",monospace; font-size:12px;
+  padding:4px 8px; text-transform:uppercase;
+}
+
+/* ── switch ────────────────────────────────────────────── */
+.sw{
+  position:relative; width:30px; height:17px; flex:none; border-radius:9px;
+  background:var(--rule-2); border:none; padding:0; cursor:pointer;
+  transition:background .16s;
+}
+.sw::after{
+  content:""; position:absolute; top:2px; left:2px; width:13px; height:13px;
+  border-radius:50%; background:var(--paper-2); transition:transform .16s cubic-bezier(.22,1,.36,1);
+}
+.sw[aria-checked="true"]{background:var(--verdigris)}
+.sw[aria-checked="true"]::after{transform:translateX(13px)}
+.sw:disabled{cursor:not-allowed; opacity:1}
+
+/* ── agents ────────────────────────────────────────────── */
+.agents{display:flex; flex-direction:column; gap:0; margin-top:4px}
+.agent{
+  display:grid; grid-template-columns:26px 1fr auto auto auto; align-items:center; gap:12px;
+  padding:9px 0; border-top:1px solid var(--rule);
+}
+.agent:first-child{border-top:none}
+.agent .n{font-family:"Spline Sans Mono",monospace; font-size:11px; color:var(--ink-3)}
+.agent .nm{font-size:13.5px; font-weight:500}
+.agent .out{
+  font-family:"Spline Sans Mono",monospace; font-size:10.5px; color:var(--ink-3);
+  display:block; margin-top:1px;
+}
+.agent.off .nm,.agent.off .out{opacity:.42}
+.agent select{font-size:12px; padding:4px 7px; font-family:"Spline Sans Mono",monospace}
+.agent .link{
+  font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--brass);
+  font-weight:600;
+}
+
+/* ── providers ─────────────────────────────────────────── */
+.grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:0 26px}
+.keychip{
+  display:inline-flex; align-items:center; gap:6px; margin-top:8px;
+  font-family:"Spline Sans Mono",monospace; font-size:11px; padding:3px 8px;
+  border-radius:var(--r); border:1px solid;
+}
+.keychip.ok{color:var(--verdigris); border-color:var(--verdigris); background:var(--verdigris-soft)}
+.keychip.miss{color:var(--oxide); border-color:var(--oxide); background:var(--oxide-soft)}
+.keychip.na{color:var(--ink-3); border-color:var(--rule-2); background:var(--paper-2)}
+
+/* ── run plan ──────────────────────────────────────────── */
+.plan{
+  margin-top:14px; padding:16px 18px; background:var(--paper-2);
+  border:1px solid var(--rule); border-radius:var(--r);
+}
+.plan h3{
+  margin:0 0 12px; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:600;
+}
+.flow{display:flex; flex-wrap:wrap; gap:5px; align-items:center}
+.node{
+  font-family:"Spline Sans Mono",monospace; font-size:11px; padding:3px 8px;
+  border:1px solid var(--rule-2); border-radius:var(--r); background:var(--paper);
+  white-space:nowrap;
+}
+.node.off{opacity:.34; text-decoration:line-through}
+.node .m{color:var(--ink-3); font-size:9.5px; margin-left:5px}
+.arrow{color:var(--ink-3); font-size:11px}
+
+/* ── guardrails (the charter) ──────────────────────────── */
+.charter{
+  background:var(--petrol); color:var(--petrol-ink); border-radius:var(--r);
+  padding:26px 28px; margin-top:4px;
+}
+.charter .ch-head{
+  display:flex; align-items:baseline; gap:10px; padding-bottom:14px;
+  border-bottom:1px solid rgba(255,255,255,.13); margin-bottom:6px;
+}
+.charter h3{
+  margin:0; font-family:Newsreader,Georgia,serif; font-size:19px; font-weight:500;
+  letter-spacing:0;
+}
+.charter .ch-head .lock{
+  margin-left:auto; font-family:"Spline Sans Mono",monospace; font-size:10px;
+  letter-spacing:.1em; text-transform:uppercase; color:#E8A98F;
+  border:1px solid rgba(226,122,95,.5); padding:2px 8px; border-radius:var(--r);
+}
+.rule{
+  display:grid; grid-template-columns:24px 1fr 34px; gap:12px; align-items:start;
+  padding:13px 0; border-bottom:1px solid rgba(255,255,255,.07);
+}
+.rule:last-child{border-bottom:none}
+.rule .rn{
+  font-family:"Spline Sans Mono",monospace; font-size:11px; color:#8FB0AC; padding-top:2px;
+}
+.rule .rt{
+  font-family:Newsreader,Georgia,serif; font-size:15px; line-height:1.45; color:var(--petrol-ink);
+}
+.rule .rt em{color:#9DC4BE; font-style:italic}
+.rule .sw{background:rgba(79,191,160,.85); opacity:.85}
+.rule .sw::after{background:var(--petrol)}
+.charter .ch-foot{
+  margin:16px 0 0; padding-top:14px; border-top:1px solid rgba(255,255,255,.13);
+  font-family:Newsreader,Georgia,serif; font-style:italic; font-size:13.5px;
+  color:#9DC4BE; line-height:1.5;
+}
+
+/* ── problems ──────────────────────────────────────────── */
+.problems{
+  margin:0 0 20px; padding:13px 16px; border-radius:var(--r);
+  background:var(--oxide-soft); border:1px solid var(--oxide); color:var(--oxide);
+  font-size:12.5px;
+}
+.problems ul{margin:6px 0 0; padding-left:18px}
+.problems li{margin:3px 0}
+.problems strong{display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase}
+
+/* ── toast ─────────────────────────────────────────────── */
+.toast{
+  position:fixed; left:50%; bottom:26px; transform:translate(-50%,14px);
+  background:var(--ink); color:var(--paper); padding:9px 18px; border-radius:var(--r);
+  font-size:12.5px; opacity:0; pointer-events:none; transition:opacity .2s,transform .2s;
+  z-index:60; box-shadow:var(--shadow);
+}
+.toast.show{opacity:1; transform:translate(-50%,0)}
+
+/* ── responsive ────────────────────────────────────────── */
+@media (max-width:840px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static; height:auto; border-right:none; border-bottom:1px solid var(--rule)}
+  nav{flex-direction:row; flex-wrap:wrap; gap:4px}
+  nav .sep{display:none}
+  .rail-foot{display:none}
+  main{padding:0 18px 90px}
+  .top{padding:11px 18px; flex-wrap:wrap}
+  .agent{grid-template-columns:22px 1fr auto auto; row-gap:6px}
+  .agent .link{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="brand">
+      <h1>Fund Control</h1>
+      <div class="sub">System Preferences</div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="rail-foot">
+      <div id="cfgpath"><code>config/preferences.json</code></div>
+    </div>
+  </aside>
+
+  <div>
+    <header class="top">
+      <div class="conn" id="conn"><span class="led"></span><span id="connlbl">connecting…</span></div>
+      <div class="spacer"></div>
+      <div class="count" id="count"></div>
+      <button class="ghost" id="theme" title="Toggle theme">◐</button>
+      <button class="ghost" id="export">Export</button>
+      <button id="revert" disabled>Revert</button>
+      <button class="primary" id="save" disabled>Save changes</button>
+    </header>
+    <main id="main"></main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+
+/* Fallback defaults — used when the page is opened without the config server
+   (file:// or as a published artifact). Kept in sync with
+   config/preferences.default.json. */
+const FALLBACK = {
+  version:1,
+  meta:{updated_at:null,updated_by:"defaults"},
+  research:{primary_ticker:"AAPL",watchlist:["MSFT","NVDA","GOOGL"],
+    scan:{universe:"sp500",min_rel_volume:2.0,min_pct_move:5.0,include_52w_extremes:true,
+      min_avg_dollar_volume:10000000,exclude_earnings_within_days:2,max_shortlist:10}},
+  risk:{max_position_pct:20,max_entry_position_pct:15,min_position_pct:2,min_cash_buffer_pct:10,
+    max_sector_pct:35,max_correlated_cluster_pct:40,correlation_threshold:0.7,max_positions:12,
+    min_risk_reward:2.0,max_portfolio_drawdown_pct:20,max_strategy_drawdown_pct:25,
+    default_stop_pct:8,require_exit_rule:true,require_stop:true},
+  backtest:{lookback_years:5,min_trades:30,min_sample_years:3,overfit_sharpe_threshold:3.0,
+    out_of_sample_pct:30,initial_capital:100000,commission_bps:5,slippage_bps:5},
+  agents:{
+    "1-scanner":{enabled:true,model:"sonnet",label:"Market Scanner",output:"fund/1-scan.md"},
+    "2-news":{enabled:true,model:"sonnet",label:"News Analyst",output:"fund/2-news.md"},
+    "3-fundamentals":{enabled:true,model:"opus",label:"Fundamental Analyst",output:"fund/3-fundamentals.md"},
+    "4-technicals":{enabled:true,model:"sonnet",label:"Technical Analyst",output:"fund/4-technicals.md"},
+    "5-quant":{enabled:true,model:"opus",label:"Quant Agent",output:"fund/5-quant.md"},
+    "6-bull":{enabled:true,model:"opus",label:"Bull Analyst",output:"fund/6-bull.md"},
+    "7-bear":{enabled:true,model:"opus",label:"Bear Analyst",output:"fund/7-bear.md"},
+    "8-risk":{enabled:true,model:"opus",label:"Risk Manager",output:"fund/8-risk.md"},
+    "9-portfolio":{enabled:true,model:"sonnet",label:"Portfolio Manager",output:"fund/9-portfolio.md"},
+    "10-memo":{enabled:true,model:"opus",label:"Fund Manager",output:"fund/10-memo.md"}},
+  data:{market_provider:"yfinance",news_provider:"newsapi",sec_enabled:true,
+    cache_ttl_minutes:60,news_lookback_days:14,max_headlines:25,price_history_years:5},
+  pipeline:{parallel_research_stages:true,stop_on_risk_reject:true,require_both_debaters:true,
+    fail_on_missing_data:true,cache_to_fund:true,verbosity:"normal"},
+  guardrails:{_locked:true,research_only:true,never_promise_profits:true,
+    label_everything_simulated:true,real_data_only:true,no_brokerage_connection:true,
+    human_approval_required:true,flag_overfitting:true,secrets_in_env_only:true,
+    memo_disclaimer_required:true,both_sides_debate_required:true}
+};
+
+const GUARDRAIL_TEXT = [
+  ["research_only","Purpose is fixed: research, backtesting, paper trading, and education. Nothing this system produces is <em>investment advice</em>."],
+  ["never_promise_profits","No agent may promise, project, or imply a profit — not in a memo, not in a backtest summary, not in passing."],
+  ["label_everything_simulated","Every portfolio, position, fill, and return is simulated, and is labelled <em>SIMULATED</em> where it appears."],
+  ["real_data_only","Prices, financials, filings, and news come from a real response or a real filing, or they do not appear at all."],
+  ["no_brokerage_connection","The system never connects to a brokerage, places an order, or moves funds. No order-placement code exists in the repository."],
+  ["human_approval_required","The system recommends. A human verifies and decides. It never acts."],
+  ["flag_overfitting","Every backtest carries an explicit over-fitting assessment. A strong in-sample result is a warning, not a finding."],
+  ["secrets_in_env_only","API keys live in <em>.env</em>, git-ignored. This page is never shown a key — only whether one is set."],
+  ["memo_disclaimer_required","Every memo ends with the not-financial-advice disclaimer."],
+  ["both_sides_debate_required","Bull and Bear both argue their strongest honest case. A one-sided memo is rejected and re-run."]
+];
+
+/* ── state ──────────────────────────────────────────────── */
+let prefs=null, saved=null, defaults=FALLBACK, keys=null, connected=false;
+
+const $=(s,r=document)=>r.querySelector(s);
+const clone=o=>JSON.parse(JSON.stringify(o));
+const get=(o,p)=>p.split(".").reduce((a,k)=>(a==null?a:a[k]),o);
+function set(o,p,v){const k=p.split(".");let c=o;for(let i=0;i<k.length-1;i++)c=c[k[i]]??=({});c[k.at(-1)]=v;}
+
+/* ── the constraint model ───────────────────────────────────
+   Mirrors tools/prefs.py. Returns the permitted band for a field
+   given every other current value, so the gauge can hatch the
+   zone that the validator would reject. */
+function band(path,p){
+  const r=p.risk,b=p.backtest;
+  switch(path){
+    case "risk.max_position_pct":
+      return {min:0,max:100,lo:Math.max(r.max_entry_position_pct,r.min_position_pct),
+        hi:100-r.min_cash_buffer_pct,
+        why:`must leave the ${r.min_cash_buffer_pct}% cash floor intact, and cover the ${r.max_entry_position_pct}% entry cap`};
+    case "risk.max_entry_position_pct":
+      return {min:0,max:100,lo:0,hi:r.max_position_pct,
+        why:`cannot exceed the ${r.max_position_pct}% single-position cap`};
+    case "risk.min_position_pct":
+      return {min:0,max:100,lo:0,hi:r.max_position_pct,
+        why:`cannot exceed the ${r.max_position_pct}% single-position cap`};
+    case "risk.min_cash_buffer_pct":
+      return {min:0,max:100,lo:0,hi:100-r.max_position_pct,
+        why:`a ${r.max_position_pct}% position must still fit alongside it`};
+    case "backtest.min_sample_years":
+      return {min:0,max:20,lo:0,hi:b.lookback_years,
+        why:`no backtest could pass a minimum longer than the ${b.lookback_years}y lookback`};
+    default:return null;
+  }
+}
+
+/* ── schema ─────────────────────────────────────────────── */
+const NUM=(path,label,unit,min,max,step,hint)=>({t:"num",path,label,unit,min,max,step,hint});
+const BOOL=(path,label,hint)=>({t:"bool",path,label,hint});
+const SEL=(path,label,opts,hint)=>({t:"sel",path,label,opts,hint});
+
+const SECTIONS=[
+ {id:"research",n:"01",title:"Research",note:"What the fund is looking at. The primary ticker travels through stages 2–10; the watchlist is researched one name at a time.",fields:[
+   {t:"ticker",path:"research.primary_ticker",label:"Primary ticker",hint:"Written to ticker.md on save."},
+   {t:"tags",path:"research.watchlist",label:"Watchlist",hint:"Candidates the Scanner also considers."},
+   SEL("research.scan.universe","Scan universe",[["sp500","S&P 500 sample"],["megacap","Mega cap"],["watchlist","Watchlist only"]],"Which names the Market Scanner sweeps."),
+   NUM("research.scan.min_rel_volume","Minimum relative volume","×",1,10,0.1,"Against the 20-day average. Below about 1.5× almost everything qualifies."),
+   NUM("research.scan.min_pct_move","Minimum daily move","%",0,25,0.5,"Absolute, so gaps down qualify too."),
+   BOOL("research.scan.include_52w_extremes","Flag 52-week extremes","Include names at a new yearly high or low."),
+   NUM("research.scan.min_avg_dollar_volume","Minimum dollar volume","$",0,500000000,1000000,"Liquidity floor. A signal you cannot trade is not a signal."),
+   NUM("research.scan.exclude_earnings_within_days","Exclude earnings within","d",0,30,1,"Moves this close to a print are event risk, not a signal."),
+   NUM("research.scan.max_shortlist","Shortlist cap","",1,50,1,"The Scanner will not pad to reach this."),
+ ]},
+ {id:"risk",n:"02",title:"Risk",note:"The Risk Manager rejects any idea that breaks one of these and says which. Hatched zones are what the validator would refuse, given your other settings.",fields:[
+   NUM("risk.max_position_pct","Max single position","%",0,100,0.5,"Hard cap on any one simulated holding."),
+   NUM("risk.max_entry_position_pct","Max position at entry","%",0,100,0.5,"New positions start here; the cap above allows for appreciation."),
+   NUM("risk.min_position_pct","Minimum position","%",0,100,0.5,"Below this a position is dust and adds no real exposure."),
+   NUM("risk.min_cash_buffer_pct","Cash floor","%",0,100,1,"The book never allocates below this."),
+   NUM("risk.max_sector_pct","Max sector exposure","%",0,100,1,"Counting the new position."),
+   NUM("risk.max_correlated_cluster_pct","Max correlated cluster","%",0,100,1,"Names that move together are one bet, not several."),
+   NUM("risk.correlation_threshold","Correlation threshold","ρ",0,1,0.05,"Above this, positions count as one cluster."),
+   NUM("risk.max_positions","Max simultaneous positions","",1,60,1,"More names than you can follow is not diversification."),
+   NUM("risk.min_risk_reward","Minimum risk / reward",":1",0,10,0.1,"Computed from the Quant's actual entry, target, and stop."),
+   NUM("risk.max_portfolio_drawdown_pct","Portfolio drawdown halt","%",0,100,1,"Breaching this stops new simulated positions."),
+   NUM("risk.max_strategy_drawdown_pct","Max strategy drawdown","%",0,100,1,"A backtest worse than this is rejected on risk alone."),
+   NUM("risk.default_stop_pct","Default stop distance","%",0,50,0.5,"Starting point; the Risk Manager wants it justified against ATR."),
+   BOOL("risk.require_exit_rule","Require a written exit rule","An idea with no exit is a hope, not a trade."),
+   BOOL("risk.require_stop","Require a stop level","Without one, position sizing is meaningless."),
+ ]},
+ {id:"backtest",n:"03",title:"Backtest",note:"Quality gates the Quant agent reports against. Results are always simulated and always carry an over-fitting assessment.",fields:[
+   NUM("backtest.lookback_years","Lookback","y",1,30,1,"How much history the test runs over."),
+   NUM("backtest.out_of_sample_pct","Held out of sample","%",0,60,5,"Reserved to validate the rules against data they were not built on."),
+   NUM("backtest.min_trades","Minimum trades","",1,500,1,"Fewer than about 30 cannot separate skill from luck."),
+   NUM("backtest.min_sample_years","Minimum sample","y",0,20,0.5,"A short sample only ever saw one regime."),
+   NUM("backtest.overfit_sharpe_threshold","Over-fit Sharpe flag","",0,10,0.1,"Above this, a strong Sharpe is treated as a warning."),
+   NUM("backtest.initial_capital","Simulated capital","$",1000,10000000,1000,"Fake money. There is no account behind this number."),
+   NUM("backtest.commission_bps","Commission","bp",0,200,1,"Applied to both sides of every simulated trade."),
+   NUM("backtest.slippage_bps","Slippage","bp",0,200,1,"Real fills are worse than any model. Raising this is honest."),
+ ]},
+ {id:"agents",n:"04",title:"Agents",note:"Ten agents, one output file each. Disabling a stage leaves its downstream readers without an input — they will say so rather than invent one.",fields:[{t:"agents"}]},
+ {id:"data",n:"05",title:"Data",note:"Where the real numbers come from. This page is never shown an API key — only whether one is set in .env.",fields:[
+   SEL("data.market_provider","Market data",[["yfinance","Yahoo (no key)"],["alphavantage","Alpha Vantage"],["fmp","Financial Modeling Prep"],["finnhub","Finnhub"]],"Yahoo needs no key but serves no financial statements."),
+   SEL("data.news_provider","News",[["newsapi","NewsAPI"],["finnhub","Finnhub"],["none","None"]],"With none, the News Analyst records that no source is configured."),
+   BOOL("data.sec_enabled","SEC EDGAR filings","Free, but EDGAR needs a User-Agent with a real contact email or it returns 403."),
+   NUM("data.cache_ttl_minutes","Cache lifetime","m",0,1440,5,"Free tiers are rate-limited. Caching is what makes ten agents viable."),
+   NUM("data.news_lookback_days","News lookback","d",1,90,1,""),
+   NUM("data.max_headlines","Headline cap","",1,100,1,""),
+   NUM("data.price_history_years","Price history","y",1,30,1,""),
+ ]},
+ {id:"pipeline",n:"06",title:"Pipeline",note:"How the run behaves.",fields:[
+   BOOL("pipeline.parallel_research_stages","Run stages 2–4 in parallel","News, fundamentals, and technicals do not depend on each other."),
+   BOOL("pipeline.stop_on_risk_reject","Stop on a risk rejection","A rejected idea does not reach the portfolio."),
+   BOOL("pipeline.require_both_debaters","Require both sides of the debate","The Fund Manager refuses to write a memo missing Bull or Bear."),
+   BOOL("pipeline.fail_on_missing_data","Fail loudly on missing data","The alternative is an agent quietly filling a gap. Leave this on."),
+   BOOL("pipeline.cache_to_fund","Cache fetched data to fund/","Lets a re-run reuse data instead of burning API quota."),
+   SEL("pipeline.verbosity","Verbosity",[["quiet","Quiet"],["normal","Normal"],["verbose","Verbose"]],""),
+ ]},
+];
+
+/* ── render ─────────────────────────────────────────────── */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function renderNav(){
+  const n=$("#nav");
+  n.innerHTML=SECTIONS.map(s=>
+    `<a href="#${s.id}" data-sec="${s.id}"><span class="idx">${s.n}</span>${esc(s.title)}<span class="dot"></span></a>`
+  ).join("")+`<div class="sep"></div>`+
+   `<a href="#guardrails" data-sec="guardrails" class="locked"><span class="idx">✳</span>Guardrails</a>`;
+}
+
+function fmtNum(v,unit){
+  if(unit==="$")return v>=1e6?(v/1e6)+"M":v.toLocaleString();
+  return v;
+}
+
+function fieldHTML(f){
+  if(f.t==="ticker"){
+    return `<div class="field"><div class="f-top"><span class="f-label">${esc(f.label)}</span></div>
+      <input type="text" class="ticker-in" id="fx-${f.path}" data-path="${f.path}"
+        value="${esc(get(prefs,f.path))}" maxlength="8" aria-label="${esc(f.label)}">
+      <p class="f-hint">${f.hint}</p></div>`;
+  }
+  if(f.t==="tags"){
+    const list=get(prefs,f.path)||[];
+    return `<div class="field"><div class="f-top"><span class="f-label">${esc(f.label)}</span></div>
+      <div class="tags" id="tags-${f.path}">
+        ${list.map((t,i)=>`<span class="tag">${esc(t)}<button data-rm="${i}" data-path="${f.path}"
+           aria-label="Remove ${esc(t)}">×</button></span>`).join("")}
+        <input type="text" data-add="${f.path}" placeholder="add" maxlength="8" aria-label="Add ticker">
+      </div><p class="f-hint">${f.hint}</p></div>`;
+  }
+  if(f.t==="bool"){
+    const v=get(prefs,f.path);
+    return `<div class="field"><div class="f-top"><span class="f-label">${esc(f.label)}</span>
+      <button class="sw" role="switch" aria-checked="${v}" data-bool="${f.path}"
+        aria-label="${esc(f.label)}"></button></div>
+      ${f.hint?`<p class="f-hint">${f.hint}</p>`:""}</div>`;
+  }
+  if(f.t==="sel"){
+    const v=get(prefs,f.path);
+    return `<div class="field"><div class="f-top"><span class="f-label">${esc(f.label)}</span>
+      <select data-sel="${f.path}" aria-label="${esc(f.label)}">${
+        f.opts.map(([val,lbl])=>`<option value="${esc(val)}"${val===v?" selected":""}>${esc(lbl)}</option>`).join("")
+      }</select></div>${f.hint?`<p class="f-hint">${f.hint}</p>`:""}
+      <span data-key="${f.path}"></span></div>`;
+  }
+  // numeric — the limit gauge
+  return `<div class="field" data-num="${f.path}">
+    <div class="f-top"><span class="f-label">${esc(f.label)}</span>
+      <span class="f-val"><input type="text" inputmode="decimal" data-in="${f.path}"
+        value="${get(prefs,f.path)}" aria-label="${esc(f.label)}">
+        <span class="unit">${esc(f.unit||"")}</span></span></div>
+    <div class="gauge" data-gauge="${f.path}" role="slider" tabindex="0"
+         aria-label="${esc(f.label)}" aria-valuemin="${f.min}" aria-valuemax="${f.max}"
+         aria-valuenow="${get(prefs,f.path)}">
+      <div class="track"><div class="safe"></div><div class="forbid"></div></div>
+      <div class="deft" title="default"></div><div class="knob"></div>
+    </div>
+    <div class="g-scale"><span class="lo">${fmtNum(f.min,f.unit)}</span><span class="cap"></span><span class="hi">${fmtNum(f.max,f.unit)}</span></div>
+    ${f.hint?`<p class="f-hint">${f.hint}</p>`:""}
+    <p class="f-hint warn" data-why="${f.path}" hidden></p></div>`;
+}
+
+function agentsHTML(){
+  const order=["1-scanner","2-news","3-fundamentals","4-technicals","5-quant",
+               "6-bull","7-bear","8-risk","9-portfolio","10-memo"];
+  return `<div class="agents">${order.map((k,i)=>{
+    const a=prefs.agents[k], d=defaults.agents[k]||{};
+    const linked=(k==="6-bull"||k==="7-bear");
+    return `<div class="agent${a.enabled?"":" off"}" data-agent="${k}">
+      <span class="n">${String(i+1).padStart(2,"0")}</span>
+      <span><span class="nm">${esc(a.label||d.label||k)}</span>
+        <span class="out">${esc(a.output||d.output||"")}</span></span>
+      ${linked?`<span class="link" title="Bull and Bear switch together — a one-sided debate produces a biased memo">paired</span>`:`<span></span>`}
+      <select data-model="${k}" aria-label="Model for ${esc(a.label||k)}">
+        ${["opus","sonnet","haiku"].map(m=>`<option value="${m}"${m===a.model?" selected":""}>${m}</option>`).join("")}
+      </select>
+      <button class="sw" role="switch" aria-checked="${a.enabled}" data-agent-on="${k}"
+        aria-label="Enable ${esc(a.label||k)}"></button>
+    </div>`;}).join("")}</div>
+    <div class="plan"><h3>Run plan</h3><div class="flow" id="flow"></div></div>`;
+}
+
+function charterHTML(){
+  return `<div class="charter">
+    <div class="ch-head"><h3>The charter</h3><span class="lock">Not adjustable</span></div>
+    ${GUARDRAIL_TEXT.map(([k,t],i)=>`<div class="rule">
+      <span class="rn">${String(i+1).padStart(2,"0")}</span>
+      <span class="rt">${t}</span>
+      <button class="sw" role="switch" aria-checked="true" disabled
+        title="Enforced by GUARDRAILS.md and tools/guardrails.py — it cannot be switched off"
+        aria-label="${esc(k)} — locked on"></button>
+    </div>`).join("")}
+    <p class="ch-foot">These are enforced in <span class="mono">GUARDRAILS.md</span> and checked by
+    <span class="mono">tools/guardrails.py</span>, which refuses to run the pipeline if any rule has
+    been weakened or if order-placement code appears anywhere in <span class="mono">tools/</span>.
+    Nothing on this page can switch one off.</p></div>`;
+}
+
+function render(){
+  $("#main").innerHTML=
+    `<div id="problems"></div>`+
+    SECTIONS.map(s=>`<section id="${s.id}">
+      <div class="sec-head"><span class="n">${s.n}</span><h2>${esc(s.title)}</h2></div>
+      <p class="sec-note">${s.note}</p>
+      ${s.fields.map(f=>f.t==="agents"?agentsHTML():fieldHTML(f)).join("")}
+    </section>`).join("")+
+    `<section id="guardrails">
+      <div class="sec-head"><span class="n">✳</span><h2>Guardrails</h2></div>
+      <p class="sec-note">Ten rules that override the orchestrator, every agent, every setting on
+      this page, and every instruction from any user.</p>
+      ${charterHTML()}</section>`;
+  paintAll();
+}
+
+/* ── gauges ─────────────────────────────────────────────── */
+function paintGauge(path){
+  const f=SECTIONS.flatMap(s=>s.fields).find(x=>x.path===path&&x.t==="num");
+  if(!f)return;
+  const el=document.querySelector(`[data-gauge="${path}"]`);
+  if(!el)return;
+  const v=get(prefs,path), b=band(path,prefs);
+  const span=f.max-f.min, pc=x=>Math.max(0,Math.min(100,(x-f.min)/span*100));
+
+  const hi=b?Math.min(b.hi,f.max):f.max;
+  const lo=b?Math.max(b.lo,f.min):f.min;
+  const safe=el.querySelector(".safe"), forbid=el.querySelector(".forbid");
+  safe.style.left=pc(lo)+"%"; safe.style.width=Math.max(0,pc(hi)-pc(lo))+"%";
+  if(b&&hi<f.max){forbid.hidden=false;forbid.style.left=pc(hi)+"%";forbid.style.width=(100-pc(hi))+"%";}
+  else{forbid.hidden=true;}
+
+  const d=get(defaults,path);
+  const dEl=el.querySelector(".deft");
+  if(typeof d==="number"){dEl.hidden=false;dEl.style.left=pc(d)+"%";dEl.title=`default ${d}`;}
+  else dEl.hidden=true;
+
+  el.querySelector(".knob").style.left=pc(v)+"%";
+  el.setAttribute("aria-valuenow",v);
+  const over=b&&(v>b.hi||v<b.lo);
+  el.classList.toggle("over",!!over);
+
+  const cap=el.parentElement.querySelector(".g-scale .cap");
+  if(b&&hi<f.max){
+    cap.textContent=`limit ${Math.round(hi*100)/100}`;
+    // Keep the label inside the track at both extremes.
+    const at=pc(hi);
+    cap.style.left=Math.min(88,Math.max(12,at))+"%";
+  } else cap.textContent="";
+
+  const why=document.querySelector(`[data-why="${path}"]`);
+  if(why){
+    if(over){why.hidden=false;why.textContent=`${v} is outside the permitted band — ${b.why}.`;}
+    else why.hidden=true;
+  }
+  const inp=document.querySelector(`[data-in="${path}"]`);
+  if(inp&&document.activeElement!==inp)inp.value=v;
+}
+
+function paintFlow(){
+  const el=$("#flow"); if(!el)return;
+  const order=["1-scanner","2-news","3-fundamentals","4-technicals","5-quant",
+               "6-bull","7-bear","8-risk","9-portfolio","10-memo"];
+  el.innerHTML=order.map((k,i)=>{
+    const a=prefs.agents[k];
+    const nm=(a.label||k).replace(/ (Analyst|Agent|Manager|Scanner)$/,m=>m);
+    return `${i?'<span class="arrow">→</span>':""}<span class="node${a.enabled?"":" off"}">${
+      esc(nm)}<span class="m">${esc(a.model)}</span></span>`;
+  }).join("");
+}
+
+function paintAll(){
+  SECTIONS.flatMap(s=>s.fields).filter(f=>f.t==="num").forEach(f=>paintGauge(f.path));
+  document.querySelectorAll("[data-bool]").forEach(b=>
+    b.setAttribute("aria-checked",String(!!get(prefs,b.dataset.bool))));
+  document.querySelectorAll("[data-sel]").forEach(s=>s.value=get(prefs,s.dataset.sel));
+  paintKeys(); paintFlow(); paintDirty(); paintProblems();
+}
+
+function paintKeys(){
+  if(!keys)return;
+  const map={"data.market_provider":prefs.data.market_provider,
+             "data.news_provider":prefs.data.news_provider};
+  for(const [path,prov] of Object.entries(map)){
+    const slot=document.querySelector(`[data-key="${path}"]`);
+    if(!slot)continue;
+    const k=keys[prov];
+    if(!k||!k.required){slot.innerHTML=`<span class="keychip na">no key needed</span>`;continue;}
+    slot.innerHTML=k.present
+      ? `<span class="keychip ok">${esc(k.env_var)} set</span>`
+      : `<span class="keychip miss">${esc(k.env_var)} missing — add it to .env</span>`;
+  }
+}
+
+/* ── validation mirror (matches tools/prefs.py) ─────────── */
+function validate(p){
+  const e=[],r=p.risk,b=p.backtest;
+  if(r.max_entry_position_pct>r.max_position_pct)
+    e.push(`Max position at entry (${r.max_entry_position_pct}%) exceeds the single-position cap (${r.max_position_pct}%).`);
+  if(r.min_position_pct>r.max_position_pct)
+    e.push(`Minimum position (${r.min_position_pct}%) exceeds the single-position cap (${r.max_position_pct}%).`);
+  if(r.max_position_pct+r.min_cash_buffer_pct>100)
+    e.push(`Max position (${r.max_position_pct}%) plus the cash floor (${r.min_cash_buffer_pct}%) exceeds 100% — a full-size position could not leave the buffer intact.`);
+  if(b.min_sample_years>b.lookback_years)
+    e.push(`Minimum sample (${b.min_sample_years}y) exceeds the lookback (${b.lookback_years}y) — no backtest could ever pass.`);
+  if(!String(p.research.primary_ticker||"").trim())
+    e.push("Primary ticker is empty.");
+  if(p.agents["6-bull"].enabled!==p.agents["7-bear"].enabled)
+    e.push("Bull and Bear must be enabled together — a one-sided debate produces a biased memo.");
+  if(!p.agents["8-risk"].enabled&&p.agents["9-portfolio"].enabled)
+    e.push("Portfolio Manager needs the Risk Manager — it may only allocate risk-approved ideas.");
+  return e;
+}
+
+function paintProblems(){
+  const box=$("#problems"); if(!box)return;
+  const probs=validate(prefs);
+  box.innerHTML=probs.length
+    ? `<div class="problems"><strong>${probs.length} setting${probs.length>1?"s":""} the validator would reject</strong>
+       <ul>${probs.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div>`
+    : "";
+  $("#save").disabled=probs.length>0||!dirtyPaths().length;
+  return probs;
+}
+
+/* ── dirty tracking ─────────────────────────────────────── */
+function walk(o,pre=""){
+  const out=[];
+  for(const [k,v] of Object.entries(o)){
+    if(k==="meta"||k==="guardrails"||k.startsWith("_"))continue;
+    const p=pre?`${pre}.${k}`:k;
+    if(v&&typeof v==="object"&&!Array.isArray(v))out.push(...walk(v,p));
+    else out.push([p,v]);
+  }
+  return out;
+}
+function dirtyPaths(){
+  if(!saved)return [];
+  const a=Object.fromEntries(walk(prefs)),b=Object.fromEntries(walk(saved));
+  return Object.keys(a).filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k]));
+}
+function paintDirty(){
+  const d=dirtyPaths(), roots=new Set(d.map(p=>p.split(".")[0]));
+  document.querySelectorAll("nav a").forEach(a=>{
+    const sec=a.dataset.sec;
+    const hit=sec==="research"?roots.has("research")
+      :sec==="agents"?roots.has("agents"):roots.has(sec);
+    a.classList.toggle("dirty",!!hit);
+  });
+  $("#count").innerHTML=d.length?`<b>${d.length}</b> unsaved change${d.length>1?"s":""}`:"";
+  $("#revert").disabled=!d.length;
+  $("#save").disabled=!d.length||validate(prefs).length>0;
+}
+
+/* ── mutation ───────────────────────────────────────────── */
+function change(path,v){
+  set(prefs,path,v);
+  const dependents={
+    "risk.max_position_pct":["risk.max_entry_position_pct","risk.min_position_pct","risk.min_cash_buffer_pct"],
+    "risk.min_cash_buffer_pct":["risk.max_position_pct"],
+    "risk.max_entry_position_pct":["risk.max_position_pct"],
+    "risk.min_position_pct":["risk.max_position_pct"],
+    "backtest.lookback_years":["backtest.min_sample_years"],
+    "backtest.min_sample_years":["backtest.lookback_years"],
+  };
+  [path,...(dependents[path]||[])].forEach(paintGauge);
+  paintDirty(); paintProblems();
+}
+
+/* ── events ─────────────────────────────────────────────── */
+function numField(path){return SECTIONS.flatMap(s=>s.fields).find(f=>f.path===path&&f.t==="num");}
+function quantize(f,x){
+  const v=Math.max(f.min,Math.min(f.max,x));
+  const snapped=Math.round(v/f.step)*f.step;
+  return Math.round(snapped*1e6)/1e6;
+}
+
+function gaugeFromPointer(el,clientX){
+  const f=numField(el.dataset.gauge); if(!f)return;
+  const r=el.getBoundingClientRect();
+  const frac=Math.max(0,Math.min(1,(clientX-r.left)/r.width));
+  change(f.path,quantize(f,f.min+frac*(f.max-f.min)));
+}
+
+document.addEventListener("pointerdown",e=>{
+  const g=e.target.closest("[data-gauge]"); if(!g)return;
+  g.setPointerCapture?.(e.pointerId);
+  g.focus();
+  gaugeFromPointer(g,e.clientX);
+  const move=ev=>gaugeFromPointer(g,ev.clientX);
+  const up=()=>{document.removeEventListener("pointermove",move);
+                document.removeEventListener("pointerup",up);};
+  document.addEventListener("pointermove",move);
+  document.addEventListener("pointerup",up);
+});
+
+document.addEventListener("keydown",e=>{
+  const g=e.target.closest?.("[data-gauge]"); if(!g)return;
+  const f=numField(g.dataset.gauge); if(!f)return;
+  const cur=get(prefs,f.path);
+  const big=(f.max-f.min)/10;
+  let v=null;
+  if(e.key==="ArrowRight"||e.key==="ArrowUp")v=cur+f.step;
+  else if(e.key==="ArrowLeft"||e.key==="ArrowDown")v=cur-f.step;
+  else if(e.key==="PageUp")v=cur+big;
+  else if(e.key==="PageDown")v=cur-big;
+  else if(e.key==="Home")v=f.min;
+  else if(e.key==="End")v=f.max;
+  if(v!==null){e.preventDefault();change(f.path,quantize(f,v));}
+});
+
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.dataset.in!==undefined){
+    const f=numField(t.dataset.in); if(!f)return;
+    const raw=parseFloat(t.value.replace(/,/g,""));
+    if(!Number.isNaN(raw))change(f.path,quantize(f,raw));
+  }
+  if(t.dataset.path!==undefined&&t.classList.contains("ticker-in")){
+    const v=t.value.toUpperCase().replace(/[^A-Z0-9.\-]/g,"");
+    if(t.value!==v)t.value=v;
+    set(prefs,t.dataset.path,v); paintDirty(); paintProblems();
+  }
+});
+
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.dataset.sel!==undefined){change(t.dataset.sel,t.value);paintKeys();}
+  if(t.dataset.model!==undefined){prefs.agents[t.dataset.model].model=t.value;paintFlow();paintDirty();}
+});
+
+document.addEventListener("click",e=>{
+  const t=e.target;
+
+  const bool=t.closest("[data-bool]");
+  if(bool){const p=bool.dataset.bool;change(p,!get(prefs,p));
+    bool.setAttribute("aria-checked",String(get(prefs,p)));return;}
+
+  const ag=t.closest("[data-agent-on]");
+  if(ag){
+    const k=ag.dataset.agentOn, next=!prefs.agents[k].enabled;
+    prefs.agents[k].enabled=next;
+    // Bull and Bear switch together — enforced here so the UI cannot
+    // create a state the validator would reject.
+    if(k==="6-bull")prefs.agents["7-bear"].enabled=next;
+    if(k==="7-bear")prefs.agents["6-bull"].enabled=next;
+    if(k==="8-risk"&&!next)prefs.agents["9-portfolio"].enabled=false;
+    document.querySelectorAll("[data-agent-on]").forEach(b=>{
+      const on=prefs.agents[b.dataset.agentOn].enabled;
+      b.setAttribute("aria-checked",String(on));
+      b.closest(".agent").classList.toggle("off",!on);
+    });
+    paintFlow();paintDirty();paintProblems();return;
+  }
+
+  const rm=t.closest("[data-rm]");
+  if(rm){const p=rm.dataset.path,i=+rm.dataset.rm;
+    const list=get(prefs,p).slice();list.splice(i,1);set(prefs,p,list);
+    render();document.querySelector(`[data-add="${p}"]`)?.focus();return;}
+});
+
+document.addEventListener("keydown",e=>{
+  const add=e.target.dataset?.add;
+  if(add&&e.key==="Enter"){
+    e.preventDefault();
+    const v=e.target.value.toUpperCase().replace(/[^A-Z0-9.\-]/g,"").trim();
+    if(!v)return;
+    const list=get(prefs,add)||[];
+    if(!list.includes(v)){set(prefs,add,[...list,v]);render();
+      document.querySelector(`[data-add="${add}"]`)?.focus();}
+    else e.target.value="";
+  }
+  if((e.metaKey||e.ctrlKey)&&e.key==="s"){e.preventDefault();doSave();}
+});
+
+/* ── nav highlight ──────────────────────────────────────── */
+function initScrollSpy(){
+  const secs=[...document.querySelectorAll("section")];
+  const io=new IntersectionObserver(ents=>{
+    ents.forEach(en=>{
+      if(en.isIntersecting){
+        document.querySelectorAll("nav a").forEach(a=>
+          a.classList.toggle("on",a.dataset.sec===en.target.id));
+      }
+    });
+  },{rootMargin:"-70px 0px -70% 0px"});
+  secs.forEach(s=>io.observe(s));
+}
+
+/* ── toast ──────────────────────────────────────────────── */
+let toastT;
+function toast(msg){
+  const el=$("#toast");el.textContent=msg;el.classList.add("show");
+  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),2600);
+}
+
+/* ── persistence ────────────────────────────────────────── */
+async function doSave(){
+  const probs=validate(prefs);
+  if(probs.length){toast("Fix the flagged settings first");return;}
+  if(!dirtyPaths().length)return;
+
+  if(connected){
+    try{
+      const res=await fetch("/api/preferences",{method:"PUT",
+        headers:{"Content-Type":"application/json"},body:JSON.stringify(prefs)});
+      const body=await res.json();
+      if(!res.ok){
+        toast((body.problems||[body.error]).join(" · "));return;
+      }
+      prefs=body.preferences;saved=clone(prefs);
+      render();toast("Saved · risk-rules.md and ticker.md re-synced");
+    }catch(err){toast("Could not reach the config server — is serve_ui.py running?");}
+    return;
+  }
+  try{localStorage.setItem("aihf.prefs",JSON.stringify(prefs));}catch(e){}
+  saved=clone(prefs);paintAll();
+  toast("Saved in this browser — use Export to apply to the fund");
+}
+
+function doRevert(){
+  prefs=clone(saved);render();toast("Reverted to the last saved state");
+}
+
+function doExport(){
+  const out=clone(prefs);delete out.guardrails;
+  const txt=JSON.stringify(out,null,2);
+  navigator.clipboard?.writeText(txt).then(
+    ()=>toast("preferences JSON copied — paste into config/preferences.json"),
+    ()=>fallbackShow(txt));
+  if(!navigator.clipboard)fallbackShow(txt);
+}
+function fallbackShow(txt){
+  const w=window.open("","_blank");
+  if(w){w.document.write("<pre>"+txt.replace(/[<&]/g,c=>c==="<"?"&lt;":"&amp;")+"</pre>");}
+  else toast("Copy blocked by the browser");
+}
+
+/* ── theme ──────────────────────────────────────────────── */
+function initTheme(){
+  let t=null;
+  try{t=localStorage.getItem("aihf.theme");}catch(e){}
+  if(t)document.documentElement.setAttribute("data-theme",t);
+  $("#theme").addEventListener("click",()=>{
+    const cur=document.documentElement.getAttribute("data-theme");
+    const isDark=cur?cur==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+    const next=isDark?"light":"dark";
+    document.documentElement.setAttribute("data-theme",next);
+    try{localStorage.setItem("aihf.theme",next);}catch(e){}
+  });
+}
+
+/* ── boot ───────────────────────────────────────────────── */
+async function boot(){
+  renderNav();initTheme();
+  $("#save").addEventListener("click",doSave);
+  $("#revert").addEventListener("click",doRevert);
+  $("#export").addEventListener("click",doExport);
+
+  try{
+    const res=await fetch("/api/preferences",{cache:"no-store"});
+    if(!res.ok)throw new Error("no api");
+    const body=await res.json();
+    prefs=body.preferences;defaults=body.defaults;keys=body.keys;connected=true;
+    $("#conn").classList.remove("off");
+    $("#connlbl").textContent="connected to config/preferences.json";
+    if(body.guardrails_intact===false){
+      $("#connlbl").textContent="guardrail check failed — see the terminal";
+      $("#conn").classList.add("off");
+    }
+  }catch(err){
+    connected=false;
+    let stored=null;
+    try{stored=JSON.parse(localStorage.getItem("aihf.prefs")||"null");}catch(e){}
+    prefs=stored||clone(FALLBACK);
+    defaults=clone(FALLBACK);
+    $("#conn").classList.add("off");
+    $("#connlbl").textContent="standalone — export to apply";
+    $("#cfgpath").innerHTML="Run <code>python3 tools/serve_ui.py</code> to edit the fund directly.";
+  }
+  prefs.guardrails=clone(FALLBACK.guardrails);
+  saved=clone(prefs);
+  render();initScrollSpy();
+
+  window.addEventListener("beforeunload",e=>{
+    if(dirtyPaths().length){e.preventDefault();e.returnValue="";}
+  });
+}
+boot();
+</script>
+</body>
+</html>
