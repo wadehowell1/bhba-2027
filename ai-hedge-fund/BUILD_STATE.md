@@ -35,8 +35,9 @@ Then continue at the first unchecked stage below. Do not redo checked stages.
 - [x] **S4 — System Preferences UI**
       `ui/index.html` control panel + `tools/serve_ui.py` config server reading/writing
       `config/preferences.json`.
-- [ ] **S5 — Ship**
+- [x] **S5 — Ship**
       Artifact published, committed, pushed, draft PR open.
+      Artifact: https://claude.ai/code/artifact/8e322ae3-446f-4ddb-ae4e-9c97c25cccbf
 
 ---
 
