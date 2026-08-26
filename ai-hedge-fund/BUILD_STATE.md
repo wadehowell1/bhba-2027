@@ -26,9 +26,9 @@ Then continue at the first unchecked stage below. Do not redo checked stages.
 
 - [x] **S0 — Scaffold**
       Directory tree, `.gitignore` (blocks `.env`), `.env.example`, this checkpoint.
-- [ ] **S1 — Spec + orchestrator**
+- [x] **S1 — Spec + orchestrator**
       `docs/SPEC.md`, `CLAUDE.md` orchestrator, `GUARDRAILS.md`, `risk-rules.md`, `ticker.md`.
-- [ ] **S2 — The 10 agents**
+- [x] **S2 — The 10 agents**
       `.claude/agents/*.md` — one per agent, prompts from the guide, wired to `fund/`.
 - [ ] **S3 — Tool layer**
       `tools/` — market data, SEC EDGAR, news, backtest engine, preference loader, pipeline runner.
