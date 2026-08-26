@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "meta": {
+    "updated_at": null,
+    "updated_by": "defaults",
+    "note": "Single source of truth for the AI Hedge Fund. Edit via the System Preferences UI (python3 tools/serve_ui.py). Runtime copy lives at config/preferences.json and is git-ignored."
+  },
+
+  "research": {
+    "primary_ticker": "AAPL",
+    "watchlist": ["MSFT", "NVDA", "GOOGL"],
+    "scan": {
+      "universe": "sp500",
+      "min_rel_volume": 2.0,
+      "min_pct_move": 5.0,
+      "include_52w_extremes": true,
+      "min_avg_dollar_volume": 10000000,
+      "exclude_earnings_within_days": 2,
+      "max_shortlist": 10
+    }
+  },
+
+  "risk": {
+    "max_position_pct": 20,
+    "max_entry_position_pct": 15,
+    "min_position_pct": 2,
+    "min_cash_buffer_pct": 10,
+    "max_sector_pct": 35,
+    "max_correlated_cluster_pct": 40,
+    "correlation_threshold": 0.7,
+    "max_positions": 12,
+    "min_risk_reward": 2.0,
+    "max_portfolio_drawdown_pct": 20,
+    "max_strategy_drawdown_pct": 25,
+    "default_stop_pct": 8,
+    "require_exit_rule": true,
+    "require_stop": true
+  },
+
+  "backtest": {
+    "lookback_years": 5,
+    "min_trades": 30,
+    "min_sample_years": 3,
+    "overfit_sharpe_threshold": 3.0,
+    "out_of_sample_pct": 30,
+    "initial_capital": 100000,
+    "commission_bps": 5,
+    "slippage_bps": 5
+  },
+
+  "agents": {
+    "1-scanner":      { "enabled": true, "model": "sonnet", "label": "Market Scanner",      "output": "fund/1-scan.md",         "notes": "" },
+    "2-news":         { "enabled": true, "model": "sonnet", "label": "News Analyst",        "output": "fund/2-news.md",         "notes": "" },
+    "3-fundamentals": { "enabled": true, "model": "opus",   "label": "Fundamental Analyst", "output": "fund/3-fundamentals.md", "notes": "" },
+    "4-technicals":   { "enabled": true, "model": "sonnet", "label": "Technical Analyst",   "output": "fund/4-technicals.md",   "notes": "" },
+    "5-quant":        { "enabled": true, "model": "opus",   "label": "Quant Agent",         "output": "fund/5-quant.md",        "notes": "" },
+    "6-bull":         { "enabled": true, "model": "opus",   "label": "Bull Analyst",        "output": "fund/6-bull.md",         "notes": "" },
+    "7-bear":         { "enabled": true, "model": "opus",   "label": "Bear Analyst",        "output": "fund/7-bear.md",         "notes": "" },
+    "8-risk":         { "enabled": true, "model": "opus",   "label": "Risk Manager",        "output": "fund/8-risk.md",         "notes": "" },
+    "9-portfolio":    { "enabled": true, "model": "sonnet", "label": "Portfolio Manager",   "output": "fund/9-portfolio.md",    "notes": "" },
+    "10-memo":        { "enabled": true, "model": "opus",   "label": "Fund Manager",        "output": "fund/10-memo.md",        "notes": "" }
+  },
+
+  "data": {
+    "market_provider": "yfinance",
+    "news_provider": "newsapi",
+    "sec_enabled": true,
+    "sec_filings": ["10-K", "10-Q", "8-K"],
+    "cache_ttl_minutes": 60,
+    "news_lookback_days": 14,
+    "max_headlines": 25,
+    "price_history_years": 5
+  },
+
+  "pipeline": {
+    "parallel_research_stages": true,
+    "stop_on_risk_reject": true,
+    "require_both_debaters": true,
+    "fail_on_missing_data": true,
+    "cache_to_fund": true,
+    "verbosity": "normal"
+  },
+
+  "guardrails": {
+    "_locked": true,
+    "_note": "Enforced by GUARDRAILS.md and tools/guardrails.py. Rendered read-only in the UI. Cannot be disabled.",
+    "research_only": true,
+    "never_promise_profits": true,
+    "label_everything_simulated": true,
+    "real_data_only": true,
+    "no_brokerage_connection": true,
+    "human_approval_required": true,
+    "flag_overfitting": true,
+    "secrets_in_env_only": true,
+    "memo_disclaimer_required": true,
+    "both_sides_debate_required": true
+  }
+}

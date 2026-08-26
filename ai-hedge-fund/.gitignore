@@ -1,0 +1,19 @@
+# Secrets — NEVER commit
+.env
+.env.local
+*.key
+
+# Runtime state
+config/preferences.json
+.cache/
+fund/*.md
+!fund/.gitkeep
+!fund/README.md
+runs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
