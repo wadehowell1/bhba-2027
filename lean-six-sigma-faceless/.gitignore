@@ -1,0 +1,9 @@
+# Secrets — never commit. .env.example holds placeholders only.
+.env
+.env.*
+!.env.example
+
+# Local build / tooling noise
+node_modules/
+.DS_Store
+*.log

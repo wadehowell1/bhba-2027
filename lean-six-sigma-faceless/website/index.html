@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Lean Desk — Lean, translated for small business</title>
+<meta name="description" content="Fix one process at a time so the same job comes out the same way every time. Lean, rewritten for businesses with eleven people, not eleven hundred. Start with a free 60-minute Waste Walk.">
+<link rel="canonical" href="https://example.com/">
+<meta name="robots" content="index,follow">
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Lean Desk — Lean, translated for small business">
+<meta property="og:description" content="Fix one process at a time, two hours a week. Start with a free 60-minute Waste Walk.">
+<meta property="og:url" content="https://example.com/">
+<meta property="og:image" content="https://example.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- TODO(launch): replace example.com throughout, add og-image.png, add favicon -->
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "The Lean Desk",
+  "description": "Lean process improvement tools and coaching for small businesses.",
+  "url": "https://example.com/"
+}
+</script>
+
+<style>
+:root{
+  --paper:#faf8f4; --paper-2:#f2eee6; --ink:#1a1a17; --ink-2:#4a463e;
+  --ink-3:#6f6a60; --rule:#ddd6c8; --accent:#b4451f; --accent-soft:#f6e6de;
+  --ok:#2f6b4f; --card:#fffdf9;
+  --measure:34rem;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#16150f; --paper-2:#1f1d16; --ink:#f2eee4; --ink-2:#c3bcac;
+    --ink-3:#8d8676; --rule:#33302a; --accent:#e07a4e; --accent-soft:#2e1f17;
+    --ok:#6cbf95; --card:#1c1a14;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#16150f; --paper-2:#1f1d16; --ink:#f2eee4; --ink-2:#c3bcac;
+  --ink-3:#8d8676; --rule:#33302a; --accent:#e07a4e; --accent-soft:#2e1f17;
+  --ok:#6cbf95; --card:#1c1a14;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font:16px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{line-height:1.15; letter-spacing:-.02em; margin:0 0 .5em; font-weight:650}
+h1{font-size:clamp(2rem,5.5vw,3.4rem); letter-spacing:-.033em}
+h2{font-size:clamp(1.5rem,3.4vw,2.1rem)}
+h3{font-size:1.075rem; letter-spacing:-.01em}
+p{margin:0 0 1.1em}
+a{color:var(--accent)}
+.wrap{max-width:64rem; margin:0 auto; padding:0 1.5rem}
+.narrow{max-width:var(--measure)}
+section{padding:clamp(3.5rem,8vw,6rem) 0; border-top:1px solid var(--rule)}
+.eyebrow{
+  font-size:.72rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 1rem;
+}
+.lede{font-size:clamp(1.05rem,2.1vw,1.2rem); color:var(--ink-2); max-width:var(--measure)}
+.muted{color:var(--ink-3)}
+.small{font-size:.875rem}
+
+/* header */
+header{position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--rule)}
+.bar{display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem 0}
+.brand{display:flex; align-items:center; gap:.6rem; font-weight:700; letter-spacing:-.02em; text-decoration:none; color:var(--ink)}
+.mark{width:22px;height:22px;flex:none}
+nav{display:flex; gap:1.35rem; align-items:center; min-width:0}
+nav a{color:var(--ink-2); text-decoration:none; font-size:.9rem; white-space:nowrap}
+nav a:hover{color:var(--ink)}
+@media(max-width:720px){nav .hide-sm{display:none}}
+.bar .btn{padding:.55rem 1rem}
+/* Below 560px the brand + "Pricing" + CTA stop fitting on one line and push the page
+   wider than the viewport. Shed the link and shrink the CTA rather than let it
+   overflow. Keep these as rules, not inline styles — an inline style on the button
+   would win over the media query and silently reintroduce the overflow. */
+@media(max-width:560px){
+  .wrap{padding:0 1.15rem}
+  nav{gap:.75rem}
+  nav .hide-xs{display:none}
+  .bar .btn{padding:.5rem .8rem; font-size:.85rem}
+  .brand{font-size:.95rem; gap:.45rem}
+}
+@media(max-width:380px){
+  .wrap{padding:0 1rem}
+  nav{gap:.5rem}
+  .bar .btn{padding:.45rem .65rem; font-size:.8rem}
+  .brand{font-size:.9rem}
+  .mark{width:18px; height:18px}
+}
+
+/* buttons */
+.btn{display:inline-block; padding:.8rem 1.35rem; border-radius:7px; font-weight:600;
+  text-decoration:none; font-size:.95rem; border:1px solid transparent; cursor:pointer}
+.btn-primary{background:var(--accent); color:#fff; border-color:var(--accent)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{border-color:var(--rule); color:var(--ink); background:transparent}
+.btn-ghost:hover{border-color:var(--ink-3)}
+
+/* hero */
+.hero{padding:clamp(3.5rem,9vw,6.5rem) 0 clamp(3rem,7vw,5rem); border-top:none}
+.hero h1{max-width:16ch}
+.hero .lede{margin-bottom:2rem}
+.cta-row{display:flex; flex-wrap:wrap; gap:.75rem; align-items:center}
+.cta-note{font-size:.85rem; color:var(--ink-3); margin:.9rem 0 0}
+
+/* generic layout helpers */
+.grid{display:grid; gap:1.5rem}
+@media(min-width:760px){ .g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} }
+.card{background:var(--card); border:1px solid var(--rule); border-radius:10px; padding:1.4rem}
+.card h3{margin-bottom:.35rem}
+.card p:last-child{margin-bottom:0}
+
+/* problem list */
+.pains{list-style:none; padding:0; margin:0 0 1.5rem; max-width:var(--measure)}
+.pains li{padding:.7rem 0 .7rem 1.6rem; border-bottom:1px solid var(--rule); position:relative; color:var(--ink-2)}
+.pains li::before{content:"—"; position:absolute; left:0; color:var(--accent)}
+
+/* steps */
+ol.steps{list-style:none; counter-reset:s; padding:0; margin:0; display:grid; gap:1.1rem}
+@media(min-width:860px){ol.steps{grid-template-columns:repeat(4,1fr)}}
+ol.steps li{counter-increment:s; background:var(--card); border:1px solid var(--rule);
+  border-radius:10px; padding:1.3rem}
+ol.steps li::before{content:counter(s); display:grid; place-items:center; width:1.9rem; height:1.9rem;
+  border-radius:50%; background:var(--accent-soft); color:var(--accent);
+  font-weight:700; font-size:.85rem; margin-bottom:.7rem}
+ol.steps h3{margin-bottom:.3rem}
+ol.steps p{font-size:.9rem; color:var(--ink-2); margin:0}
+ol.steps .out{display:block; margin-top:.7rem; padding-top:.7rem; border-top:1px dashed var(--rule);
+  font-size:.84rem; color:var(--ink-3)}
+
+/* kit list */
+.kit{list-style:none; padding:0; margin:0; display:grid; gap:.1rem}
+@media(min-width:760px){.kit{grid-template-columns:1fr 1fr; gap:.1rem 2.5rem}}
+.kit li{display:flex; gap:.85rem; padding:.85rem 0; border-bottom:1px solid var(--rule); font-size:.94rem}
+.kit .n{color:var(--accent); font-weight:700; font-variant-numeric:tabular-nums; flex:none}
+.kit strong{font-weight:640}
+.kit span.d{color:var(--ink-2)}
+
+/* pricing */
+.tiers{display:grid; gap:1.25rem}
+@media(min-width:900px){.tiers{grid-template-columns:repeat(4,1fr); align-items:start}}
+.tier{background:var(--card); border:1px solid var(--rule); border-radius:11px; padding:1.5rem; display:flex; flex-direction:column}
+.tier.feature{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent)}
+.tier .price{font-size:1.65rem; font-weight:680; letter-spacing:-.02em; margin:.2rem 0 .1rem}
+.tier .per{font-size:.8rem; color:var(--ink-3); margin-bottom:.9rem}
+.tier ul{list-style:none; padding:0; margin:0 0 1.3rem; font-size:.9rem; color:var(--ink-2)}
+.tier ul li{padding:.32rem 0 .32rem 1.15rem; position:relative}
+.tier ul li::before{content:"·"; position:absolute; left:.3rem; color:var(--accent); font-weight:700}
+.tier .guarantee{font-size:.8rem; color:var(--ink-3); margin:0 0 1.2rem; padding-top:.8rem; border-top:1px solid var(--rule)}
+.tier .btn{margin-top:auto; text-align:center}
+
+/* proof / honesty box */
+.note{border-left:3px solid var(--accent); background:var(--accent-soft); padding:1.15rem 1.35rem;
+  border-radius:0 8px 8px 0; max-width:var(--measure)}
+.note p:last-child{margin-bottom:0}
+.note strong{color:var(--ink)}
+
+/* faq */
+details{border-bottom:1px solid var(--rule); padding:1.05rem 0}
+details summary{cursor:pointer; font-weight:620; list-style:none; display:flex; justify-content:space-between; gap:1rem; align-items:baseline}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+"; color:var(--accent); font-weight:700; flex:none}
+details[open] summary::after{content:"–"}
+details .body{padding-top:.75rem; color:var(--ink-2); max-width:var(--measure)}
+details .body p:last-child{margin-bottom:0}
+
+/* form */
+.signup{background:var(--paper-2); border:1px solid var(--rule); border-radius:12px; padding:clamp(1.5rem,4vw,2.4rem)}
+.field{display:flex; flex-wrap:wrap; gap:.6rem; margin:1.2rem 0 .5rem}
+.field input{flex:1 1 15rem; min-width:0; padding:.8rem .9rem; font:inherit; font-size:.95rem;
+  border:1px solid var(--rule); border-radius:7px; background:var(--card); color:var(--ink)}
+.field input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:transparent}
+.field input[aria-invalid="true"]{border-color:var(--accent)}
+.msg{font-size:.86rem; margin:.4rem 0 0; min-height:1.2em}
+.msg.err{color:var(--accent)}
+.msg.ok{color:var(--ok)}
+
+/* footer */
+footer{border-top:1px solid var(--rule); padding:2.5rem 0 3.5rem; font-size:.875rem; color:var(--ink-3)}
+.fnav{display:flex; flex-wrap:wrap; gap:1.1rem; margin:0 0 1.2rem; padding:0; list-style:none}
+.fnav a{color:var(--ink-2); text-decoration:none}
+.fnav a:hover{color:var(--ink)}
+
+.skip{position:absolute; left:-9999px}
+.skip:focus{left:1rem; top:1rem; background:var(--card); padding:.6rem 1rem; border-radius:6px; z-index:50}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top">
+      <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2" y="4" width="20" height="3" rx="1" fill="currentColor"/>
+        <rect x="2" y="10.5" width="13" height="3" rx="1" fill="var(--accent)"/>
+        <rect x="2" y="17" width="8" height="3" rx="1" fill="currentColor" opacity=".45"/>
+      </svg>
+      The Lean Desk
+    </a>
+    <nav>
+      <a class="hide-sm" href="#how">How it works</a>
+      <a class="hide-sm" href="#kit">The Kit</a>
+      <a class="hide-xs" href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Free Waste Walk</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <p class="eyebrow">Lean, translated for small business</p>
+    <h1>The same job. The same way. Every time.</h1>
+    <p class="lede">
+      Most improvement material was written for factories with a thousand people.
+      This is written for a business with eleven — where the person fixing the process
+      is also the person answering the phone.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#start">Run the free Waste Walk</a>
+      <a class="btn btn-ghost" href="#how">See how it works</a>
+    </div>
+    <p class="cta-note">One process. One hour. No account, no call.</p>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="wrap">
+    <p class="eyebrow">The problem</p>
+    <h2>You already know where it hurts</h2>
+    <p class="lede" style="margin-bottom:1.8rem">You have had this week before.</p>
+    <ul class="pains">
+      <li>The job that got done twice, because nobody wrote down how it was done the first time.</li>
+      <li>The customer who found the mistake before you did.</li>
+      <li>The quote that was wrong, because the information was in someone's head, or someone's van.</li>
+      <li>The Tuesday that disappeared into questions only you can answer.</li>
+    </ul>
+    <div class="narrow">
+      <p>
+        None of it is a disaster. That is the problem. It is small, it is constant, and
+        it is expensive in a way that never shows up as a line on the accounts.
+      </p>
+      <p>
+        And the advice out there does not fit. It assumes a plant, a budget, a spare
+        team and a six-month programme. You have none of those. You have Thursday.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="wrap">
+    <p class="eyebrow">The approach</p>
+    <h2>Fix one process. Properly. Then the next one.</h2>
+    <p class="lede" style="margin-bottom:2rem">
+      There is a proven method for this. It is called lean, and it works — it is just
+      that almost everything written about it was written for large manufacturers.
+      The published research on why lean fails in small businesses says exactly that:
+      the roadmaps were built for big companies, and small firms cannot run them with
+      the time, money and expertise they actually have. So we changed the packaging,
+      not the method.
+    </p>
+    <div class="grid g2">
+      <div class="card">
+        <h3>One process at a time</h3>
+        <p class="muted">Not a transformation. Not a programme. One thing that keeps going wrong, fixed so it stops.</p>
+      </div>
+      <div class="card">
+        <h3>Two hours a week</h3>
+        <p class="muted">Because you do not have five. If a method needs more slack than you have, you will abandon it in week two.</p>
+      </div>
+      <div class="card">
+        <h3>Every template already filled in</h3>
+        <p class="muted">A blank template is not help. You see a worked example from a business the size of yours before you fill in anything.</p>
+      </div>
+      <div class="card">
+        <h3>Your words on the outside</h3>
+        <p class="muted">The method has its own vocabulary. You never have to use it — though it is all in there, translated, if you want it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>Four weeks, four things done</h2>
+    <p class="lede" style="margin-bottom:2.2rem">
+      Each week ends with something finished for your business — not a finished lesson.
+    </p>
+    <ol class="steps">
+      <li>
+        <h3>Pick and measure</h3>
+        <p>Choose one process. Write down what actually happens now — not what is supposed to happen.</p>
+        <span class="out">You end with: a number you can beat, and a map that fits on one page.</span>
+      </li>
+      <li>
+        <h3>Find the real cause</h3>
+        <p>Walk the job. Ask the people doing it. Separate the symptoms from the thing actually causing them.</p>
+        <span class="out">You end with: a short list of causes, with evidence.</span>
+      </li>
+      <li>
+        <h3>Design and pilot</h3>
+        <p>Design the new way with the person who does the job. Run it for one week.</p>
+        <span class="out">You end with: standard work your team helped write.</span>
+      </li>
+      <li>
+        <h3>Make it stick</h3>
+        <p>Ten minutes a day to catch problems early. Then measure the same thing again.</p>
+        <span class="out">You end with: a before and after, and a process that holds.</span>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section id="benefits">
+  <div class="wrap">
+    <p class="eyebrow">What changes</p>
+    <h2>What you actually get out of it</h2>
+    <div class="grid g2" style="margin-bottom:2.5rem">
+      <div class="card">
+        <h3>The job comes out the same</h3>
+        <p class="muted">Whoever happens to be doing it that day.</p>
+      </div>
+      <div class="card">
+        <h3>You stop being the only one who knows</h3>
+        <p class="muted">It is written down — by the people who actually do it.</p>
+      </div>
+      <div class="card">
+        <h3>Problems surface on Tuesday</h3>
+        <p class="muted">Not on the invoice, and not in a complaint.</p>
+      </div>
+      <div class="card">
+        <h3>It keeps going without us</h3>
+        <p class="muted">The point of the coaching is that you run the second process yourself.</p>
+      </div>
+    </div>
+
+    <h2 style="font-size:1.35rem">And what this is not</h2>
+    <div class="narrow">
+      <p><strong>Not a certificate.</strong> If you want a belt, we will point you at the people who sell them. That is a different purchase.</p>
+      <p><strong>Not cost-cutting.</strong> Every hour we find goes back into work you are already trying to do, not onto a redundancy list. If your goal is fewer people, we are the wrong people — and it would not work anyway, because your team has to want it to.</p>
+      <p><strong>Not a transformation programme.</strong> One process. Then the next one.</p>
+    </div>
+  </div>
+</section>
+
+<!-- KIT / FEATURES -->
+<section id="kit">
+  <div class="wrap">
+    <p class="eyebrow">The Small Shop Lean Kit</p>
+    <h2>Nine tools. All of them already filled in.</h2>
+    <p class="lede" style="margin-bottom:2.2rem">
+      The lean toolset, rewritten for a business with eleven people. Sheets and docs you
+      copy and use — not a slide deck about the theory.
+    </p>
+    <ul class="kit">
+      <li><span class="n">01</span><span><strong>Process Map</strong> — <span class="d">one page, twelve steps maximum. If it needs a swimlane, it is too big.</span></span></li>
+      <li><span class="n">02</span><span><strong>Waste Walk Worksheet</strong> — <span class="d">the full version of the free one.</span></span></li>
+      <li><span class="n">03</span><span><strong>Standard Work sheet</strong> — <span class="d">written for the person doing the job, with room for photos.</span></span></li>
+      <li><span class="n">04</span><span><strong>Daily Huddle board</strong> — <span class="d">a ten-minute agenda, including what to say.</span></span></li>
+      <li><span class="n">05</span><span><strong>Problem One-Pager</strong> — <span class="d">one page to think a problem through properly.</span></span></li>
+      <li><span class="n">06</span><span><strong>5 Whys sheet</strong> — <span class="d">with a worked example that is not about a car factory.</span></span></li>
+      <li><span class="n">07</span><span><strong>Job Setup Checklist</strong> — <span class="d">stop the mistake before it happens.</span></span></li>
+      <li><span class="n">08</span><span><strong>Improvement Tracker</strong> — <span class="d">one sheet. Not a project management system.</span></span></li>
+      <li><span class="n">09</span><span><strong>The Translation Guide</strong> — <span class="d">every lean term, what it means, and whether you ever need to say it out loud.</span></span></li>
+    </ul>
+    <p class="small muted" style="margin-top:1.6rem">
+      Every one comes three ways: blank to use, filled in as an example, and a one-page how-to.
+    </p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="wrap">
+    <p class="eyebrow">Pricing</p>
+    <h2>What it costs</h2>
+    <p class="lede" style="margin-bottom:2.4rem">
+      Published, because you should not have to book a call to find out what something costs.
+    </p>
+
+    <div class="tiers">
+      <div class="tier feature">
+        <h3>The Waste Walk</h3>
+        <div class="price">Free</div>
+        <div class="per">One process, one hour</div>
+        <ul>
+          <li>Guided one-hour audit</li>
+          <li>Printable worksheet</li>
+          <li>Ranked list of where the time goes</li>
+          <li>Works on its own</li>
+        </ul>
+        <p class="guarantee">Most people should start here.</p>
+        <a class="btn btn-primary" href="#start">Get it free</a>
+      </div>
+
+      <div class="tier">
+        <h3>The Kit</h3>
+        <div class="price">$49</div>
+        <div class="per">One-time</div>
+        <ul>
+          <li>All nine tools</li>
+          <li>Filled-in examples</li>
+          <li>One-page how-to for each</li>
+          <li>Free updates, forever</li>
+        </ul>
+        <p class="guarantee">30-day refund — and you keep the files.</p>
+        <!-- TODO(launch): point at real hosted checkout -->
+        <a class="btn btn-ghost" href="#start" data-cta="kit">Get the Kit</a>
+      </div>
+
+      <div class="tier">
+        <h3>Fix One Process</h3>
+        <div class="price">$349</div>
+        <div class="per">One-time · 30 days</div>
+        <ul>
+          <li>The four-week system</li>
+          <li>Short video walkthroughs</li>
+          <li>Troubleshooting for the five common stalls</li>
+          <li>Includes the Kit</li>
+        </ul>
+        <p class="guarantee">Finish week one. If the baseline has not shown you something you did not know, full refund.</p>
+        <a class="btn btn-ghost" href="#start" data-cta="course">Join the list</a>
+      </div>
+
+      <div class="tier">
+        <h3>The 90-Day Desk</h3>
+        <div class="price">$2,400</div>
+        <div class="per">Per 90 days · limited places</div>
+        <ul>
+          <li>Kick-off diagnostic</li>
+          <li>Six working sessions</li>
+          <li>Two processes fixed — you lead the second</li>
+          <li>Before/after measure on both</li>
+        </ul>
+        <p class="guarantee">After the diagnostic, if you would rather stop, pay for the diagnostic and stop.</p>
+        <a class="btn btn-ghost" href="#start" data-cta="coaching">Ask about a place</a>
+      </div>
+    </div>
+
+    <p class="small muted" style="margin-top:1.6rem">
+      You will know exactly who you are working with before you pay for any coaching.
+    </p>
+  </div>
+</section>
+
+<!-- HONESTY / PROOF -->
+<section id="proof">
+  <div class="wrap">
+    <p class="eyebrow">Proof</p>
+    <h2>We have not published results yet</h2>
+    <div class="note">
+      <p>
+        <strong>There are no case studies on this page, because there are none to show
+        yet.</strong> When there are, they will appear here with real numbers and the
+        client's name on them.
+      </p>
+      <p>
+        In the meantime the free Waste Walk exists so you can test the method on your
+        own process, in an hour, at no cost. That is better evidence than a testimonial
+        anyway — it is your business, not someone else's.
+      </p>
+    </div>
+    <!--
+      ⚠️ DO NOT REPLACE THIS SECTION WITH INVENTED PROOF.
+      No fabricated testimonials, no stock-photo clients, no logo bars for
+      non-clients, no "join 1,000+ owners" before there are 1,000.
+      Replace only with a real, permissioned case study (validation plan, Test 6).
+    -->
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <p class="eyebrow">Questions</p>
+    <h2>The ones people actually ask</h2>
+    <div style="max-width:44rem">
+      <details>
+        <summary>Do I get a certification?</summary>
+        <div class="body"><p>No. We do not sell one and we are not accredited to. If a credential is what you need, Green Belt courses run from a few hundred dollars up to around $2,500 and there are several reputable providers. What we sell is a process that works, which is a different purchase.</p></div>
+      </details>
+      <details>
+        <summary>Is this just a cost-cutting exercise?</summary>
+        <div class="body"><p>No, and it would not work if it were. The research on why lean fails in small businesses names this exact misreading as a leading cause: the moment a team believes an improvement effort is aimed at their jobs, it stops working. We aim at rework, waiting and mistakes. If your goal is fewer people, we are the wrong people.</p></div>
+      </details>
+      <details>
+        <summary>I genuinely do not have time.</summary>
+        <div class="body"><p>That is the objection and the symptom. It is also why the scope is what it is: one hour for the Waste Walk, two hours a week after that. If you cannot find two hours a week, this will not work, and we would rather you kept your money.</p></div>
+      </details>
+      <details>
+        <summary>Why is there nobody's face on this?</summary>
+        <div class="body"><p>Because the material should stand up on its own. The free Waste Walk exists so you can judge the method on your own business before you trust anyone. Coaching is different — you will know exactly who is in the room with you before you pay for anything.</p></div>
+      </details>
+      <details>
+        <summary>Can I get these templates free somewhere?</summary>
+        <div class="body"><p>Some of them, yes, and there are good free libraries out there. What you are paying for is that ours are filled in, sequenced, and written for a business your size. If a blank template were enough, this would already be fixed.</p></div>
+      </details>
+      <details>
+        <summary>What results should I expect?</summary>
+        <div class="body"><p>We are not going to give you a number we have not measured. We can tell you the method, the scope, and exactly what you will have at the end of four weeks. When we have measured results from real clients, they will appear on this site with their names on them.</p></div>
+      </details>
+      <details>
+        <summary>Will this work for my industry?</summary>
+        <div class="body"><p>It works where the same job runs many times a week and runs differently every time. That covers a lot of trades, clinics, agencies, workshops and fulfilment operations. The Waste Walk is free specifically so you can test that on your own process rather than take our word for it.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA / SIGNUP -->
+<section id="start">
+  <div class="wrap">
+    <div class="signup">
+      <p class="eyebrow">Start here</p>
+      <h2>Start with one process and one hour</h2>
+      <p class="lede">
+        You do not have to decide anything about the rest of it. Run the Waste Walk on
+        the one process that annoyed you most this week, and see what it turns up.
+      </p>
+
+      <form id="signup-form" novalidate>
+        <div class="field">
+          <label for="email" class="skip">Email address</label>
+          <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
+                 placeholder="you@yourbusiness.com" required aria-describedby="form-msg">
+          <button class="btn btn-primary" type="submit">Send me the Waste Walk</button>
+        </div>
+        <p class="msg" id="form-msg" role="status" aria-live="polite"></p>
+        <p class="small muted" style="margin:.6rem 0 0">
+          A worksheet, a guide, and an hour. No call, no account. Unsubscribe any time.
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <ul class="fnav">
+      <li><a href="#start">Waste Walk</a></li>
+      <li><a href="#kit">The Kit</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <!-- TODO(launch): these pages must exist before collecting any email -->
+      <li><a href="/privacy.html">Privacy</a></li>
+      <li><a href="/terms.html">Terms</a></li>
+      <li><a href="/contact.html">Contact</a></li>
+    </ul>
+    <p style="margin:0">The Lean Desk — lean, translated for small business.</p>
+    <p style="margin:.35rem 0 0" class="small">
+      We publish no results we have not measured, and no clients we do not have.
+    </p>
+  </div>
+</footer>
+
+<!--
+  ANALYTICS PLACEHOLDER
+  Privacy-friendly analytics (Plausible / Fathom) go here. No third-party script is
+  loaded by default, and none should be added before the privacy policy exists.
+  <script defer data-domain="REPLACE_ME" src="https://plausible.io/js/script.js"></script>
+-->
+
+<script>
+(function () {
+  "use strict";
+
+  var form = document.getElementById("signup-form");
+  var input = document.getElementById("email");
+  var msg = document.getElementById("form-msg");
+  if (!form || !input || !msg) return;
+
+  // Deliberately permissive: the ESP performs real verification via double opt-in.
+  // Over-strict client regexes reject valid addresses and cost signups.
+  var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  function setMsg(text, kind) {
+    msg.textContent = text;
+    msg.className = "msg" + (kind ? " " + kind : "");
+  }
+
+  input.addEventListener("input", function () {
+    if (input.getAttribute("aria-invalid") === "true") {
+      input.removeAttribute("aria-invalid");
+      setMsg("");
+    }
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var value = input.value.trim();
+
+    if (!value) {
+      input.setAttribute("aria-invalid", "true");
+      setMsg("Pop your email in and we'll send it over.", "err");
+      input.focus();
+      return;
+    }
+    if (!EMAIL.test(value)) {
+      input.setAttribute("aria-invalid", "true");
+      setMsg("That doesn't look like an email address — mind checking it?", "err");
+      input.focus();
+      return;
+    }
+
+    // TODO(launch): POST to the ESP.
+    // The API key MUST NOT appear in this file. Two acceptable options:
+    //   1. the ESP's own hosted form endpoint (no secret needed), or
+    //   2. a serverless function that reads the key from an environment variable.
+    // See .env.example and README.md.
+    setMsg(
+      "Not wired up yet — this is a pre-launch build. Connect an email provider before going live.",
+      "ok"
+    );
+    // eslint-disable-next-line no-console
+    console.info("[signup] captured (not sent):", value);
+  });
+
+  // Interest signal on the paid CTAs, so we learn what people click before
+  // checkout exists. No third-party tracking, no cookies, no personal data.
+  document.querySelectorAll("[data-cta]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      // TODO(launch): forward to analytics as a custom event.
+      console.info("[cta]", el.getAttribute("data-cta"));
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
