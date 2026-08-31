@@ -66,8 +66,15 @@ lean-six-sigma-faceless/
 │   ├── lead-magnet/waste-walk.md   The free tier, written out in full and usable
 │   ├── content/content-system.md   Channels, 30 ideas, hooks, posts, case-study structures
 │   ├── email/sequence.md           6-email sequence
-│   └── outreach/sequence.md        4-message outreach, with compliance warnings
-├── automations/workflows.md        Phase 7 — 16 trigger→action workflows, minimum stack
+│   ├── outreach/sequence.md        4-message outreach, with compliance warnings
+│   └── social/                     ← TikTok + Instagram
+│       ├── README.md               Faceless strategy, pillars, hook rules, success thresholds
+│       ├── 30-day-calendar.md      30 posts written out — every slide, caption, hashtag
+│       └── production-system.md    Design system, batching, what never gets automated
+├── automations/
+│   ├── workflows.md                Phase 7 — 16 trigger→action workflows, minimum stack
+│   ├── social-publishing-pipeline.md  Notion → approval → Buffer → TikTok/IG
+│   └── weekly-routine-setup.md     The two Routines to create, ready to paste
 ├── analytics/kpi-dashboard.md      Phase 8 — the few metrics worth tracking
 └── launch/
     ├── launch-checklist.md         What blocks launch, and the launch sequence
@@ -111,6 +118,26 @@ sounds right. That is the difference between a plan you can act on and a plan th
 merely reads well.
 
 ---
+
+## The social engine
+
+Faceless TikTok + Instagram, approved once a week, publishing itself.
+
+**Live now:**
+- Notion board `The Lean Desk — Content Calendar` with **all 30 posts loaded** as
+  `Draft` — https://app.notion.com/p/3cd19c12699d412ea4483bf19c8d3c95
+- Buffer enabled in Zapier (**needs your OAuth** — see `weekly-routine-setup.md`)
+
+**Format decision:** slideshows and carousels, not video. TikTok photo mode and IG
+carousels need no rendering step, which is the only reason the loop can run hands-off.
+Video is phase two, once a pillar has proven it holds attention.
+
+**The safety property:** nothing publishes unless a human sets a row to `Approved`.
+The default state is "does not post," and no automation may ever set `Approved` itself.
+
+**What is not automated, deliberately:** replies to comments. When someone comments
+"this is literally my Tuesday," that is a discovery conversation asking to happen — and
+the validation plan needs fifteen of those.
 
 ## Immediate next actions
 
