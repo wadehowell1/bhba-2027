@@ -147,7 +147,9 @@ Weekends are off. Consistency for a year beats intensity for a month.
 
 ## Posting times
 
-| Platform | Slots (local time) |
+**All times Jamaica (America/Jamaica, UTC−5, no daylight saving).**
+
+| Platform | Slots |
 |---|---|
 | TikTok | 06:30 or 19:30 — before the working day, or after it |
 | Instagram | 07:00 or 12:30 |
@@ -155,6 +157,28 @@ Weekends are off. Consistency for a year beats intensity for a month.
 **Reasoning, not data:** the audience is running a business between 8am and 6pm. They
 scroll before they start, at lunch, and after they have stopped. ⚠️ These are
 hypotheses — replace them with your own analytics after 30 days.
+
+### ⚠️ One question these times depend on: who is the audience?
+
+The schedule above assumes a **Jamaican** audience, because that is where you are.
+If the target market is actually the **US**, the times need shifting — and more than
+the times would change.
+
+Jamaica sits at UTC−5 all year. US Eastern is UTC−5 in winter but **UTC−4 from March
+to November**, so a 06:30 Jamaica post lands at 07:30 Eastern for most of the year —
+which is fine, but it drifts by an hour twice a year while your clock does not.
+
+**This is worth deciding deliberately, because it reaches further than posting times:**
+
+| If the market is | Then |
+|---|---|
+| **Jamaica / Caribbean** | Times above are right as they stand. Prices should be reconsidered — the $49/$349/$2,400 ladder was benchmarked against US and UK training and consulting rates. The vertical choice changes too |
+| **US** | Shift posting slots one hour later Mar–Nov, or just set them in US Eastern and let your own clock be the odd one out. Pricing stands as drafted |
+| **Both** | Pick one to start. Content that speaks to everyone speaks to nobody, and the Callout pillar only works if the specifics are recognisable |
+
+Nothing in the research so far assumed a geography, so this is genuinely open — but
+it should be answered before the vertical is chosen (C4 in the validation plan), not
+after.
 
 ---
 

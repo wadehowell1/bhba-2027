@@ -141,12 +141,18 @@ batch should sound like.
 
 ## Posting schedule
 
-| Day | Time | Platform |
+| Day | Time (Jamaica, UTC−5) | Platform |
 |---|---|---|
 | Mon–Fri | 06:30 | TikTok |
 | Mon–Fri | 07:00 | Instagram |
 
-⚠️ Hypotheses, not data. Replace after 30 days with your own analytics.
+**Set the Buffer account timezone to America/Jamaica.** Buffer schedules in the
+account's timezone, so if it is left on a default these slots fire at the wrong hour.
+Jamaica does not observe daylight saving, so once set it never needs adjusting.
+
+⚠️ The slots themselves are hypotheses, not data. Replace after 30 days with your own
+analytics. See the audience-geography question in `../marketing/social/README.md` —
+if the target market is the US rather than Jamaica, these shift.
 
 ---
 

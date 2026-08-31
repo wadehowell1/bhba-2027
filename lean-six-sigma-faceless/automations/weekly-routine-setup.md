@@ -36,16 +36,54 @@ Routines UI *can* have connectors attached, so that is where these belong.
 - [ ] Connect your TikTok and Instagram channels **inside Buffer**
 - [ ] Publish one manual test post from Buffer to each channel, and confirm it lands
 - [ ] Note your Buffer channel IDs (the Zapier action needs them)
-- [ ] Check the times below against your timezone — **both crons are UTC**
+- [ ] Set your **Buffer account timezone to America/Jamaica** — Buffer schedules in the
+      account's timezone, and if it is left on a default the posts go out at the wrong hour
 
 ---
 
-## Routine 1 — Sunday approval digest
+## Timezone and why the days are what they are
+
+**All times below are Jamaica (America/Jamaica, UTC−5).** Jamaica does not observe
+daylight saving, so this offset never changes and the crons never need seasonal
+adjustment — a genuine convenience most timezones do not have.
+
+**Cron is evaluated in UTC**, so the stored expressions are the local time plus five
+hours. Note that the Sunday publish Routine crosses midnight in UTC and therefore
+appears as **Monday** in its cron (`* * 1`). That is correct, not a typo.
+
+| Routine | Jamaica | UTC | Cron |
+|---|---|---|---|
+| Approval digest | **Sat 09:00** | Sat 14:00 | `0 14 * * 6` |
+| Publish | **Sun 20:00** | Mon 01:00 | `0 1 * * 1` |
+
+### Why Saturday and Sunday, rather than Sunday and Monday
+
+The first post of the week goes out **Monday 06:30**. A publish step running Monday
+morning would be racing the post it is meant to schedule — Buffer needs the item in
+its queue well before the slot.
+
+So the week runs:
+
+```
+Sat 09:00  digest arrives          ─┐
+                                    │  ~35 hours to review and approve
+Sun 20:00  publish step runs       ─┘
+                                    │  ~10.5 hours of queue lead time
+Mon 06:30  first post goes live    ─┘
+```
+
+You get a relaxed weekend window to approve, and the queue is loaded the night before
+the first post. If you approve late on Sunday, anything approved after 20:00 simply
+waits for the following week's run rather than half-posting.
+
+---
+
+## Routine 1 — Saturday approval digest
 
 | Setting | Value |
 |---|---|
-| Name | `Lean Desk — Sunday approval digest` |
-| Schedule | `0 18 * * 0` — Sundays 18:00 **UTC** |
+| Name | `Lean Desk — Saturday approval digest` |
+| Schedule | `0 14 * * 6` — **Saturdays 09:00 Jamaica** (14:00 UTC) |
 | Mode | New session each run |
 | Connectors | **Notion, Gmail** |
 | Notifications | Push on |
@@ -94,12 +132,12 @@ RULES:
 
 ---
 
-## Routine 2 — Monday publish
+## Routine 2 — Sunday publish
 
 | Setting | Value |
 |---|---|
-| Name | `Lean Desk — Monday publish approved posts` |
-| Schedule | `0 8 * * 1` — Mondays 08:00 **UTC** |
+| Name | `Lean Desk — Sunday publish approved posts` |
+| Schedule | `0 1 * * 1` — **Sundays 20:00 Jamaica** (01:00 UTC Monday) |
 | Mode | New session each run |
 | Connectors | **Notion, Zapier** |
 | Notifications | Push on |
@@ -127,8 +165,8 @@ TASK:
    b. Create a Buffer update for each platform listed in the row's Platform
       property, using the Caption plus that platform's hashtags from the
       Hashtags field, the images from Assets, and the row's Publish date.
-      Scheduled times: TikTok 06:30, Instagram 07:00, local to the Buffer
-      account.
+      Scheduled times: TikTok 06:30, Instagram 07:00 — these are in the Buffer
+      account's timezone, which must be set to America/Jamaica.
    c. On success, set that row's Status to "Scheduled".
 3. Report at the end: how many scheduled, how many skipped and why, and any
    failures with the error.
