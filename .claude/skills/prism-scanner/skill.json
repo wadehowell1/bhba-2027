@@ -1,0 +1,39 @@
+{
+  "name": "prism-scanner",
+  "version": "0.1.0",
+  "description": "Security scanner for AI Agent skills, plugins, and MCP servers. Detects malicious code, data exfiltration, supply chain attacks, and system residue with 39+ detection rules and A-F grading.",
+  "author": "prismlab",
+  "tags": [
+    "security",
+    "scanner",
+    "agent-safety",
+    "skill-vetting",
+    "mcp-security",
+    "supply-chain",
+    "malware-detection",
+    "static-analysis",
+    "plugin-security",
+    "code-audit"
+  ],
+  "requires": {
+    "bins": [
+      "python3"
+    ],
+    "optionalBins": [
+      "git"
+    ]
+  },
+  "install": [
+    {
+      "id": "prism-scanner",
+      "kind": "pip",
+      "package": "prism-scanner",
+      "bins": ["prism"]
+    }
+  ],
+  "platforms": [
+    "linux",
+    "macos",
+    "wsl2"
+  ]
+}
