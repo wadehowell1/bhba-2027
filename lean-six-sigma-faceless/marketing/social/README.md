@@ -216,7 +216,7 @@ Buffer, and for analytics.
 
 > ⚠️ **Disclosure:** if synthetic voice or AI-generated imagery is used later, say so
 > once in the bio or channel description. Both platforms also have their own
-> AI-content labelling requirements — check them at the time.
+> AI-content labeling requirements — check them at the time.
 
 ---
 

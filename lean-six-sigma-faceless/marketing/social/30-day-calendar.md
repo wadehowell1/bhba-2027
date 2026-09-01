@@ -731,7 +731,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 | 5 | Twelve steps maximum. |
 | 6 | If you are past twenty, you are mapping a department, not a process. |
 | 7 | Split it and pick one piece. |
-| 8 | **Complexity is not rigour. It is usually just scope you have not cut yet.** |
+| 8 | **Complexity is not rigor. It is usually just scope you have not cut yet.** |
 
 **Caption:**
 > The corporate version of this involves software, a workshop and two days of

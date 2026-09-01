@@ -7,3 +7,8 @@
 node_modules/
 .DS_Store
 *.log
+
+# Slide PNGs are build output from tools/slide-renderer — but they are committed
+# deliberately, so the calendar and its finished assets stay in one place and the
+# Notion rows can point at real files. Regenerate with:
+#   cd tools/slide-renderer && python3 render.py

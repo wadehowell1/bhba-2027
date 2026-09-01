@@ -1,0 +1,794 @@
+[
+  {
+    "day": 1,
+    "title": "The job that got done twice",
+    "pillar": "Callout",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-01/tiktok/01.png",
+        "marketing/social/slides/day-01/tiktok/02.png",
+        "marketing/social/slides/day-01/tiktok/03.png",
+        "marketing/social/slides/day-01/tiktok/04.png",
+        "marketing/social/slides/day-01/tiktok/05.png",
+        "marketing/social/slides/day-01/tiktok/06.png",
+        "marketing/social/slides/day-01/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-01/ig/01.png",
+        "marketing/social/slides/day-01/ig/02.png",
+        "marketing/social/slides/day-01/ig/03.png",
+        "marketing/social/slides/day-01/ig/04.png",
+        "marketing/social/slides/day-01/ig/05.png",
+        "marketing/social/slides/day-01/ig/06.png",
+        "marketing/social/slides/day-01/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 2,
+    "title": "\"Standard work\"",
+    "pillar": "Translation",
+    "slides": 6,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-02/tiktok/01.png",
+        "marketing/social/slides/day-02/tiktok/02.png",
+        "marketing/social/slides/day-02/tiktok/03.png",
+        "marketing/social/slides/day-02/tiktok/04.png",
+        "marketing/social/slides/day-02/tiktok/05.png",
+        "marketing/social/slides/day-02/tiktok/06.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-02/ig/01.png",
+        "marketing/social/slides/day-02/ig/02.png",
+        "marketing/social/slides/day-02/ig/03.png",
+        "marketing/social/slides/day-02/ig/04.png",
+        "marketing/social/slides/day-02/ig/05.png",
+        "marketing/social/slides/day-02/ig/06.png"
+      ]
+    }
+  },
+  {
+    "day": 3,
+    "title": "The two-week tally sheet",
+    "pillar": "Fix",
+    "slides": 8,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-03/tiktok/01.png",
+        "marketing/social/slides/day-03/tiktok/02.png",
+        "marketing/social/slides/day-03/tiktok/03.png",
+        "marketing/social/slides/day-03/tiktok/04.png",
+        "marketing/social/slides/day-03/tiktok/05.png",
+        "marketing/social/slides/day-03/tiktok/06.png",
+        "marketing/social/slides/day-03/tiktok/07.png",
+        "marketing/social/slides/day-03/tiktok/08.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-03/ig/01.png",
+        "marketing/social/slides/day-03/ig/02.png",
+        "marketing/social/slides/day-03/ig/03.png",
+        "marketing/social/slides/day-03/ig/04.png",
+        "marketing/social/slides/day-03/ig/05.png",
+        "marketing/social/slides/day-03/ig/06.png",
+        "marketing/social/slides/day-03/ig/07.png",
+        "marketing/social/slides/day-03/ig/08.png"
+      ]
+    }
+  },
+  {
+    "day": 4,
+    "title": "Only Dave knows how to do that",
+    "pillar": "Callout",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-04/tiktok/01.png",
+        "marketing/social/slides/day-04/tiktok/02.png",
+        "marketing/social/slides/day-04/tiktok/03.png",
+        "marketing/social/slides/day-04/tiktok/04.png",
+        "marketing/social/slides/day-04/tiktok/05.png",
+        "marketing/social/slides/day-04/tiktok/06.png",
+        "marketing/social/slides/day-04/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-04/ig/01.png",
+        "marketing/social/slides/day-04/ig/02.png",
+        "marketing/social/slides/day-04/ig/03.png",
+        "marketing/social/slides/day-04/ig/04.png",
+        "marketing/social/slides/day-04/ig/05.png",
+        "marketing/social/slides/day-04/ig/06.png",
+        "marketing/social/slides/day-04/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 5,
+    "title": "An hour of work, three days of process",
+    "pillar": "Number",
+    "slides": 8,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-05/tiktok/01.png",
+        "marketing/social/slides/day-05/tiktok/02.png",
+        "marketing/social/slides/day-05/tiktok/03.png",
+        "marketing/social/slides/day-05/tiktok/04.png",
+        "marketing/social/slides/day-05/tiktok/05.png",
+        "marketing/social/slides/day-05/tiktok/06.png",
+        "marketing/social/slides/day-05/tiktok/07.png",
+        "marketing/social/slides/day-05/tiktok/08.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-05/ig/01.png",
+        "marketing/social/slides/day-05/ig/02.png",
+        "marketing/social/slides/day-05/ig/03.png",
+        "marketing/social/slides/day-05/ig/04.png",
+        "marketing/social/slides/day-05/ig/05.png",
+        "marketing/social/slides/day-05/ig/06.png",
+        "marketing/social/slides/day-05/ig/07.png",
+        "marketing/social/slides/day-05/ig/08.png"
+      ]
+    }
+  },
+  {
+    "day": 6,
+    "title": "Your team is not the problem",
+    "pillar": "Myth",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-06/tiktok/01.png",
+        "marketing/social/slides/day-06/tiktok/02.png",
+        "marketing/social/slides/day-06/tiktok/03.png",
+        "marketing/social/slides/day-06/tiktok/04.png",
+        "marketing/social/slides/day-06/tiktok/05.png",
+        "marketing/social/slides/day-06/tiktok/06.png",
+        "marketing/social/slides/day-06/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-06/ig/01.png",
+        "marketing/social/slides/day-06/ig/02.png",
+        "marketing/social/slides/day-06/ig/03.png",
+        "marketing/social/slides/day-06/ig/04.png",
+        "marketing/social/slides/day-06/ig/05.png",
+        "marketing/social/slides/day-06/ig/06.png",
+        "marketing/social/slides/day-06/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 7,
+    "title": "Five questions on the phone call",
+    "pillar": "Fix",
+    "slides": 8,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-07/tiktok/01.png",
+        "marketing/social/slides/day-07/tiktok/02.png",
+        "marketing/social/slides/day-07/tiktok/03.png",
+        "marketing/social/slides/day-07/tiktok/04.png",
+        "marketing/social/slides/day-07/tiktok/05.png",
+        "marketing/social/slides/day-07/tiktok/06.png",
+        "marketing/social/slides/day-07/tiktok/07.png",
+        "marketing/social/slides/day-07/tiktok/08.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-07/ig/01.png",
+        "marketing/social/slides/day-07/ig/02.png",
+        "marketing/social/slides/day-07/ig/03.png",
+        "marketing/social/slides/day-07/ig/04.png",
+        "marketing/social/slides/day-07/ig/05.png",
+        "marketing/social/slides/day-07/ig/06.png",
+        "marketing/social/slides/day-07/ig/07.png",
+        "marketing/social/slides/day-07/ig/08.png"
+      ]
+    }
+  },
+  {
+    "day": 8,
+    "title": "\"Root cause\"",
+    "pillar": "Translation",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-08/tiktok/01.png",
+        "marketing/social/slides/day-08/tiktok/02.png",
+        "marketing/social/slides/day-08/tiktok/03.png",
+        "marketing/social/slides/day-08/tiktok/04.png",
+        "marketing/social/slides/day-08/tiktok/05.png",
+        "marketing/social/slides/day-08/tiktok/06.png",
+        "marketing/social/slides/day-08/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-08/ig/01.png",
+        "marketing/social/slides/day-08/ig/02.png",
+        "marketing/social/slides/day-08/ig/03.png",
+        "marketing/social/slides/day-08/ig/04.png",
+        "marketing/social/slides/day-08/ig/05.png",
+        "marketing/social/slides/day-08/ig/06.png",
+        "marketing/social/slides/day-08/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 9,
+    "title": "The customer found it before you did",
+    "pillar": "Callout",
+    "slides": 6,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-09/tiktok/01.png",
+        "marketing/social/slides/day-09/tiktok/02.png",
+        "marketing/social/slides/day-09/tiktok/03.png",
+        "marketing/social/slides/day-09/tiktok/04.png",
+        "marketing/social/slides/day-09/tiktok/05.png",
+        "marketing/social/slides/day-09/tiktok/06.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-09/ig/01.png",
+        "marketing/social/slides/day-09/ig/02.png",
+        "marketing/social/slides/day-09/ig/03.png",
+        "marketing/social/slides/day-09/ig/04.png",
+        "marketing/social/slides/day-09/ig/05.png",
+        "marketing/social/slides/day-09/ig/06.png"
+      ]
+    }
+  },
+  {
+    "day": 10,
+    "title": "The ten-minute meeting",
+    "pillar": "Fix",
+    "slides": 9,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-10/tiktok/01.png",
+        "marketing/social/slides/day-10/tiktok/02.png",
+        "marketing/social/slides/day-10/tiktok/03.png",
+        "marketing/social/slides/day-10/tiktok/04.png",
+        "marketing/social/slides/day-10/tiktok/05.png",
+        "marketing/social/slides/day-10/tiktok/06.png",
+        "marketing/social/slides/day-10/tiktok/07.png",
+        "marketing/social/slides/day-10/tiktok/08.png",
+        "marketing/social/slides/day-10/tiktok/09.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-10/ig/01.png",
+        "marketing/social/slides/day-10/ig/02.png",
+        "marketing/social/slides/day-10/ig/03.png",
+        "marketing/social/slides/day-10/ig/04.png",
+        "marketing/social/slides/day-10/ig/05.png",
+        "marketing/social/slides/day-10/ig/06.png",
+        "marketing/social/slides/day-10/ig/07.png",
+        "marketing/social/slides/day-10/ig/08.png",
+        "marketing/social/slides/day-10/ig/09.png"
+      ]
+    }
+  },
+  {
+    "day": 11,
+    "title": "Every quote is a small act of guessing",
+    "pillar": "Callout",
+    "slides": 6,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-11/tiktok/01.png",
+        "marketing/social/slides/day-11/tiktok/02.png",
+        "marketing/social/slides/day-11/tiktok/03.png",
+        "marketing/social/slides/day-11/tiktok/04.png",
+        "marketing/social/slides/day-11/tiktok/05.png",
+        "marketing/social/slides/day-11/tiktok/06.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-11/ig/01.png",
+        "marketing/social/slides/day-11/ig/02.png",
+        "marketing/social/slides/day-11/ig/03.png",
+        "marketing/social/slides/day-11/ig/04.png",
+        "marketing/social/slides/day-11/ig/05.png",
+        "marketing/social/slides/day-11/ig/06.png"
+      ]
+    }
+  },
+  {
+    "day": 12,
+    "title": "\"Value stream\"",
+    "pillar": "Translation",
+    "slides": 6,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-12/tiktok/01.png",
+        "marketing/social/slides/day-12/tiktok/02.png",
+        "marketing/social/slides/day-12/tiktok/03.png",
+        "marketing/social/slides/day-12/tiktok/04.png",
+        "marketing/social/slides/day-12/tiktok/05.png",
+        "marketing/social/slides/day-12/tiktok/06.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-12/ig/01.png",
+        "marketing/social/slides/day-12/ig/02.png",
+        "marketing/social/slides/day-12/ig/03.png",
+        "marketing/social/slides/day-12/ig/04.png",
+        "marketing/social/slides/day-12/ig/05.png",
+        "marketing/social/slides/day-12/ig/06.png"
+      ]
+    }
+  },
+  {
+    "day": 13,
+    "title": "What one callback actually costs",
+    "pillar": "Number",
+    "slides": 9,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-13/tiktok/01.png",
+        "marketing/social/slides/day-13/tiktok/02.png",
+        "marketing/social/slides/day-13/tiktok/03.png",
+        "marketing/social/slides/day-13/tiktok/04.png",
+        "marketing/social/slides/day-13/tiktok/05.png",
+        "marketing/social/slides/day-13/tiktok/06.png",
+        "marketing/social/slides/day-13/tiktok/07.png",
+        "marketing/social/slides/day-13/tiktok/08.png",
+        "marketing/social/slides/day-13/tiktok/09.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-13/ig/01.png",
+        "marketing/social/slides/day-13/ig/02.png",
+        "marketing/social/slides/day-13/ig/03.png",
+        "marketing/social/slides/day-13/ig/04.png",
+        "marketing/social/slides/day-13/ig/05.png",
+        "marketing/social/slides/day-13/ig/06.png",
+        "marketing/social/slides/day-13/ig/07.png",
+        "marketing/social/slides/day-13/ig/08.png",
+        "marketing/social/slides/day-13/ig/09.png"
+      ]
+    }
+  },
+  {
+    "day": 14,
+    "title": "You do not need a Green Belt",
+    "pillar": "Myth",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-14/tiktok/01.png",
+        "marketing/social/slides/day-14/tiktok/02.png",
+        "marketing/social/slides/day-14/tiktok/03.png",
+        "marketing/social/slides/day-14/tiktok/04.png",
+        "marketing/social/slides/day-14/tiktok/05.png",
+        "marketing/social/slides/day-14/tiktok/06.png",
+        "marketing/social/slides/day-14/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-14/ig/01.png",
+        "marketing/social/slides/day-14/ig/02.png",
+        "marketing/social/slides/day-14/ig/03.png",
+        "marketing/social/slides/day-14/ig/04.png",
+        "marketing/social/slides/day-14/ig/05.png",
+        "marketing/social/slides/day-14/ig/06.png",
+        "marketing/social/slides/day-14/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 15,
+    "title": "Watch one job, start to finish",
+    "pillar": "Fix",
+    "slides": 8,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-15/tiktok/01.png",
+        "marketing/social/slides/day-15/tiktok/02.png",
+        "marketing/social/slides/day-15/tiktok/03.png",
+        "marketing/social/slides/day-15/tiktok/04.png",
+        "marketing/social/slides/day-15/tiktok/05.png",
+        "marketing/social/slides/day-15/tiktok/06.png",
+        "marketing/social/slides/day-15/tiktok/07.png",
+        "marketing/social/slides/day-15/tiktok/08.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-15/ig/01.png",
+        "marketing/social/slides/day-15/ig/02.png",
+        "marketing/social/slides/day-15/ig/03.png",
+        "marketing/social/slides/day-15/ig/04.png",
+        "marketing/social/slides/day-15/ig/05.png",
+        "marketing/social/slides/day-15/ig/06.png",
+        "marketing/social/slides/day-15/ig/07.png",
+        "marketing/social/slides/day-15/ig/08.png"
+      ]
+    }
+  },
+  {
+    "day": 16,
+    "title": "The van goes back twice",
+    "pillar": "Callout",
+    "slides": 6,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-16/tiktok/01.png",
+        "marketing/social/slides/day-16/tiktok/02.png",
+        "marketing/social/slides/day-16/tiktok/03.png",
+        "marketing/social/slides/day-16/tiktok/04.png",
+        "marketing/social/slides/day-16/tiktok/05.png",
+        "marketing/social/slides/day-16/tiktok/06.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-16/ig/01.png",
+        "marketing/social/slides/day-16/ig/02.png",
+        "marketing/social/slides/day-16/ig/03.png",
+        "marketing/social/slides/day-16/ig/04.png",
+        "marketing/social/slides/day-16/ig/05.png",
+        "marketing/social/slides/day-16/ig/06.png"
+      ]
+    }
+  },
+  {
+    "day": 17,
+    "title": "\"Poka-yoke\"",
+    "pillar": "Translation",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-17/tiktok/01.png",
+        "marketing/social/slides/day-17/tiktok/02.png",
+        "marketing/social/slides/day-17/tiktok/03.png",
+        "marketing/social/slides/day-17/tiktok/04.png",
+        "marketing/social/slides/day-17/tiktok/05.png",
+        "marketing/social/slides/day-17/tiktok/06.png",
+        "marketing/social/slides/day-17/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-17/ig/01.png",
+        "marketing/social/slides/day-17/ig/02.png",
+        "marketing/social/slides/day-17/ig/03.png",
+        "marketing/social/slides/day-17/ig/04.png",
+        "marketing/social/slides/day-17/ig/05.png",
+        "marketing/social/slides/day-17/ig/06.png",
+        "marketing/social/slides/day-17/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 18,
+    "title": "Write it with them, not for them",
+    "pillar": "Fix",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-18/tiktok/01.png",
+        "marketing/social/slides/day-18/tiktok/02.png",
+        "marketing/social/slides/day-18/tiktok/03.png",
+        "marketing/social/slides/day-18/tiktok/04.png",
+        "marketing/social/slides/day-18/tiktok/05.png",
+        "marketing/social/slides/day-18/tiktok/06.png",
+        "marketing/social/slides/day-18/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-18/ig/01.png",
+        "marketing/social/slides/day-18/ig/02.png",
+        "marketing/social/slides/day-18/ig/03.png",
+        "marketing/social/slides/day-18/ig/04.png",
+        "marketing/social/slides/day-18/ig/05.png",
+        "marketing/social/slides/day-18/ig/06.png",
+        "marketing/social/slides/day-18/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 19,
+    "title": "You are the escalation point",
+    "pillar": "Callout",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-19/tiktok/01.png",
+        "marketing/social/slides/day-19/tiktok/02.png",
+        "marketing/social/slides/day-19/tiktok/03.png",
+        "marketing/social/slides/day-19/tiktok/04.png",
+        "marketing/social/slides/day-19/tiktok/05.png",
+        "marketing/social/slides/day-19/tiktok/06.png",
+        "marketing/social/slides/day-19/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-19/ig/01.png",
+        "marketing/social/slides/day-19/ig/02.png",
+        "marketing/social/slides/day-19/ig/03.png",
+        "marketing/social/slides/day-19/ig/04.png",
+        "marketing/social/slides/day-19/ig/05.png",
+        "marketing/social/slides/day-19/ig/06.png",
+        "marketing/social/slides/day-19/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 20,
+    "title": "Lean is not cost-cutting",
+    "pillar": "Myth",
+    "slides": 8,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-20/tiktok/01.png",
+        "marketing/social/slides/day-20/tiktok/02.png",
+        "marketing/social/slides/day-20/tiktok/03.png",
+        "marketing/social/slides/day-20/tiktok/04.png",
+        "marketing/social/slides/day-20/tiktok/05.png",
+        "marketing/social/slides/day-20/tiktok/06.png",
+        "marketing/social/slides/day-20/tiktok/07.png",
+        "marketing/social/slides/day-20/tiktok/08.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-20/ig/01.png",
+        "marketing/social/slides/day-20/ig/02.png",
+        "marketing/social/slides/day-20/ig/03.png",
+        "marketing/social/slides/day-20/ig/04.png",
+        "marketing/social/slides/day-20/ig/05.png",
+        "marketing/social/slides/day-20/ig/06.png",
+        "marketing/social/slides/day-20/ig/07.png",
+        "marketing/social/slides/day-20/ig/08.png"
+      ]
+    }
+  },
+  {
+    "day": 21,
+    "title": "Pick the boring process, not the loud one",
+    "pillar": "Fix",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-21/tiktok/01.png",
+        "marketing/social/slides/day-21/tiktok/02.png",
+        "marketing/social/slides/day-21/tiktok/03.png",
+        "marketing/social/slides/day-21/tiktok/04.png",
+        "marketing/social/slides/day-21/tiktok/05.png",
+        "marketing/social/slides/day-21/tiktok/06.png",
+        "marketing/social/slides/day-21/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-21/ig/01.png",
+        "marketing/social/slides/day-21/ig/02.png",
+        "marketing/social/slides/day-21/ig/03.png",
+        "marketing/social/slides/day-21/ig/04.png",
+        "marketing/social/slides/day-21/ig/05.png",
+        "marketing/social/slides/day-21/ig/06.png",
+        "marketing/social/slides/day-21/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 22,
+    "title": "\"Takt time\"",
+    "pillar": "Translation",
+    "slides": 6,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-22/tiktok/01.png",
+        "marketing/social/slides/day-22/tiktok/02.png",
+        "marketing/social/slides/day-22/tiktok/03.png",
+        "marketing/social/slides/day-22/tiktok/04.png",
+        "marketing/social/slides/day-22/tiktok/05.png",
+        "marketing/social/slides/day-22/tiktok/06.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-22/ig/01.png",
+        "marketing/social/slides/day-22/ig/02.png",
+        "marketing/social/slides/day-22/ig/03.png",
+        "marketing/social/slides/day-22/ig/04.png",
+        "marketing/social/slides/day-22/ig/05.png",
+        "marketing/social/slides/day-22/ig/06.png"
+      ]
+    }
+  },
+  {
+    "day": 23,
+    "title": "The vacation test",
+    "pillar": "Number",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-23/tiktok/01.png",
+        "marketing/social/slides/day-23/tiktok/02.png",
+        "marketing/social/slides/day-23/tiktok/03.png",
+        "marketing/social/slides/day-23/tiktok/04.png",
+        "marketing/social/slides/day-23/tiktok/05.png",
+        "marketing/social/slides/day-23/tiktok/06.png",
+        "marketing/social/slides/day-23/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-23/ig/01.png",
+        "marketing/social/slides/day-23/ig/02.png",
+        "marketing/social/slides/day-23/ig/03.png",
+        "marketing/social/slides/day-23/ig/04.png",
+        "marketing/social/slides/day-23/ig/05.png",
+        "marketing/social/slides/day-23/ig/06.png",
+        "marketing/social/slides/day-23/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 24,
+    "title": "It is in someone's head, or someone's van",
+    "pillar": "Callout",
+    "slides": 6,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-24/tiktok/01.png",
+        "marketing/social/slides/day-24/tiktok/02.png",
+        "marketing/social/slides/day-24/tiktok/03.png",
+        "marketing/social/slides/day-24/tiktok/04.png",
+        "marketing/social/slides/day-24/tiktok/05.png",
+        "marketing/social/slides/day-24/tiktok/06.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-24/ig/01.png",
+        "marketing/social/slides/day-24/ig/02.png",
+        "marketing/social/slides/day-24/ig/03.png",
+        "marketing/social/slides/day-24/ig/04.png",
+        "marketing/social/slides/day-24/ig/05.png",
+        "marketing/social/slides/day-24/ig/06.png"
+      ]
+    }
+  },
+  {
+    "day": 25,
+    "title": "The one-page process map",
+    "pillar": "Fix",
+    "slides": 8,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-25/tiktok/01.png",
+        "marketing/social/slides/day-25/tiktok/02.png",
+        "marketing/social/slides/day-25/tiktok/03.png",
+        "marketing/social/slides/day-25/tiktok/04.png",
+        "marketing/social/slides/day-25/tiktok/05.png",
+        "marketing/social/slides/day-25/tiktok/06.png",
+        "marketing/social/slides/day-25/tiktok/07.png",
+        "marketing/social/slides/day-25/tiktok/08.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-25/ig/01.png",
+        "marketing/social/slides/day-25/ig/02.png",
+        "marketing/social/slides/day-25/ig/03.png",
+        "marketing/social/slides/day-25/ig/04.png",
+        "marketing/social/slides/day-25/ig/05.png",
+        "marketing/social/slides/day-25/ig/06.png",
+        "marketing/social/slides/day-25/ig/07.png",
+        "marketing/social/slides/day-25/ig/08.png"
+      ]
+    }
+  },
+  {
+    "day": 26,
+    "title": "When this stuff does not work",
+    "pillar": "Myth",
+    "slides": 8,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-26/tiktok/01.png",
+        "marketing/social/slides/day-26/tiktok/02.png",
+        "marketing/social/slides/day-26/tiktok/03.png",
+        "marketing/social/slides/day-26/tiktok/04.png",
+        "marketing/social/slides/day-26/tiktok/05.png",
+        "marketing/social/slides/day-26/tiktok/06.png",
+        "marketing/social/slides/day-26/tiktok/07.png",
+        "marketing/social/slides/day-26/tiktok/08.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-26/ig/01.png",
+        "marketing/social/slides/day-26/ig/02.png",
+        "marketing/social/slides/day-26/ig/03.png",
+        "marketing/social/slides/day-26/ig/04.png",
+        "marketing/social/slides/day-26/ig/05.png",
+        "marketing/social/slides/day-26/ig/06.png",
+        "marketing/social/slides/day-26/ig/07.png",
+        "marketing/social/slides/day-26/ig/08.png"
+      ]
+    }
+  },
+  {
+    "day": 27,
+    "title": "\"5S\"",
+    "pillar": "Translation",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-27/tiktok/01.png",
+        "marketing/social/slides/day-27/tiktok/02.png",
+        "marketing/social/slides/day-27/tiktok/03.png",
+        "marketing/social/slides/day-27/tiktok/04.png",
+        "marketing/social/slides/day-27/tiktok/05.png",
+        "marketing/social/slides/day-27/tiktok/06.png",
+        "marketing/social/slides/day-27/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-27/ig/01.png",
+        "marketing/social/slides/day-27/ig/02.png",
+        "marketing/social/slides/day-27/ig/03.png",
+        "marketing/social/slides/day-27/ig/04.png",
+        "marketing/social/slides/day-27/ig/05.png",
+        "marketing/social/slides/day-27/ig/06.png",
+        "marketing/social/slides/day-27/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 28,
+    "title": "Nothing is on fire. That is the problem",
+    "pillar": "Callout",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-28/tiktok/01.png",
+        "marketing/social/slides/day-28/tiktok/02.png",
+        "marketing/social/slides/day-28/tiktok/03.png",
+        "marketing/social/slides/day-28/tiktok/04.png",
+        "marketing/social/slides/day-28/tiktok/05.png",
+        "marketing/social/slides/day-28/tiktok/06.png",
+        "marketing/social/slides/day-28/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-28/ig/01.png",
+        "marketing/social/slides/day-28/ig/02.png",
+        "marketing/social/slides/day-28/ig/03.png",
+        "marketing/social/slides/day-28/ig/04.png",
+        "marketing/social/slides/day-28/ig/05.png",
+        "marketing/social/slides/day-28/ig/06.png",
+        "marketing/social/slides/day-28/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 29,
+    "title": "Measure it again",
+    "pillar": "Fix",
+    "slides": 7,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-29/tiktok/01.png",
+        "marketing/social/slides/day-29/tiktok/02.png",
+        "marketing/social/slides/day-29/tiktok/03.png",
+        "marketing/social/slides/day-29/tiktok/04.png",
+        "marketing/social/slides/day-29/tiktok/05.png",
+        "marketing/social/slides/day-29/tiktok/06.png",
+        "marketing/social/slides/day-29/tiktok/07.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-29/ig/01.png",
+        "marketing/social/slides/day-29/ig/02.png",
+        "marketing/social/slides/day-29/ig/03.png",
+        "marketing/social/slides/day-29/ig/04.png",
+        "marketing/social/slides/day-29/ig/05.png",
+        "marketing/social/slides/day-29/ig/06.png",
+        "marketing/social/slides/day-29/ig/07.png"
+      ]
+    }
+  },
+  {
+    "day": 30,
+    "title": "What a month of this is worth",
+    "pillar": "Number",
+    "slides": 9,
+    "files": {
+      "tiktok": [
+        "marketing/social/slides/day-30/tiktok/01.png",
+        "marketing/social/slides/day-30/tiktok/02.png",
+        "marketing/social/slides/day-30/tiktok/03.png",
+        "marketing/social/slides/day-30/tiktok/04.png",
+        "marketing/social/slides/day-30/tiktok/05.png",
+        "marketing/social/slides/day-30/tiktok/06.png",
+        "marketing/social/slides/day-30/tiktok/07.png",
+        "marketing/social/slides/day-30/tiktok/08.png",
+        "marketing/social/slides/day-30/tiktok/09.png"
+      ],
+      "ig": [
+        "marketing/social/slides/day-30/ig/01.png",
+        "marketing/social/slides/day-30/ig/02.png",
+        "marketing/social/slides/day-30/ig/03.png",
+        "marketing/social/slides/day-30/ig/04.png",
+        "marketing/social/slides/day-30/ig/05.png",
+        "marketing/social/slides/day-30/ig/06.png",
+        "marketing/social/slides/day-30/ig/07.png",
+        "marketing/social/slides/day-30/ig/08.png",
+        "marketing/social/slides/day-30/ig/09.png"
+      ]
+    }
+  }
+]

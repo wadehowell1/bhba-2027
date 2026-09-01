@@ -76,32 +76,35 @@ helps people commit to swiping.
 
 ## Two production routes
 
-### Route A — Canva (recommended for launch)
+### ✅ Built: HTML → PNG renderer
 
-Canva is connected to this project, so a template can be built once and populated per
-post.
+**This is done.** `tools/slide-renderer/` renders every slide from the calendar copy —
+no design tool, no subscription, no manual layout.
 
-1. Build **one** master template with slide layouts: Hook, Body, Emphasis, Close.
-2. For each post, duplicate and fill in the slide copy from the calendar.
-3. Export as PNG set.
-4. Upload to Google Drive → the Notion row → Buffer.
+```bash
+cd tools/slide-renderer && python3 render.py
+```
 
-**Why this route:** Canva handles the layout, brand kit and export, and it can be
-driven programmatically from this project. Realistic effort after the template exists:
-**5–8 minutes per post**, so a batch of ten is about an hour.
+**Current output: 30 posts, 216 slides, 432 PNGs** (TikTok 1080×1920 and Instagram
+1080×1350), in `marketing/social/slides/`. A full run takes about 2.5 minutes.
 
-### Route B — HTML → PNG (for scale, later)
+The calendar markdown is the single source of truth: edit a slide there, re-run, and
+the PNG updates. There is no separate data file to drift out of sync.
 
-Render slides from an HTML template with a headless browser — the same technique used
-to verify the website in this project. Copy lives in a data file, and a script emits
-every PNG.
+**What this changes about production.** The original plan had Canva at 5–8 minutes per
+post. Regenerating all thirty now costs one command, so the marginal cost of a copy
+change is effectively zero — which matters because after the day-30 review the winning
+pillar gets rebuilt and rerun, not hand-edited.
 
-**Trade-off:** a few hours to build, near-zero marginal cost per post afterwards, and
-perfectly consistent output. Worth doing at around post 60, not now. Building a
-rendering pipeline before knowing whether the format works is exactly the premature
-investment the validation plan warns against everywhere else.
+See `tools/slide-renderer/README.md` for the design rules it encodes and the two Chrome
+rendering bugs found and fixed while building it.
 
----
+### Canva, if you prefer to hand-tune
+
+Still viable for one-off variants or if you want to art-direct a specific post. Build
+one master template with Hook / Body / Emphasis / Close layouts and fill from the
+calendar. Slower per post, and the output will drift from the renderer's unless you
+are careful — so treat it as the exception, not the route.
 
 ## Batching
 
@@ -109,14 +112,17 @@ investment the validation plan warns against everywhere else.
 
 | Step | Time | What |
 |---|---|---|
-| 1 | 20 min | Review the next ten from the calendar; adjust anything stale |
-| 2 | 60 min | Generate all ten sets of slides |
+| 1 | 20 min | Review the next ten in the calendar; adjust anything stale |
+| 2 | **~1 min** | `python3 render.py` — regenerates every slide |
 | 3 | 15 min | Captions and hashtags — already drafted, just check |
-| 4 | 10 min | Upload assets, populate Notion rows |
-| **Total** | **~1h 45m** | **Ten posts = two weeks of publishing** |
+| 4 | 10 min | Confirm the Notion rows point at the right assets |
+| **Total** | **~45 min** | **Ten posts = two weeks of publishing** |
 
-That is roughly **3.5 hours a month** for a five-a-week presence on two platforms.
-That number is the whole reason for choosing slideshows over video.
+Roughly **1.5 hours a month** for a five-a-week presence on two platforms, now that
+rendering is a command rather than an hour in a design tool.
+
+The batching discipline still matters — reviewing copy ten at a time keeps the voice
+consistent — but the production step is no longer the expensive part.
 
 ---
 
