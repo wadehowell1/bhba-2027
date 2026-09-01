@@ -28,7 +28,7 @@ runs many times a week and runs differently every time. Full profile:
 
 The same faults keep happening — rework, callbacks, things dropped between people,
 one person who is the only one who knows — and the owner has no method to fix it, no
-time to learn one, and no slack in the team to run a change programme.
+time to learn one, and no slack in the team to run a change program.
 
 ## PROMISED OUTCOME
 
@@ -64,7 +64,7 @@ Each rung is a complete, honest purchase on its own. Nobody has to climb.
 that ends in a ranked list of where the time and money actually go.
 
 **Why it exists:** the research says small business owners have no slack and no
-method, and that lean fails when it arrives as a programme. So the first contact must
+method, and that lean fails when it arrives as a program. So the first contact must
 cost one hour and produce something real. It also proves the method on their own
 business rather than on a Toyota case study.
 
@@ -118,7 +118,7 @@ completed artifact for their business.
 
 **Why 30 days:** long enough to change something real, short enough that an owner can
 see the end from the start. **Why two hours a week:** because the research says the
-team has no slack, and a programme demanding more will be abandoned in week two.
+team has no slack, and a program demanding more will be abandoned in week two.
 
 **Included:** all Kit templates, worked examples, short video walkthroughs, and a
 "what if it goes wrong" troubleshooting section for the five most common stalls.
@@ -236,7 +236,7 @@ One primary CTA per page. The Waste Walk is the front door for almost everyone.
 - No fake urgency, countdown timers, or "only 3 spots left."
 - No income or savings claims of any kind until we have measured evidence.
 - No testimonials until real ones exist.
-- No enterprise "transformation programme."
+- No enterprise "transformation program."
 
 ---
 

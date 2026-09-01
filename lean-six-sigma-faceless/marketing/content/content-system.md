@@ -31,7 +31,7 @@ that publishes daily for six weeks and stops.
 - Screen recordings, diagrams, whiteboard-style animation, and B-roll of real work.
 - Voiceover is fine. If synthetic voice is used, **say so once in the channel
   description.** Do not pretend a synthetic voice is a person.
-- Never fabricate a client story to illustrate a point. Use clearly-labelled worked
+- Never fabricate a client story to illustrate a point. Use clearly-labeled worked
   examples ("here's a made-up plumbing firm with eleven people") — illustration is
   honest, invented evidence is not.
 

@@ -53,7 +53,7 @@ never has to close a sale. It has to be *useful enough to follow*.
    native form of "here are the five places the quote goes wrong."
 3. **It is saveable.** Carousels and slideshows get saved and sent to a colleague far
    more than talking-head video does — and "sends to a business partner" is exactly the
-   behaviour that reaches an owner with budget.
+   behavior that reaches an owner with budget.
 4. **It is cheap to be wrong.** If a format fails, we have lost an hour, not a
    weekend of filming.
 
@@ -92,9 +92,9 @@ more credibility than ten posts claiming it always does.
 **Slide 1 does all the work.** If slide 1 fails, slides 2–9 do not exist.
 
 **A good slide 1 here:**
-- Names a specific, recognisable situation — not a benefit, not a promise
+- Names a specific, recognizable situation — not a benefit, not a promise
 - Is readable in under a second (≤ 10 words, big type)
-- Implies the rest without summarising it
+- Implies the rest without summarizing it
 
 | ✅ Works | ❌ Does not |
 |---|---|
@@ -120,7 +120,7 @@ nouns, no jargon on the front slide.
 - **No hype punctuation.** No "🔥 THIS 🔥", no all-caps sentences, no emoji ladders.
 - **No engagement bait.** No "comment YES if…", no fake polls, no "tag someone who".
 - **No invented statistics.** If a number appears on a slide, it is either arithmetic
-  the viewer can check, or it is labelled as an example.
+  the viewer can check, or it is labeled as an example.
 - **No fake authority.** The account never says "we've helped hundreds of businesses"
   because we have not helped any yet.
 
@@ -147,9 +147,10 @@ Weekends are off. Consistency for a year beats intensity for a month.
 
 ## Posting times
 
-**All times Jamaica (America/Jamaica, UTC−5, no daylight saving).**
+**All times US Eastern.** The audience is in the US; you are in Jamaica. The slots are
+set in the reader's clock, not yours.
 
-| Platform | Slots |
+| Platform | Slots (ET) |
 |---|---|
 | TikTok | 06:30 or 19:30 — before the working day, or after it |
 | Instagram | 07:00 or 12:30 |
@@ -158,29 +159,43 @@ Weekends are off. Consistency for a year beats intensity for a month.
 scroll before they start, at lunch, and after they have stopped. ⚠️ These are
 hypotheses — replace them with your own analytics after 30 days.
 
-### ⚠️ One question these times depend on: who is the audience?
+**Set Buffer's timezone to `America/New_York`.** Jamaica is UTC−5 year-round; US
+Eastern is UTC−4 from March to November. Anchoring to Eastern keeps the slot fixed for
+the reader and lets Buffer handle daylight saving. Your own local time for a post
+shifts by an hour twice a year, which costs nothing.
 
-The schedule above assumes a **Jamaican** audience, because that is where you are.
-If the target market is actually the **US**, the times need shifting — and more than
-the times would change.
-
-Jamaica sits at UTC−5 all year. US Eastern is UTC−5 in winter but **UTC−4 from March
-to November**, so a 06:30 Jamaica post lands at 07:30 Eastern for most of the year —
-which is fine, but it drifts by an hour twice a year while your clock does not.
-
-**This is worth deciding deliberately, because it reaches further than posting times:**
-
-| If the market is | Then |
-|---|---|
-| **Jamaica / Caribbean** | Times above are right as they stand. Prices should be reconsidered — the $49/$349/$2,400 ladder was benchmarked against US and UK training and consulting rates. The vertical choice changes too |
-| **US** | Shift posting slots one hour later Mar–Nov, or just set them in US Eastern and let your own clock be the odd one out. Pricing stands as drafted |
-| **Both** | Pick one to start. Content that speaks to everyone speaks to nobody, and the Callout pillar only works if the specifics are recognisable |
-
-Nothing in the research so far assumed a geography, so this is genuinely open — but
-it should be answered before the vertical is chosen (C4 in the validation plan), not
-after.
+Eastern covers Central acceptably (06:30 ET = 05:30 CT). Pacific is poorly served; if
+the data later shows a West Coast audience, add an afternoon slot rather than moving
+this one.
 
 ---
+
+## Market: North America / US
+
+Decided, and it reaches further than the clock.
+
+**What it settles:**
+- **Pricing stands as drafted.** The $49 / $349 / $2,400 ladder was benchmarked against
+  US and UK certification and consulting rates, so it is already aimed at this market.
+- **Language is American English.** All 30 posts, the site and the lead magnet have
+  been localized — this matters more than it sounds. The Callout pillar works entirely
+  on recognition: "that is literally my Tuesday." A reader who registers the writer as
+  foreign before they register the problem has already stopped reading. Words like
+  *fortnight*, *on holiday* and *organised* break that spell instantly.
+- **Examples are US-shaped**: apartments and elevators, not flats and lifts; a sheet of
+  paper, not A4; vacation, not holiday.
+
+**What it leaves open:**
+- **The vertical (C4)** is still unchosen. US trades and home services is the strongest
+  candidate — large, reachable on these platforms, and the waste is physical and
+  visible. Not yet decided.
+- **Regional accent within the US.** Nothing in the content is region-specific, which
+  is fine to start.
+
+**What it does not change:** the faceless posture. Selling US small businesses from
+Jamaica is a non-issue for digital products, and for coaching the brand is faceless
+anyway — the named human appears at the discovery call, where trust is actually built.
+If anything the geography argues *for* the faceless model rather than against it.
 
 ## Account setup
 
@@ -226,7 +241,7 @@ Reviewed at day 30, against thresholds committed **now**:
 | **Profile → link clicks** | ≥ 2% of profile visits | The bio and CTA are working |
 | **Waste Walk opt-ins from social** | ≥ 25 in month 1 | The funnel connects at all |
 | **Which pillar wins** | Any clear winner | Rebuild the calendar around it |
-| Followers | *Not a threshold* | Tracked, not optimised for |
+| Followers | *Not a threshold* | Tracked, not optimized for |
 
 **If opt-ins are under 10 after 30 days** with reasonable reach, the problem is the
 bridge — bio, CTA or landing page — not the content. Fix that before making more.

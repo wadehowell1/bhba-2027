@@ -31,21 +31,38 @@ Routines UI *can* have connectors attached, so that is where these belong.
 
 ## Before you create them
 
-- [ ] **Authorise Buffer in Zapier** — the app is enabled but not connected:
+- [ ] **Authorize Buffer in Zapier** — the app is enabled but not connected:
       https://mcp.zapier.com/api/v1/connect-auth/BufferCLIAPI?accountId=4745045
 - [ ] Connect your TikTok and Instagram channels **inside Buffer**
 - [ ] Publish one manual test post from Buffer to each channel, and confirm it lands
 - [ ] Note your Buffer channel IDs (the Zapier action needs them)
-- [ ] Set your **Buffer account timezone to America/Jamaica** — Buffer schedules in the
-      account's timezone, and if it is left on a default the posts go out at the wrong hour
+- [ ] Set your **Buffer account timezone to America/New_York** — NOT Jamaica. Buffer
+      schedules in the account's timezone, and the slots should be fixed in the
+      *audience's* clock, not yours. See "Two clocks" below
 
 ---
 
 ## Timezone and why the days are what they are
 
-**All times below are Jamaica (America/Jamaica, UTC−5).** Jamaica does not observe
-daylight saving, so this offset never changes and the crons never need seasonal
-adjustment — a genuine convenience most timezones do not have.
+### Two clocks, and which governs what
+
+You are in Jamaica. The audience is in the US. These are different clocks and they
+govern different things — getting this backwards is the most likely scheduling
+mistake here.
+
+| | Clock | Why |
+|---|---|---|
+| **Post times** (in Buffer) | **US Eastern** — `America/New_York` | The slots must land at the same local moment for the *reader*, every week. Set Buffer to Eastern and it handles US daylight saving for you |
+| **Routine times** (the crons) | **Jamaica** — `America/Jamaica` | These only need to run before the first post, with lead time. Anchoring them to Jamaica means they never shift, because Jamaica has no daylight saving |
+
+**Why this matters:** Jamaica is UTC−5 all year. US Eastern is UTC−5 in winter but
+**UTC−4 from March to November**. If you set Buffer to Jamaica, your 06:30 slot would
+silently become 07:30 Eastern for eight months of the year. Setting Buffer to Eastern
+fixes the slot in the reader's clock; your own local time for it just shifts by an
+hour twice a year, which costs you nothing.
+
+The Routine crons below are anchored to Jamaica and never need seasonal adjustment.
+Both give ample lead time in either season.
 
 **Cron is evaluated in UTC**, so the stored expressions are the local time plus five
 hours. Note that the Sunday publish Routine crosses midnight in UTC and therefore
@@ -166,7 +183,8 @@ TASK:
       property, using the Caption plus that platform's hashtags from the
       Hashtags field, the images from Assets, and the row's Publish date.
       Scheduled times: TikTok 06:30, Instagram 07:00 — these are in the Buffer
-      account's timezone, which must be set to America/Jamaica.
+      account's timezone, which must be set to America/New_York (US Eastern), so
+      they stay fixed in the audience's clock through daylight saving.
    c. On success, set that row's Status to "Scheduled".
 3. Report at the end: how many scheduled, how many skipped and why, and any
    failures with the error.

@@ -102,9 +102,9 @@ for large manufacturers), the existence of a cheap and partly free template mark
 and the viability of faceless formats for B2B education. Sources are listed in
 `research/market-research.md`.
 
-**Assumptions, labelled as such throughout:** every price, every conversion rate, every
+**Assumptions, labeled as such throughout:** every price, every conversion rate, every
 cost-to-deliver, all build-time estimates, coaching capacity, and most of the customer
-profile's behavioural detail.
+profile's behavioral detail.
 
 **Not done, and not fudged:**
 - No customer has been spoken to

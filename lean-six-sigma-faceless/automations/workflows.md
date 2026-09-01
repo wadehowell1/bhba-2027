@@ -1,7 +1,7 @@
 # Automations
 
 > ⚠️ **The framework's warning, restated because it matters:** Claude Code can only
-> reach tools you have actually connected and authorised. Nothing in this file is
+> reach tools you have actually connected and authorized. Nothing in this file is
 > live. It is a design for workflows a human must set up, connect and test.
 
 ## Design principle: automate the delivery, not the relationship

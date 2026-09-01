@@ -14,7 +14,7 @@
 Published Lean Six Sigma Green Belt training prices span roughly **$300 to $2,500**:
 
 - Self-paced / aggregator online courses commonly listed from **~$300** upward.
-- University-run programmes are materially higher — the University of Kansas lists an
+- University-run programs are materially higher — the University of Kansas lists an
   in-person 5-day Green Belt at **$2,495** and an 8-week online self-paced Green Belt
   at **$1,995**.
 - Certification **exam** fees sit separately at around **$295**, with an ASQ Green Belt
@@ -40,7 +40,7 @@ barriers:
   operations difficult.
 - **Management and cultural barriers** — lack of top-management commitment, middle
   management resistance, weak employee involvement, over-reliance on tools, and the
-  perception that **lean is a cost-cutting programme rather than an improvement
+  perception that **lean is a cost-cutting program rather than an improvement
   philosophy**.
 - **Framework mismatch** — many published lean roadmaps were built for **large
   manufacturing companies, not for SMEs**, and firms struggle to apply them.
@@ -75,7 +75,7 @@ share of it is free. Selling "the templates" is selling a commodity.
 small-business-specific wording, worked examples from an 11-person business rather
 than a 1,100-person plant, and a sequence that tells the buyer what to do on Monday.
 
-### A4. Faceless content is a recognised, working format for B2B education
+### A4. Faceless content is a recognized, working format for B2B education
 
 Industry commentary on the format is consistent: for businesses the highest-return
 faceless formats are educational explainers, walkthroughs and training content; the
@@ -114,7 +114,7 @@ this business model.
    price and "sales" counts for 15 listings.*
 3. **C3 — Keyword demand.** No search-volume data has been gathered for either
    practitioner terms ("A3 template", "5S checklist") or operator terms ("stop
-   rework", "systemise my business"). *Method: keyword tool pass before committing
+   rework", "systemize my business"). *Method: keyword tool pass before committing
    the content calendar.*
 4. **C4 — Which vertical.** Trades, clinics, agencies, e-commerce ops and light
    manufacturing all fit the profile. Not yet chosen. *Method: 15 discovery
@@ -134,8 +134,8 @@ Grouped by what they actually take money for, not by what they call themselves.
 | Group | Examples observed | Strength | Weakness for our buyer |
 |---|---|---|---|
 | **Accreditation bodies** | ASQ, IASSC, CSSC | Own the credential; trusted | Sell exams, not outcomes; nothing changes in the business |
-| **Training aggregators** | KnowledgeHut, Unichrone, Master of Project | Volume, SEO dominance, low price | Generic, enterprise-flavoured, learner-focused |
-| **University programmes** | e.g. University of Kansas ($1,995–$2,495) | Institutional credibility | Expensive, scheduled, time-costly for an owner |
+| **Training aggregators** | KnowledgeHut, Unichrone, Master of Project | Volume, SEO dominance, low price | Generic, enterprise-flavored, learner-focused |
+| **University programs** | e.g. University of Kansas ($1,995–$2,495) | Institutional credibility | Expensive, scheduled, time-costly for an owner |
 | **Lean consultancies** | New England Lean Consulting, Incito, OpEx Lean, Mattox, GENEDGE | Real implementation; retainers | Priced/scoped for mid-market manufacturers; opaque pricing (C1) |
 | **Free content libraries** | Learn Lean Sigma | Free, comprehensive | No sequence, no accountability, no translation |
 | **Template sellers** | Etsy toolkit listings | Cheap, instant | Slide decks; enterprise framing; no support |
@@ -197,7 +197,7 @@ competitor quotes for C1 → *then* price and build the mid and high tiers.
 - [2026 Six Sigma Green Belt Certification Cost — Master of Project](https://blog.masterofproject.com/six-sigma-green-belt-certification-cost/)
 - [Green Belt Certification Cost — Unichrone](https://unichrone.com/resource/green-belt-certification-cost)
 - [How Much Does Lean Six Sigma Certification Cost in 2026 — WhichCert](https://whichcert.com/how-much-does-lean-six-sigma-certification-cost/)
-- [Lean Six Sigma Green Belt programmes — Jayhawk Global, University of Kansas](https://jayhawkglobal.ku.edu/node/602)
+- [Lean Six Sigma Green Belt programs — Jayhawk Global, University of Kansas](https://jayhawkglobal.ku.edu/node/602)
 - [The Challenges of Implementing Lean Across Different Industries — Energiaa](https://energiaa.vamk.fi/en/articles/future/the-challenges-of-implementing-lean-across-different-industries/)
 - [Barriers to Lean Implementation: Perceptions of Top Managers, Middle Managers and Workers — ScienceDirect](https://www.sciencedirect.com/science/article/pii/S2212827116312574)
 - [Lean Implementation Frameworks: The Challenges for SMEs — ScienceDirect](https://www.sciencedirect.com/science/article/pii/S2212827117303529)

@@ -155,8 +155,14 @@ worth planning around, because it is what months 3–8 probably look like.
 1. Test 2 competitor quotes → repricing Rung 3, probably significantly.
 2. Test 5 real conversion → repricing Rung 1 or rebuilding the sales page.
 3. Choosing a vertical (C4) → higher prices are defensible in a narrow niche.
-4. Sales tax / VAT / GST on digital goods → **jurisdiction-dependent, needs an
-   accountant.** Not modelled here at all.
+4. **Payment processing.** ⚠️ Stripe is unavailable in Jamaica, so a merchant of
+   record is required. MoR fees run materially higher than Stripe's ~2.9% + $0.30 —
+   Lemon Squeezy publishes 5% + $0.50, for example (⚠️ verify current rates). Every
+   cost-to-deliver line below assumes Stripe-like fees and is therefore **understated**.
+   At $49 the real fee is roughly $3 rather than $1.72; at $349, roughly $18 rather
+   than $10.42. Margins stay high, but re-run these once the platform is chosen.
+5. **US sales tax** on digital goods is largely handled by the MoR as seller of record.
+   Confirm residual obligations with an accountant.
 
 ---
 

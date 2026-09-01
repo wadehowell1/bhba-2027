@@ -43,7 +43,7 @@ None of it is a disaster. That is the problem. It is small, it is constant, and 
 expensive in a way that never shows up as a line on the accounts.
 
 And the advice out there does not fit. It assumes a plant, a budget, a spare team and
-a six-month programme. You have none of those. You have Thursday.
+a six-month program. You have none of those. You have Thursday.
 
 ---
 
@@ -59,7 +59,7 @@ expertise they actually have.
 
 So we changed the packaging, not the method.
 
-**One process at a time.** Not a transformation. Not a programme. One thing that keeps
+**One process at a time.** Not a transformation. Not a program. One thing that keeps
 going wrong, fixed so it stops.
 
 **Two hours a week.** Because you do not have five.
@@ -103,7 +103,7 @@ plain English.
 - Not cost-cutting. Every hour we find goes back into work you are already trying to
   do, not into a redundancy list. If your goal is fewer people, we are the wrong
   people.
-- Not a transformation programme. One process. Then the next one.
+- Not a transformation program. One process. Then the next one.
 
 ---
 
@@ -193,7 +193,7 @@ them.
 
 **Will this work for my industry?**
 It works where the same job runs many times a week and runs differently every time.
-That covers a lot of trades, clinics, agencies, workshops and fulfilment operations.
+That covers a lot of trades, clinics, agencies, workshops and fulfillment operations.
 The Waste Walk is free specifically so you can test that on your own process rather
 than take our word for it.
 

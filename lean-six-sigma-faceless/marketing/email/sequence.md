@@ -2,7 +2,7 @@
 
 Six emails, triggered by the Waste Walk opt-in. Tone matches the site: an operator
 talking to another operator. Plain text, no header images, no "Hi {{first_name}}!"
-theatre.
+theater.
 
 **Sending rules**
 - Double opt-in. ⚠️ Required in several jurisdictions and better for deliverability.
@@ -67,12 +67,12 @@ entirely sitting in an inbox, waiting on a decision, waiting on a callback, wait
 for someone to be free.
 
 That matters because of where people usually look. When a job takes too long, the
-instinct is to look at the person doing it — work faster, be more organised, try
+instinct is to look at the person doing it — work faster, be more organized, try
 harder. But if 90% of the elapsed time is waiting, then making the working part 20%
-faster changes almost nothing. You optimised the hour and ignored the three days.
+faster changes almost nothing. You optimized the hour and ignored the three days.
 
 The second surprise is usually the K column — the steps only one person can do. Every
-one of those is a step that stops when they are on holiday. Most owners know they have
+one of those is a step that stops when they are on vacation. Most owners know they have
 one or two. Very few have counted.
 
 If you have run the walk, look at your W and K rows again. That is usually where the
@@ -103,7 +103,7 @@ The instinct is "we need to be more careful when quoting."
 
 The walk shows something different. The person quoting is working from a phone call
 taken by whoever answered, written on whatever was to hand. Sometimes the caller
-mentioned it was a third-floor flat with no lift. Sometimes they did not, because
+mentioned it was a third-floor apartment with no elevator. Sometimes they did not, because
 nobody asked.
 
 So the quote is not going wrong at the quote. It is going wrong at the phone call, two
@@ -119,7 +119,7 @@ occasional lost job.
 Two honest caveats. That 69 hours is for *ranking* problems, not a forecast of cash —
 some of it just becomes slack, and that is fine. And the fix only works if the person
 answering the phone helped design the five questions. Hand them a form they did not
-help write and it will be half-filled within a fortnight.
+help write and it will be half-filled within two weeks.
 
 That whole pattern — the problem is upstream of where it shows up — is most of what
 this method is.
@@ -141,7 +141,7 @@ I am not going to tell you that you do. You know your week better than I do.
 But it is worth separating two things, because they get bundled together.
 
 **"I don't have time to fix things"** is usually true and usually permanent, if the
-fixing is a project. A programme, a workshop, a consultant, six months. You are right
+fixing is a project. A program, a workshop, a consultant, six months. You are right
 to refuse that. Most small businesses cannot absorb it, and the research on why lean
 fails in small firms says exactly that — the frameworks were designed for large
 companies with slack that you do not have.
@@ -234,7 +234,7 @@ for than a big one that ignores me.
 - ⚠️ Do not add urgency, discounts or scarcity to email 5. At $49 there is nothing to
   discount, and fake scarcity on an evergreen digital product is a lie the audience
   will spot.
-- Email 3's example is labelled as illustrative **in the email**, not just here. Keep
+- Email 3's example is labeled as illustrative **in the email**, not just here. Keep
   that label. Replace the whole email with a real case study once Test 6 delivers one.
 - Reply CTAs are load-bearing. Replies are the cheapest source of the discovery
   conversations in Test 4 — treat every one as a research interview.

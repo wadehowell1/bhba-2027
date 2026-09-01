@@ -19,7 +19,7 @@ two days a week.
 ### JOB / BUSINESS
 🔶 Owner-operator of a service or light-production business with **repeatable work**:
 trades and home services, clinics (dental, veterinary, physio), agencies and studios,
-e-commerce fulfilment, small food production, specialist workshops.
+e-commerce fulfillment, small food production, specialist workshops.
 
 **The qualifier is not the industry, it is the shape of the work:** the same job runs
 many times a week, and it runs differently every time.
@@ -32,16 +32,16 @@ callbacks, jobs quoted wrong, things falling between people, and the one employe
 who is the only person who knows how something works.
 
 ✅ They have no method for this, no time to learn one, and no slack in the team to
-absorb a change programme. The literature is explicit that SMEs are consumed by
+absorb a change program. The literature is explicit that SMEs are consumed by
 day-to-day operations and cannot easily change those operations.
 
 ### WHAT THEY WANT
 - The same job to come out the same way every time.
 - To stop being the bottleneck and the escalation point.
-- 🔶 To take a two-week holiday without the business degrading.
+- 🔶 To take a two-week vacation without the business degrading.
 - To grow without the chaos growing proportionally.
 
-They do **not** want: a certificate, a philosophy, a transformation programme, or a
+They do **not** want: a certificate, a philosophy, a transformation program, or a
 binder.
 
 ### WHAT THEY HAVE ALREADY TRIED
@@ -56,7 +56,7 @@ agreeing with it. 🔶 Possibly one bad consultant.
 
 ### WHAT THEY DISLIKE
 - ✅ **Anything that smells like cost-cutting or layoffs.** The literature names this
-  directly as a cultural barrier — lean read as a cost programme rather than an
+  directly as a cultural barrier — lean read as a cost program rather than an
   improvement one. Say "efficiency" carelessly and the team hears "redundancies."
 - ✅ Enterprise material. Case studies about Toyota and 900-person plants read as
   "not for me."
@@ -64,7 +64,7 @@ agreeing with it. 🔶 Possibly one bad consultant.
 - Blank templates. ✅ They lack the expertise to fill them in; that is the training
   gap the research identifies.
 - "Book a call to discuss pricing."
-- Long programmes with a payoff in month six.
+- Long programs with a payoff in month six.
 
 ### WHAT THEY WOULD PAY FOR
 🔶 A specific, bounded fix to a named, painful process — with the artifact left behind
@@ -185,7 +185,7 @@ Saying no here is what makes the content specific enough to work.
 
 - **COMPLETED:** Two profiles, exclusions, and the connection between them made
   explicit rather than assumed silently.
-- **ASSUMPTIONS:** Nearly all of Profile 1's behavioural detail is 🔶 inference.
+- **ASSUMPTIONS:** Nearly all of Profile 1's behavioral detail is 🔶 inference.
 - **NEEDS HUMAN REVIEW:** Vertical choice (C4); whether to design for the *direct* or
   *referral* path — it changes the content plan.
 - **NEXT ACTION:** `validation-plan.md`.

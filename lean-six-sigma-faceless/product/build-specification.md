@@ -4,7 +4,7 @@ This business has **two** product types, and the doc's framework treats them
 differently for good reason:
 
 - **Digital product** (Rungs 0–2) — modules, files, templates, bonuses, delivery.
-- **Service** (Rung 3) — deliverables, onboarding, fulfilment, reporting, renewal.
+- **Service** (Rung 3) — deliverables, onboarding, fulfillment, reporting, renewal.
 
 Both specs are below, plus the light software surface needed to sell them.
 
@@ -33,7 +33,7 @@ list and one decision; genuinely useful if they never buy anything.
 **Nine files.** Each ships in three states, and the middle one is the actual product:
 
 1. **Blank** — to use
-2. **Filled-in example** — a fictional 11-person business, *clearly labelled as an
+2. **Filled-in example** — a fictional 11-person business, *clearly labeled as an
    illustrative example, not a real client*
 3. **One-page how-to** — what it is for, when to use it, what "done" looks like
 
@@ -58,7 +58,7 @@ shareable asset in the Kit — which makes it a referral engine as well as a pro
 | **Delivery** | Checkout → automatic delivery email → access page with "Make a copy" links + a zip of PDFs |
 | **Bonus** | Kit → course discount ($49 credited against Rung 2) |
 | **Build effort** | 🔶 ~20–30 hrs |
-| **Updates** | Buyers get all future versions free — a real reason to buy, and cheap to honour |
+| **Updates** | Buyers get all future versions free — a real reason to buy, and cheap to honor |
 
 ### 1.3 Rung 2 — Fix One Process *($349)*
 
@@ -121,7 +121,7 @@ sold dependency. The engagement succeeds when they run the second one.
 and employee involvement; taking a client whose owner will not attend is selling a
 known failure.
 
-### 2.3 Fulfilment rhythm
+### 2.3 Fulfillment rhythm
 
 Fortnightly 60-minute working session. Standing structure:
 
@@ -162,10 +162,48 @@ deliver.
 | Marketing site | Static HTML/CSS — `../website/` | Built |
 | Email capture | Form → email platform API | Key in env var, never in client JS |
 | Email delivery | ESP (ConvertKit / MailerLite / Resend) | Choice pending |
-| Payments | Stripe Checkout or Gumroad/Podia hosted | **Never** handle card data ourselves |
+| Payments | **Merchant of record** (Lemon Squeezy / Paddle / Gumroad) — ⚠️ **not Stripe**, see below | **Never** handle card data ourselves |
 | Product delivery | Hosted platform or emailed links | Choice pending |
 | Booking | Cal.com / Calendly | — |
 | Analytics | Privacy-friendly (Plausible / Fathom) | Placeholder in site |
+
+### ⚠️ Payments: Stripe is not available, and this changes the plan
+
+**Stripe does not support Jamaica as a merchant country.** Verified, not assumed —
+Stripe operates in roughly 46 countries and Jamaica is not among them. A Jamaica-based
+business cannot open a Stripe account directly.
+
+This matters more than "pick a different processor," because it removes the default
+option every guide assumes.
+
+**Do not** register a shell company in a supported country to get around it. Using a US
+LLC to present a Jamaica-operated business as US-based can breach Stripe's terms, and
+the failure mode is account closure with funds held — after you have customers.
+
+**Use a merchant of record instead.** An MoR (Lemon Squeezy, Paddle, Gumroad, Polar)
+legally sells the product to the customer and pays you out. Two consequences, and the
+second is the reason to be pleased about this:
+
+1. **Seller eligibility is a payout question, not a merchant question** — much more
+   permissive. Payouts reach many more countries than Stripe's merchant list, including
+   via PayPal. ⚠️ **Verify Jamaica payout eligibility with each platform directly
+   before committing.** Do not take a comparison blog's word for it, and do not take
+   mine — check the platform's own supported-countries page and, if it is ambiguous,
+   ask their support in writing.
+2. **They handle US sales tax for you.** Selling digital products into the US means
+   economic nexus rules across many states. An MoR takes that on as the seller of
+   record. For a one-person business selling into the US from abroad this is worth
+   more than the fee difference, and it retires a whole class of risk that was
+   previously flagged as needing an accountant.
+
+**Typical cost:** meaningfully higher than Stripe's ~2.9% + $0.30 — Lemon Squeezy for
+example publishes 5% + $0.50. ⚠️ **Verify current rates; they change.** At $49 that is
+roughly $3 versus $1.72 a sale. Worth it for the tax handling alone at this volume.
+
+**Coaching invoices** ($2,400) are a separate problem — MoR platforms are built for
+digital goods, not services. Options: an MoR that supports services, direct bank
+transfer/wire, Wise, or PayPal invoicing. ⚠️ Unresolved; needs a decision before
+selling the first engagement.
 
 ### Security and secrets rules (non-negotiable)
 
@@ -219,7 +257,7 @@ earlier bets are wrong.
 | 5 | Rung 3 price | Must wait for Test 2 |
 | 6 | Refund terms | Contractual commitments |
 | 7 | Contract / terms of service | Needs a lawyer |
-| 8 | Sales tax on digital goods | Jurisdiction-dependent; needs an accountant |
+| 8 | US sales tax on digital goods | Largely solved by using a merchant of record, but confirm with an accountant |
 | 9 | Privacy policy + data handling | Legal requirement before email capture |
 | 10 | Insurance for consulting work | Jurisdiction-dependent |
 

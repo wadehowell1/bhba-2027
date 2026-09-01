@@ -17,7 +17,7 @@ Pull search volumes for two baskets:
 
 | Practitioner basket | Operator basket |
 |---|---|
-| a3 template, 5s checklist, value stream map example, dmaic template, standard work template, root cause analysis template | how to stop rework, sop template small business, my business can't run without me, reduce mistakes in my team, systemise my business |
+| a3 template, 5s checklist, value stream map example, dmaic template, standard work template, root cause analysis template | how to stop rework, sop template small business, my business can't run without me, reduce mistakes in my team, systemize my business |
 
 **Pass:** the operator basket shows meaningful non-branded volume → the direct path is
 live; build operator-intent content.

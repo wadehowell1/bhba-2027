@@ -1,7 +1,7 @@
 # Lean Six Sigma Faceless — Business Plan (Phase 1: Idea)
 
 > **Status:** Draft v1. Every number in this project is an assumption until validated
-> against real customers and real costs. Assumptions are labelled inline.
+> against real customers and real costs. Assumptions are labeled inline.
 
 ---
 
@@ -43,7 +43,7 @@ learn one.
 The academic literature on lean in SMEs is unusually blunt about why the existing
 answer does not reach them — lack of training and expertise, tiny teams fully
 consumed by daily operations, tight budgets, lean being misread as a cost-cutting
-(read: layoffs) programme, and, critically, that **most published lean roadmaps were
+(read: layoffs) program, and, critically, that **most published lean roadmaps were
 designed for large manufacturers, not for small firms**
 ([sources](research/market-research.md#sources)).
 

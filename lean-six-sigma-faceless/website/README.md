@@ -28,11 +28,11 @@ Implemented:
 
 - **Responsive** — single fluid column on mobile, grids from 760px, no horizontal scroll.
 - **Light and dark** — full token palette on `:root`, overridden under
-  `prefers-color-scheme: dark` and `[data-theme="dark"]`. No colour is defined only
+  `prefers-color-scheme: dark` and `[data-theme="dark"]`. No color is defined only
   inside a media query.
 - **SEO basics** — title, meta description, canonical, Open Graph, Twitter card,
   `Organization` JSON-LD.
-- **Accessibility** — skip link, labelled input, `aria-invalid` on error,
+- **Accessibility** — skip link, labeled input, `aria-invalid` on error,
   `role="status"` live region, visible focus, `prefers-reduced-motion` respected.
 - **Form validation** — client-side, permissive by design (the ESP does real
   verification through double opt-in; over-strict regexes reject valid addresses).

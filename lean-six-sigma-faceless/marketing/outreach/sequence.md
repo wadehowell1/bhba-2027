@@ -22,7 +22,7 @@ read on a phone between jobs.
    Not "I noticed you're hiring" if you did not.
 4. **Four messages, then stop.** Someone who has not replied to four is not
    interested, and a fifth converts nothing except goodwill into irritation.
-5. **Honour "no" instantly and warmly.** Small industries talk.
+5. **Honor "no" instantly and warmly.** Small industries talk.
 
 **Who to contact:** businesses matching the ICP where you have a genuine reason to
 reach out — a visible process problem, a local presence, a mutual connection, or a

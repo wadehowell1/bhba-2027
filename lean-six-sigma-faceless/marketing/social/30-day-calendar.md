@@ -47,7 +47,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 | 20 | Myth | Lean is not cost-cutting |
 | 21 | Fix | Pick the boring process, not the loud one |
 | 22 | Translation | "Takt time" |
-| 23 | Number | The holiday test |
+| 23 | Number | The vacation test |
 | 24 | Callout | It is in someone's head, or someone's van |
 | 25 | Fix | The one-page process map |
 | 26 | Myth | When this stuff does not work |
@@ -150,7 +150,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 | 1 | **"Only Dave knows how to do that."** |
 | 2 | Every business has a Dave. |
 | 3 | Sometimes the Dave is you. |
-| 4 | It is fine — until Dave is on holiday. |
+| 4 | It is fine — until Dave is on vacation. |
 | 5 | Or off sick. Or hands in his notice. |
 | 6 | Count how many steps in your business stop when one person does. |
 | 7 | **That number is your actual risk.** |
@@ -181,14 +181,14 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 | 5 | Sat in an inbox. Waiting on a decision. Waiting on a callback. |
 | 6 | Here is why that matters: |
 | 7 | Making the hour 20% faster changes almost nothing. |
-| 8 | **You optimised the hour and ignored the three days.** |
+| 8 | **You optimized the hour and ignored the three days.** |
 
 **Caption:**
 > This is the single most common pattern I see, and it's the one that redirects where
 > people look.
 >
 > When a job takes too long the instinct is to look at the person doing it. Work
-> faster, be more organised. But if 90% of the elapsed time is waiting, then the person
+> faster, be more organized. But if 90% of the elapsed time is waiting, then the person
 > doing the work was never the problem.
 >
 > Time both next week. The gap is the whole answer.
@@ -217,7 +217,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 > Hard one to accept when you're frustrated, and it's the difference between a fix
 > that holds and one that doesn't.
 >
-> "Be more careful" has a shelf life of about a fortnight. Every time. Then the
+> "Be more careful" has a shelf life of about two weeks. Every time. Then the
 > pressure comes back and you're where you started.
 >
 > If a mistake can happen, eventually it will. The question isn't who did it. It's what
@@ -238,7 +238,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 | 3 | So you tell everyone to be more careful when quoting. |
 | 4 | But look one step upstream. |
 | 5 | The person quoting is working from a phone call taken by whoever answered. |
-| 6 | Sometimes the caller mentioned the third floor and no lift. Sometimes not. |
+| 6 | Sometimes the caller mentioned the third floor and no elevator. Sometimes not. |
 | 7 | **Because nobody asked.** |
 | 8 | The fix is five required questions on the call. Not "be careful." |
 
@@ -249,7 +249,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 > given. No amount of care fixes a missing input.
 >
 > Pick your five questions with the person who answers the phone — if they didn't help
-> write it, it'll be half-filled within a fortnight. Free audit in the bio.
+> write it, it'll be half-filled within two weeks. Free audit in the bio.
 
 **Hashtags — TikTok:** #tradesbusiness #smallbusinessowner #quoting #businesstips
 **Hashtags — IG:** #tradesbusiness #smallbusinessowner #quoting #estimating #contractorlife #businesssystems #processimprovement #smallbusinesstips #operations #businessowner
@@ -296,7 +296,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 | 6 | **That is an expensive place to find out.** |
 
 **Caption:**
-> Every business has a last line of defence. The question is whether you chose it.
+> Every business has a last line of defense. The question is whether you chose it.
 >
 > If the answer is "the customer complains," that's not a process — that's a hope with
 > an invoice attached.
@@ -380,7 +380,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 > This one has a bad reputation because the corporate version involves a wall, sticky
 > notes, and two days of everyone's time.
 >
-> The small business version is one sheet of A4 and forty minutes. Same value, and
+> The small business version is one sheet of paper and forty minutes. Same value, and
 > you'll spot the waiting immediately once it's drawn.
 
 **Hashtags — TikTok:** #leansixsigma #processimprovement #businessowner #operations
@@ -518,13 +518,13 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 | 7 | **Say "make it impossible to get wrong." Never say poka-yoke.** |
 
 **Caption:**
-> #4, and my favourite idea in the whole method.
+> #4, and my favorite idea in the whole method.
 >
 > The test: if your fix relies on someone remembering, it isn't a fix. It's a hope
 > with a deadline.
 >
 > Everything good in this category is cheap and physical. A checklist that has to be
-> filled to proceed. A different coloured box. A required field.
+> filled to proceed. A different colored box. A required field.
 
 **Hashtags — TikTok:** #leansixsigma #processimprovement #businessowner #qualitycontrol
 **Hashtags — IG:** #leansixsigma #pokayoke #mistakeproofing #qualitycontrol #continuousimprovement #processimprovement #lean #operationsmanagement #businessowner #errorprevention
@@ -545,8 +545,8 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 | 7 | **People follow what they helped write. They ignore what they were handed.** |
 
 **Caption:**
-> This one is the difference between a change that holds and a change that's gone in a
-> fortnight.
+> This one is the difference between a change that holds and a change that's gone in
+> two weeks.
 >
 > A process someone helped design is theirs. A process someone was handed is yours —
 > and the moment it gets inconvenient, it's your rule they're breaking, not their own
@@ -602,7 +602,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 
 **Caption:**
 > The research on why improvement efforts fail in small firms puts this near the top of
-> the list: lean gets read as a cost-cutting programme instead of an improvement one.
+> the list: lean gets read as a cost-cutting program instead of an improvement one.
 >
 > And once your team believes that, they're right to protect themselves — and you'll
 > never see how the job actually gets done.
@@ -668,12 +668,12 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 
 ---
 
-## Day 23 — The holiday test
+## Day 23 — The vacation test
 **Pillar:** Number · **Format:** 7 slides · **CTA:** none
 
 | # | Slide copy |
 |---|---|
-| 1 | **The holiday test.** |
+| 1 | **The vacation test.** |
 | 2 | Two weeks off. Phone genuinely off. |
 | 3 | What breaks first? |
 | 4 | Write down the answer. Be honest. |
@@ -684,7 +684,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 **Caption:**
 > Best diagnostic question I know, and it takes ten seconds.
 >
-> You don't have to actually take the holiday. Just answer honestly what would fall
+> You don't have to actually take the vacation. Just answer honestly what would fall
 > over first — most owners know immediately, which tells you they've thought about it
 > before.
 >
@@ -737,7 +737,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 > The corporate version of this involves software, a workshop and two days of
 > everyone's time. It is not better. It's just bigger.
 >
-> One sheet of A4, forty minutes, boxes and arrows. You'll see the problem before
+> One sheet of paper, forty minutes, boxes and arrows. You'll see the problem before
 > you've finished drawing it.
 >
 > Template with a filled-in example is in the free kit — link in bio.
@@ -795,7 +795,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 **Caption:**
 > #6, and probably the most misused idea in the whole method.
 >
-> 5S gets taught as a cleaning programme, which is why people roll their eyes at it.
+> 5S gets taught as a cleaning program, which is why people roll their eyes at it.
 > The actual idea is that you should be able to tell at a glance that something is
 > missing, without hunting.
 >
@@ -853,7 +853,7 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 > start so you can't quietly redefine success afterwards.
 >
 > And if it didn't work — genuinely fine. You've learned something real, which is more
-> than most improvement programmes produce.
+> than most improvement programs produce.
 
 **Hashtags — TikTok:** #smallbusinessowner #businesstips #operations #measurement
 **Hashtags — IG:** #smallbusinessowner #kpi #measurement #businesstips #continuousimprovement #operations #processimprovement #dataDriven #businessowner #performance
@@ -869,14 +869,14 @@ CTA; the rest end on the idea. An account that asks every time gets scrolled pas
 | 2 | That is eight hours total. |
 | 3 | One process, picked properly. |
 | 4 | Measured before. Changed with the person who does it. Measured after. |
-| 5 | Not a transformation. Not a programme. |
+| 5 | Not a transformation. Not a program. |
 | 6 | One thing that used to go wrong, that now does not. |
 | 7 | Then you pick the next one. |
 | 8 | That is the entire method. |
 | 9 | **Everything else is packaging.** |
 
 **Caption:**
-> Thirty days of this account, summarised.
+> Thirty days of this account, summarized.
 >
 > There's no secret in here. Lean has been around for decades and it works. The only
 > reason it doesn't reach businesses your size is that almost everything written about

@@ -7,8 +7,8 @@ and without it eating a weekend.
 
 ## The design system
 
-Consistency is the whole game for a faceless account. There is no face to recognise,
-so **the look has to do the recognising.** Someone should identify a Lean Desk post
+Consistency is the whole game for a faceless account. There is no face to recognize,
+so **the look has to do the recognizing.** Someone should identify a Lean Desk post
 from the thumbnail, at speed, without reading the handle.
 
 ### Canvas
@@ -40,7 +40,7 @@ Same tokens as the website, so social and site look like one business:
 - **Hook slide:** 90–110pt. Big enough to read at thumbnail size.
 - **Body slides:** 60–72pt. If your copy needs smaller than 54pt, the copy is too long
   — cut it, do not shrink it.
-- Left-aligned. Centred text at this size reads as a motivational quote.
+- Left-aligned. Centered text at this size reads as a motivational quote.
 
 ### Slide anatomy
 
@@ -62,7 +62,7 @@ Same tokens as the website, so social and site look like one business:
 **The slide counter matters more than it looks.** It signals length, which measurably
 helps people commit to swiping.
 
-### The rules that keep it recognisable
+### The rules that keep it recognizable
 
 1. **One idea per slide.** If there is an "and", it is two slides.
 2. **No stock photography.** Ever. It is the single fastest way to look like every
@@ -127,7 +127,7 @@ That number is the whole reason for choosing slideshows over video.
 - [ ] Slide counter correct
 - [ ] One accent element per slide
 - [ ] Caption has no invented statistic, testimonial or client
-- [ ] Any example is labelled as an example
+- [ ] Any example is labeled as an example
 - [ ] Hashtags within platform norms (TikTok 3–5, IG 8–12)
 - [ ] Link CTA points at the Waste Walk page, and that page is live
 - [ ] Read the caption out loud — if it sounds like an advert, rewrite it

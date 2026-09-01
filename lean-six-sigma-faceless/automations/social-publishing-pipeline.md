@@ -117,7 +117,7 @@ batch should sound like.
 - [ ] Load the 30 posts from the calendar as rows, status `Draft`
 - [ ] Set the default view to filter `Status = Draft`, sorted by Publish date
 
-### Step 3 — Zapier *(needs your authorisation)*
+### Step 3 — Zapier *(needs your authorization)*
 - [ ] Enable the **Buffer** app
 - [ ] Connect your Buffer account (OAuth — you do this, no key is ever handled here)
 - [ ] Confirm the profile IDs for the TikTok and Instagram channels
@@ -129,7 +129,7 @@ batch should sound like.
 > ⚠️ **These cannot be created from a Claude Code session.** A Routine created that
 > way fires with **no connectors** — no Notion, no Gmail, no Zapier — so it can read
 > nothing and send nothing. Attaching connectors explicitly is not available for this
-> organisation from here. Create both from the **claude.ai Routines UI**, where
+> organization from here. Create both from the **claude.ai Routines UI**, where
 > connectors can be attached. Exact prompts and schedules, ready to paste:
 > **`weekly-routine-setup.md`**.
 
@@ -141,18 +141,23 @@ batch should sound like.
 
 ## Posting schedule
 
-| Day | Time (Jamaica, UTC−5) | Platform |
+| Day | Time (US Eastern) | Platform |
 |---|---|---|
-| Mon–Fri | 06:30 | TikTok |
-| Mon–Fri | 07:00 | Instagram |
+| Mon–Fri | 06:30 ET | TikTok |
+| Mon–Fri | 07:00 ET | Instagram |
 
-**Set the Buffer account timezone to America/Jamaica.** Buffer schedules in the
-account's timezone, so if it is left on a default these slots fire at the wrong hour.
-Jamaica does not observe daylight saving, so once set it never needs adjusting.
+**Set the Buffer account timezone to `America/New_York`, not Jamaica.** The audience is
+in the US, so the slots must be fixed in the reader's clock. Buffer then handles US
+daylight saving automatically. If Buffer were set to Jamaica (UTC−5, no DST), every
+slot would silently drift an hour later in the audience's day from March to November.
+
+Eastern also covers Central reasonably — 06:30 ET is 05:30 CT, early but inside the
+"before the working day" window. Pacific is poorly served by this slot; if the data
+later shows a West Coast audience, add a second afternoon slot rather than moving this
+one.
 
 ⚠️ The slots themselves are hypotheses, not data. Replace after 30 days with your own
-analytics. See the audience-geography question in `../marketing/social/README.md` —
-if the target market is the US rather than Jamaica, these shift.
+analytics.
 
 ---
 
@@ -182,7 +187,7 @@ platform-policy risk.
 - All OAuth connections live in Zapier, Buffer and Notion. **No API key is stored in
   this repository, and none is handled in application code.**
 - `.env` is git-ignored; `.env.example` holds placeholders only.
-- Buffer and Zapier authorisation is done by you, in their UI. Claude never sees a
+- Buffer and Zapier authorization is done by you, in their UI. Claude never sees a
   credential.
 - If a connection is revoked, the pipeline fails closed — it does not post.
 

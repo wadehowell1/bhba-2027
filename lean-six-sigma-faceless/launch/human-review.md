@@ -1,7 +1,7 @@
 # Human Review Register
 
 Every decision in this project that a person has to make. Nothing here can be resolved
-by more analysis — each one needs a judgement, a purchase, a professional, or a
+by more analysis — each one needs a judgment, a purchase, a professional, or a
 conversation with a real customer.
 
 **Ordered by what blocks what.**
@@ -17,7 +17,9 @@ conversation with a real customer.
 | 3 | **Brand name, domain, trademark** | Nothing has been checked — no availability, no trademark search | Legal exposure and a rebrand later |
 | 4 | **Privacy policy** | Legal requirement before collecting an email | Non-compliant from the first signup |
 | 5 | **Terms and refund policy** | Contractual commitments | Refund promises on the site are currently unbacked |
-| 6 | **Sales tax / VAT / GST on digital goods** | Jurisdiction-specific; needs an accountant | Unbudgeted liability that accrues silently |
+| 6 | **Payment processor** — Stripe is unavailable in Jamaica | Needs a merchant of record, and Jamaica payout eligibility verified per platform | No way to take money. Blocks every paid tier |
+| 6b | **US sales tax on digital goods** | An MoR covers it as seller of record; residual obligations need an accountant | Unbudgeted liability that accrues silently |
+| 6c | **How coaching is invoiced** | MoR platforms serve digital goods, not services | Blocks the high tier specifically |
 | 7 | **Professional indemnity insurance** | Jurisdiction and profession specific | Uninsured advisory work |
 
 ## 🟠 Blocking the paid tiers
@@ -30,7 +32,7 @@ conversation with a real customer.
 | 11 | **Coaching capacity** (4–6 assumed) | Depends on your available hours and other commitments | You |
 | 12 | **Support response commitment** | It is a promise to customers | You |
 
-## 🟡 Judgement calls worth making deliberately
+## 🟡 Judgment calls worth making deliberately
 
 | # | Decision | The trade-off |
 |---|---|---|

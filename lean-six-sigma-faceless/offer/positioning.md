@@ -6,7 +6,7 @@
 > time, **The Lean Desk** is a set of tools and coaching that fixes one process at a
 > time — so it runs the same way without you in the room.
 > Unlike certification courses and enterprise lean consultancies, we sell the fixed
-> process, not a credential or a transformation programme.
+> process, not a credential or a transformation program.
 
 ## The one-line version
 
@@ -66,7 +66,7 @@ transformation consultancy, or an ad.
 
 | Say | Don't say |
 |---|---|
-| the same way every time | standardisation |
+| the same way every time | standardization |
 | rework, doing it twice | non-conformance |
 | where the time goes | value stream analysis |
 | a one-pager | an A3 |

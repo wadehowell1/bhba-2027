@@ -12,8 +12,16 @@
 - [ ] **Privacy policy live** — ⚠️ required *before* collecting a single email address
 - [ ] **Terms of service / purchase terms** — refund terms are contractual commitments
 - [ ] **Business registration** appropriate to your jurisdiction
-- [ ] **Sales tax / VAT / GST on digital products** — jurisdiction-dependent, and a
-      real liability. **Ask an accountant.** Not modelled anywhere in this project
+- [ ] **Payment processing decided** — ⚠️ **Stripe does not support Jamaica.** Use a
+      merchant of record (Lemon Squeezy / Paddle / Gumroad) and **verify Jamaica payout
+      eligibility with the platform directly** before building checkout. Do not
+      incorporate a shell company abroad to get a Stripe account — it breaches their
+      terms and risks funds being held. See `../product/build-specification.md`
+- [ ] **US sales tax on digital products** — a merchant of record handles economic
+      nexus across US states as seller of record, which is the main reason to use one.
+      Confirm your own residual obligations with an accountant
+- [ ] **How coaching gets invoiced** ($2,400) — MoR platforms are built for digital
+      goods, not services. Unresolved
 - [ ] **Cookie / consent position confirmed** (cookieless analytics makes this simpler,
       not automatically exempt)
 - [ ] **Email compliance** — double opt-in, one-click unsubscribe, physical address in
@@ -33,9 +41,9 @@
 - [ ] No results, percentages or savings figures that were not measured
 - [ ] No "join N+ owners" unless N is true today
 - [ ] No fake urgency, scarcity or struck-through prices never charged
-- [ ] Illustrative examples labelled **as illustrative**, in the artifact itself
+- [ ] Illustrative examples labeled **as illustrative**, in the artifact itself
 - [ ] The site's "no results yet" section is intact and honest
-- [ ] Refund promises match what you will actually honour
+- [ ] Refund promises match what you will actually honor
 
 > This section is the one most likely to be quietly skipped as launch approaches.
 > It is also the one that decides whether this brand is trusted. **Read every page.**
@@ -59,7 +67,7 @@
 
 ### Product readiness
 - [ ] All nine Kit files complete in three states (blank / filled / how-to)
-- [ ] Every filled example labelled as illustrative
+- [ ] Every filled example labeled as illustrative
 - [ ] Files open correctly for someone outside your Google account — **test with a
       second account**; broken "make a copy" links are the most common launch failure
       for this product type

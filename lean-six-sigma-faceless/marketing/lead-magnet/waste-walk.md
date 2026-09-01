@@ -40,9 +40,9 @@ Write one sentence:
 > "This process starts when ______________ and finishes when ______________."
 
 **Examples:**
-- Starts when a customer calls to book, finishes when the job is in the diary and confirmed.
+- Starts when a customer calls to book, finishes when the job is on the schedule and confirmed.
 - Starts when the van is loaded, finishes when the job sheet comes back to the office.
-- Starts when an order drops, finishes when it is packed and labelled.
+- Starts when an order drops, finishes when it is packed and labeled.
 
 **Then answer:**
 - How many times does this run per week? `______`
@@ -103,7 +103,7 @@ steps get none. Some get three.
 > **The W and K columns are usually where the shock is.** In most small businesses the
 > work takes an hour and the *process* takes three days, and almost all of the
 > difference is waiting. K is the one that keeps owners awake — every K is a step that
-> stops when that person is on holiday.
+> stops when that person is on vacation.
 
 **Now total them:**
 
