@@ -177,15 +177,25 @@ TASK:
 1. Query Notion for rows where Status = "Approved" AND Publish date is within
    the next 8 days.
 2. For each such row, in Publish date order:
-   a. SKIP it and report it if the Assets field is empty. Never schedule a post
+   a. Confirm the slide images for that Day actually resolve (fetch the first
+      one). If they do not, SKIP the row and report it. Never schedule a post
       with no images.
-   b. Create a Buffer update for each platform listed in the row's Platform
+   b. Build the image list for the row. Do NOT rely on the Assets field being
+      filled in — derive the URLs from the Day number, which is always correct:
+
+        https://raw.githubusercontent.com/wadehowell1/bhba-2027/<BRANCH>/lean-six-sigma-faceless/marketing/social/slides/day-<NN>/<PLATFORM>/<SS>.png
+
+      where <BRANCH> is claude/lean-six-sigma-faceless-orhfzg (change to main once
+      the pull request is merged), <NN> is the zero-padded Day, <PLATFORM> is
+      tiktok or ig, and <SS> is the zero-padded slide number starting at 01.
+      The slide count per day is in slides/manifest.json in the same repo.
+   c. Create a Buffer update for each platform listed in the row's Platform
       property, using the Caption plus that platform's hashtags from the
-      Hashtags field, the images from Assets, and the row's Publish date.
+      Hashtags field, the derived image list, and the row's Publish date.
       Scheduled times: TikTok 06:30, Instagram 07:00 — these are in the Buffer
       account's timezone, which must be set to America/New_York (US Eastern), so
       they stay fixed in the audience's clock through daylight saving.
-   c. On success, set that row's Status to "Scheduled".
+   d. On success, set that row's Status to "Scheduled".
 3. Report at the end: how many scheduled, how many skipped and why, and any
    failures with the error.
 
@@ -209,8 +219,11 @@ RULES:
 1. **Only `Approved` rows publish**, and only a human sets `Approved`. If you later
    ask Claude to "just approve the good ones" you have removed the only safety
    property in this design.
-2. **A row with empty Assets never gets scheduled.** It is the guard against posting a
-   caption with no images.
+2. **A row whose slide images do not resolve never gets scheduled.** This is the guard
+   against posting a caption with no pictures. Note it checks the *images*, not the
+   Assets field — the URLs are derived from the Day number, so there is nothing to
+   paste and nothing to mistype. The Assets field is a convenience link for you, not
+   an input to the pipeline.
 
 ## First run
 

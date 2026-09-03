@@ -82,7 +82,7 @@ One database, `Content Calendar`.
 | Caption | Text | Final caption |
 | Hashtags | Text | Per platform |
 | CTA | Select | None / Soft / Link |
-| Assets | Files/URL | Exported slide images |
+| Assets | URL | Convenience link to that day's slide folder. **Not** an input to the pipeline — image URLs are derived from the Day number |
 | Notes | Text | Your edits |
 
 ### How you approve
@@ -166,7 +166,7 @@ analytics.
 | Risk | Consequence | Guard |
 |---|---|---|
 | Buffer↔TikTok connection silently expires | Posts vanish, nothing errors visibly | Weekly Routine checks last-published date; alerts if nothing posted in 48h |
-| A post is approved with a broken asset link | Blank or failed post | Pipeline refuses to schedule a row with an empty Assets field |
+| A post is approved but its images are missing | Blank or failed post | Pipeline fetches the first slide before scheduling and skips the row if it does not resolve |
 | Duplicate scheduling | Same post twice | Status must be exactly `Approved` to schedule; immediately set to `Scheduled` |
 | Nobody approves that week | Silence on the channels | Sunday email; if zero approvals by Tuesday, one reminder. **Then it stays quiet — no auto-approve, ever** |
 | Platform rejects content | Post fails | Buffer reports failures; surface them in the Monday run |
