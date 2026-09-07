@@ -1,0 +1,96 @@
+# AI Asset & Usage Register - monthly regeneration
+# Classification: INTERNAL USE
+#
+# Runs on the 1st of each month at 06:12 UTC (01:12 Jamaica time, UTC-5 year
+# round - Jamaica does not observe daylight saving, so this slot is stable).
+# 06:12 rather than 06:00 keeps the job off the peak-of-hour scheduling queue.
+#
+# WHAT THIS JOB CAN AND CANNOT REFRESH
+#   Can:    repository commit history, the telemetry ledger, all derived CSVs,
+#           snapshots and the rendered dashboard.
+#   Cannot: connector and skill inventory. Those live behind the claude.ai
+#           registries and are only readable from a Claude session, so they are
+#           refreshed by the companion monthly Claude Routine. If they age past
+#           45 days this job still runs and the dashboard flags them Stale
+#           rather than presenting last-known-good data as current.
+name: AI Asset Register - monthly
+
+on:
+  schedule:
+    - cron: '12 6 1 * *'
+  workflow_dispatch:
+    inputs:
+      period:
+        description: 'Reporting period to generate (YYYY-MM). Defaults to the current month.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ai-assets-register
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository (full history for commit counts)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Resolve reporting period
+        id: period
+        run: |
+          PERIOD="${{ inputs.period }}"
+          if [ -z "$PERIOD" ]; then PERIOD="$(date -u +%Y-%m)"; fi
+          echo "period=$PERIOD" >> "$GITHUB_OUTPUT"
+          echo "Reporting period: $PERIOD"
+
+      - name: Refresh repository commit history
+        env:
+          # Optional. A fine-grained PAT with read-only Contents access to the
+          # other repositories in the register. Without it, only this
+          # repository's history is refreshed and the rest are left at their
+          # last captured values, which the freshness panel then reports.
+          AI_ASSETS_TOKEN: ${{ secrets.AI_ASSETS_TOKEN }}
+        run: python3 ai-assets/refresh_sources.py
+
+      - name: Generate register, dataset and dashboard
+        run: python3 ai-assets/generate.py --period "${{ steps.period.outputs.period }}"
+
+      - name: Verify pipeline (self-test must pass before anything is committed)
+        run: python3 ai-assets/selftest.py
+
+      - name: Commit refreshed outputs
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ai-assets/data ai-assets/sources ai-assets/ai_assets_dashboard.html
+          if git diff --cached --quiet; then
+            echo "No change in the register this period - nothing to commit."
+            exit 0
+          fi
+          git commit -m "chore(ai-assets): regenerate register for ${{ steps.period.outputs.period }}
+
+          Automated monthly run. Repository history and the telemetry ledger were
+          refreshed; connector and skill inventory carry forward from their last
+          Claude-session capture and are flagged in the freshness panel if stale."
+          git push
+
+      - name: Publish dashboard as a run artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-assets-dashboard-${{ steps.period.outputs.period }}
+          path: |
+            ai-assets/ai_assets_dashboard.html
+            ai-assets/data/asset_register.csv
+            ai-assets/data/usage_monthly.csv
+          retention-days: 90

@@ -1,0 +1,20 @@
+{
+  "captured_at": "2026-09-07T19:38:00Z",
+  "source": "Claude ListConnectors tool (claude.ai org connector registry)",
+  "connectors": [
+    {"name":"Atlassian Rovo","description":"Atlassian Rovo work graph search and Jira/Confluence access","installState":"unknown","isAuthless":false,"connected":null,"enabledInChat":false},
+    {"name":"Booking.com","description":"Find hotels, homes and more","installState":"unknown","isAuthless":true,"connected":null,"enabledInChat":false},
+    {"name":"Canva","description":"Search, create, autofill, and export Canva designs","installState":"connected","isAuthless":false,"connected":true,"enabledInChat":true},
+    {"name":"Figma","description":"Generate diagrams and better code from Figma context","installState":"connected","isAuthless":false,"connected":true,"enabledInChat":true},
+    {"name":"Gmail","description":"Draft replies, summarize threads, & search your inbox","installState":"connected","isAuthless":false,"connected":true,"enabledInChat":true},
+    {"name":"Google Calendar","description":"Manage your schedule and coordinate meetings effortlessly","installState":"connected","isAuthless":false,"connected":true,"enabledInChat":true},
+    {"name":"Google Drive","description":"Search, read, and upload files instantly","installState":"connected","isAuthless":false,"connected":true,"enabledInChat":true},
+    {"name":"Intuit Mailchimp","description":"Create marketing campaigns","installState":"connected","isAuthless":false,"connected":true,"enabledInChat":true},
+    {"name":"Microsoft 365","description":"SharePoint, OneDrive, Outlook and Teams access","installState":"unknown","isAuthless":false,"connected":null,"enabledInChat":false},
+    {"name":"Notion","description":"Search, update, and power workflows across your Notion workspace","installState":"connected","isAuthless":false,"connected":true,"enabledInChat":true},
+    {"name":"Slack","description":"Send messages, create canvases, and fetch Slack data","installState":"unknown","isAuthless":false,"connected":null,"enabledInChat":false},
+    {"name":"Spotify","description":"Music and podcast recommendations","installState":"connected","isAuthless":true,"connected":true,"enabledInChat":true},
+    {"name":"Wix","description":"Manage and build sites and apps on Wix","installState":"connected","isAuthless":false,"connected":true,"enabledInChat":true},
+    {"name":"Zapier","description":"Automate workflows across thousands of apps","installState":"connected","isAuthless":false,"connected":true,"enabledInChat":true}
+  ]
+}

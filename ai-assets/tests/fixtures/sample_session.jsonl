@@ -1,0 +1,8 @@
+{"type": "assistant", "uuid": "u1", "sessionId": "s1", "cwd": "/home/user/bhba-2027", "timestamp": "2026-07-14T09:12:00.000Z", "message": {"content": [{"type": "tool_use", "name": "mcp__Gmail__search_threads", "input": {}}]}}
+{"type": "assistant", "uuid": "u2", "sessionId": "s1", "cwd": "/home/user/bhba-2027", "timestamp": "2026-07-14T09:14:00.000Z", "message": {"content": [{"type": "tool_use", "name": "mcp__Google_Drive__search_files", "input": {}}, {"type": "tool_use", "name": "Skill", "input": {"skill": "xlsx"}}]}}
+{"type": "assistant", "uuid": "u3", "sessionId": "s2", "cwd": "/home/user/bhba-2027", "timestamp": "2026-08-02T11:00:00.000Z", "message": {"content": [{"type": "tool_use", "name": "mcp__Notion__notion-search", "input": {}}]}}
+{"type": "assistant", "uuid": "u4", "sessionId": "s2", "cwd": "/home/user/bhba-2027", "timestamp": "2026-08-02T11:05:00.000Z", "message": {"content": [{"type": "tool_use", "name": "mcp__github__list_commits", "input": {}}]}}
+{"type": "assistant", "uuid": "u5", "sessionId": "s2", "cwd": "/home/user/bhba-2027", "timestamp": "2026-08-02T11:06:00.000Z", "message": {"content": [{"type": "tool_use", "name": "Bash", "input": {}}]}}
+{"type": "user", "uuid": "u6", "message": {"content": "plain text turn"}}
+{"type": "assistant", "uuid": "u7", "message": {"content": null}}
+{ not valid json at all

@@ -1,0 +1,41 @@
+{
+ "captured_at": "2026-09-07T19:52:19Z",
+ "source": "Claude Code Remote list_repos + GitHub REST list_commits",
+ "repositories": [
+  {
+   "full_name": "wadehowell1/bhba-2027",
+   "visibility": "public",
+   "pushed_at": "2026-09-07T19:24:48Z",
+   "commit_history": "complete",
+   "note": "Local full clone, all refs enumerated"
+  },
+  {
+   "full_name": "wadehowell1/job-agent",
+   "visibility": "private",
+   "pushed_at": "2026-09-07T19:35:57Z",
+   "commit_history": "unavailable",
+   "note": "Repository attach denied by session policy classifier; inventory recorded from list_repos, commit history not retrievable this run"
+  },
+  {
+   "full_name": "wadehowell1/lean-six-sigma-faceless",
+   "visibility": "private",
+   "pushed_at": "2026-09-05T15:46:18Z",
+   "commit_history": "complete",
+   "note": "Default branch enumerated via GitHub REST"
+  },
+  {
+   "full_name": "wadehowell1/ai-hedge-fund-",
+   "visibility": "private",
+   "pushed_at": "2026-09-01T11:49:42Z",
+   "commit_history": "complete",
+   "note": "Default branch enumerated via GitHub REST"
+  },
+  {
+   "full_name": "wadehowell1/BHBA2027",
+   "visibility": "private",
+   "pushed_at": "2026-06-16T00:39:41Z",
+   "commit_history": "empty",
+   "note": "GitHub returned 409 Git Repository is empty - zero commits"
+  }
+ ]
+}

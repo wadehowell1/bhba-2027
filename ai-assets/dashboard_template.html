@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Asset &amp; Usage Register</title>
+<meta name="description" content="Monthly register of AI connectors, skills and repositories with measured usage.">
+<style>
+/* ==========================================================================
+   AI Asset & Usage Dashboard  -  standalone stylesheet
+   Classification: __CLASSIFICATION__   Version: __VERSION__
+   No external fonts, no CDN, no build step.
+   ========================================================================== */
+:root{
+  --bg:#f4f6f9; --panel:#ffffff; --panel-2:#fafbfd; --ink:#121a24; --ink-2:#48586b;
+  --ink-3:#7a8a9d; --line:#dfe5ec; --line-2:#eef2f6; --accent:#0f766e; --accent-soft:#d7efec;
+  --green:#1f8a5b; --amber:#b8791f; --red:#c0453f;
+  --green-bg:#e2f4ea; --amber-bg:#fbeeda; --red-bg:#fbe5e4;
+  --c1:#0f766e; --c2:#3b5bdb; --c3:#c98a1e; --c4:#b4504f; --c5:#5f7185; --c6:#7a53b8;
+  --shadow:0 1px 2px rgba(16,28,42,.06),0 8px 24px -12px rgba(16,28,42,.18);
+  --radius:10px;
+}
+html[data-theme="dark"]{
+  --bg:#0d1117; --panel:#151b23; --panel-2:#1a212b; --ink:#e6edf5; --ink-2:#9fb0c4;
+  --ink-3:#6d7f94; --line:#252e3a; --line-2:#1e262f; --accent:#3fbfae; --accent-soft:#123b37;
+  --green:#4ac68a; --amber:#e0a94a; --red:#e9736d;
+  --green-bg:#12291f; --amber-bg:#2c2210; --red-bg:#2e1817;
+  --c1:#3fbfae; --c2:#6c8cff; --c3:#e0a94a; --c4:#e9736d; --c5:#8899ad; --c6:#a98ae0;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+/* ---- shell ------------------------------------------------------------ */
+.wrap{max-width:1440px;margin:0 auto;padding:20px 20px 64px}
+header.top{
+  display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;justify-content:space-between;
+  padding:18px 20px;background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px;
+}
+.brand{display:flex;gap:14px;align-items:center;min-width:0}
+.mark{
+  width:40px;height:40px;border-radius:9px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--c1),var(--c2));
+  display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;letter-spacing:-.02em;
+}
+.brand h1{font-size:18px}
+.sub{color:var(--ink-2);font-size:12.5px;margin-top:2px}
+.hdr-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+  font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap;
+}
+.chip.class{background:var(--amber-bg);border-color:transparent;color:var(--amber)}
+.chip.period{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+button.btn{
+  font:inherit;font-size:12px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--ink-2);
+}
+button.btn:hover{color:var(--ink);border-color:var(--ink-3)}
+
+/* ---- kpi -------------------------------------------------------------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(178px,100%),1fr));gap:12px;margin-bottom:18px}
+.kpi{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.kpi::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--bar,var(--c1))}
+.kpi .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:600}
+.kpi .val{font-size:30px;font-weight:650;letter-spacing:-.025em;line-height:1.15;margin-top:6px}
+.kpi .note{font-size:11.5px;color:var(--ink-2);margin-top:4px}
+
+/* ---- tabs ------------------------------------------------------------- */
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid var(--line)}
+nav.tabs button{
+  font:inherit;font-size:13px;font-weight:600;padding:9px 14px;border:0;background:none;
+  color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+nav.tabs button:hover{color:var(--ink-2)}
+nav.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+section[role=tabpanel][hidden]{display:none}
+
+/* ---- cards / grid ----------------------------------------------------- */
+.grid{display:grid;gap:14px;margin-bottom:14px}
+/* min() keeps a track from forcing overflow on viewports narrower than its floor */
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))}
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 18px;box-shadow:var(--shadow);min-width:0;
+}
+.card > h3{font-size:13.5px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.card .cap{font-size:11.5px;color:var(--ink-3);font-weight:500;letter-spacing:0}
+.card .hint{font-size:11.5px;color:var(--ink-3);margin-top:10px;line-height:1.45}
+
+/* ---- charts ----------------------------------------------------------- */
+.chartbox{margin-top:14px;overflow-x:auto}
+svg{display:block;max-width:100%}
+svg text{fill:var(--ink-2);font-size:11px;font-family:inherit}
+svg text.axis{fill:var(--ink-3);font-size:10.5px}
+svg text.val{fill:var(--ink);font-size:10.5px;font-weight:600}
+svg .grid-line{stroke:var(--line-2);stroke-width:1}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;flex:0 0 auto}
+
+/* ---- tables ----------------------------------------------------------- */
+.tablewrap{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:640px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line-2);vertical-align:top}
+thead th{
+  background:var(--panel-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--ink-3);font-weight:700;position:sticky;top:0;white-space:nowrap;cursor:pointer;
+}
+thead th:hover{color:var(--ink-2)}
+thead th::after{content:"";opacity:.5;font-size:9px}
+thead th[data-dir="asc"]::after{content:" ▲"}
+thead th[data-dir="desc"]::after{content:" ▼"}
+tbody tr:hover{background:var(--panel-2)}
+tbody tr:last-child td{border-bottom:0}
+td.wrap-cell{white-space:normal;max-width:420px;color:var(--ink-2)}
+.tag{
+  display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700;
+  letter-spacing:.03em;white-space:nowrap;
+}
+.tag.NEW{background:var(--green-bg);color:var(--green)}
+.tag.EXISTING{background:var(--panel-2);color:var(--ink-3);border:1px solid var(--line)}
+.tag.BASELINE{background:var(--accent-soft);color:var(--accent)}
+.tag.RETIRED{background:var(--red-bg);color:var(--red)}
+.dot{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.dot i{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dot.Green i{background:var(--green)} .dot.Amber i{background:var(--amber)} .dot.Red i{background:var(--red)}
+.dot.Green{color:var(--green)} .dot.Amber{color:var(--amber)} .dot.Red{color:var(--red)}
+
+/* ---- filters ---------------------------------------------------------- */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.filters input[type=search],.filters select{
+  font:inherit;font-size:12.5px;padding:7px 10px;border-radius:8px;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--ink);
+}
+.filters input[type=search]{min-width:0;flex:1 1 200px}
+.filters input:focus,.filters select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.count{font-size:11.5px;color:var(--ink-3);margin-left:auto}
+
+/* ---- callouts --------------------------------------------------------- */
+.note{
+  border-left:3px solid var(--amber);background:var(--amber-bg);
+  padding:12px 14px;border-radius:0 8px 8px 0;font-size:12.5px;line-height:1.55;color:var(--ink);
+}
+.note.ok{border-left-color:var(--green);background:var(--green-bg)}
+.note strong{font-weight:700}
+dl.kv{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:12.5px}
+dl.kv dt{color:var(--ink-3);font-weight:600;white-space:nowrap}
+dl.kv dd{margin:0;color:var(--ink-2)}
+footer.foot{
+  margin-top:24px;padding-top:16px;border-top:1px solid var(--line);
+  font-size:11.5px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;
+}
+@media print{
+  body{background:#fff}
+  nav.tabs,.filters,button.btn{display:none!important}
+  section[role=tabpanel][hidden]{display:block!important}
+  .card,header.top,.kpi{box-shadow:none;break-inside:avoid}
+}
+@media (max-width:600px){
+  .wrap{padding:12px 12px 48px}
+  .kpi .val{font-size:24px}
+  header.top{padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="brand">
+    <div class="mark">AI</div>
+    <div>
+      <h1>AI Asset &amp; Usage Register</h1>
+      <div class="sub">Connectors, skills and repositories &middot; provisioning, lifecycle and measured usage</div>
+    </div>
+  </div>
+  <div class="hdr-meta">
+    <span class="chip class">__CLASSIFICATION__</span>
+    <span class="chip period">Period __PERIOD__</span>
+    <span class="chip">v__VERSION__</span>
+    <span class="chip" id="genChip">__GENERATED__</span>
+    <button class="btn" id="themeBtn" type="button">Light</button>
+    <button class="btn" id="printBtn" type="button">Print / PDF</button>
+  </div>
+</header>
+
+<div class="kpis" id="kpis"></div>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" aria-selected="true"  data-tab="overview">Overview</button>
+  <button role="tab" aria-selected="false" data-tab="register">Asset register</button>
+  <button role="tab" aria-selected="false" data-tab="usage">Usage &amp; activity</button>
+  <button role="tab" aria-selected="false" data-tab="governance">Governance</button>
+</nav>
+
+<!-- ================= OVERVIEW ================= -->
+<section role="tabpanel" id="tab-overview">
+  <div class="grid g2">
+    <div class="card">
+      <h3>Portfolio composition <span class="cap">Assets by class</span></h3>
+      <div class="chartbox" id="chartComposition"></div>
+      <div class="legend" id="legendComposition"></div>
+    </div>
+    <div class="card">
+      <h3>Lifecycle mix <span class="cap">New vs existing, by class</span></h3>
+      <div class="chartbox" id="chartLifecycle"></div>
+      <div class="legend" id="legendLifecycle"></div>
+      <p class="hint" id="lifecycleHint"></p>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Monthly asset activity <span class="cap">Measured events per month</span></h3>
+      <div class="chartbox" id="chartTrend"></div>
+      <div class="legend" id="legendTrend"></div>
+      <p class="hint">Every column is a counted event with a source file behind it: commits from
+        repository history, provisioning from the skills manifest, and invocations from session
+        transcripts. Nothing on this chart is estimated.</p>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Connector risk profile <span class="cap">Tier by data exposure</span></h3>
+      <div class="chartbox" id="chartRisk"></div>
+      <div class="legend" id="legendRisk"></div>
+      <p class="hint">Tier 1 connectors can reach personal data and engage the Jamaica Data
+        Protection Act 2020, First Schedule &mdash; Standard 7 (security measures) and Standard 8
+        (transfer of personal data outside Jamaica).</p>
+    </div>
+    <div class="card">
+      <h3>Usage instrumentation coverage <span class="cap">RAG</span></h3>
+      <div class="tablewrap">
+        <table id="instrTable">
+          <thead><tr><th>Asset class</th><th>Assets</th><th>Observed</th><th>Coverage</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint">Coverage is the share of assets in each class for which at least one usage
+        event was measurable this run. It is a measure of the telemetry, not of the assets.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REGISTER ================= -->
+<section role="tabpanel" id="tab-register" hidden>
+  <div class="card">
+    <h3>Asset register <span class="cap">Full inventory, one row per asset</span></h3>
+    <div class="filters">
+      <input type="search" id="q" placeholder="Search name, provider, status&hellip;" aria-label="Search register">
+      <select id="fClass" aria-label="Filter by asset class"><option value="">All classes</option></select>
+      <select id="fLife" aria-label="Filter by lifecycle"><option value="">All lifecycle states</option></select>
+      <select id="fRag" aria-label="Filter by status"><option value="">All statuses</option></select>
+      <span class="count" id="rowCount"></span>
+    </div>
+    <div class="tablewrap">
+      <table id="registerTable">
+        <thead><tr>
+          <th data-k="asset_id">ID</th>
+          <th data-k="asset_class">Class</th>
+          <th data-k="asset_name">Asset</th>
+          <th data-k="provider">Provider</th>
+          <th data-k="lifecycle">Lifecycle</th>
+          <th data-k="status">Status</th>
+          <th data-k="rag">RAG</th>
+          <th data-k="risk_tier">Tier</th>
+          <th data-k="first_observed">First seen</th>
+          <th data-k="last_changed">Last change</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="hint">Sort any column by clicking its header. The full register, including data
+      exposure and control references, ships alongside this file as
+      <code>data/asset_register.csv</code>.</p>
+  </div>
+</section>
+
+<!-- ================= USAGE ================= -->
+<section role="tabpanel" id="tab-usage" hidden>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Repository commit activity <span class="cap">Commits per month</span></h3>
+      <div class="chartbox" id="chartRepo"></div>
+      <div class="legend" id="legendRepo"></div>
+    </div>
+    <div class="card">
+      <h3>Skill provisioning cohorts <span class="cap">Skills added per month</span></h3>
+      <div class="chartbox" id="chartSkill"></div>
+      <p class="hint">Dated from the <code>updatedAt</code> field of each skill in the synced
+        skills manifest &mdash; the date the skill entered or last changed in the workspace.</p>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Measured usage by asset <span class="cap">All counted events, by month</span></h3>
+      <div class="filters">
+        <select id="fMetric" aria-label="Filter by metric"><option value="">All metrics</option></select>
+        <select id="fFactClass" aria-label="Filter by class"><option value="">All classes</option></select>
+        <span class="count" id="factCount"></span>
+      </div>
+      <div class="tablewrap">
+        <table id="factTable">
+          <thead><tr>
+            <th data-k="month">Month</th><th data-k="asset_class">Class</th>
+            <th data-k="asset_name">Asset</th><th data-k="metric">Metric</th>
+            <th data-k="value">Count</th><th data-k="basis">Basis</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint">Exported unchanged as <code>data/usage_monthly.csv</code> in tidy long
+        format &mdash; one row per month/asset/metric, ready to load straight into Power BI or Excel
+        without reshaping.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GOVERNANCE ================= -->
+<section role="tabpanel" id="tab-governance" hidden>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Report control <span class="cap">Document metadata</span></h3>
+      <dl class="kv" id="docMeta"></dl>
+    </div>
+    <div class="card">
+      <h3>Standards mapping <span class="cap">Controls this register serves</span></h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Reference</th><th>Control</th><th>How it is met</th></tr></thead>
+          <tbody>
+            <tr><td>ISO/IEC 27001:2022 A.5.9</td><td>Inventory of information and other associated assets</td><td class="wrap-cell">Every connector, skill and repository is enumerated with an owner, a status and a unique asset ID.</td></tr>
+            <tr><td>ISO/IEC 27001:2022 A.5.19</td><td>Information security in supplier relationships</td><td class="wrap-cell">Connectors are third-party processors; each carries a risk tier and a stated data exposure.</td></tr>
+            <tr><td>ISO/IEC 27001:2022 A.5.23</td><td>Information security for use of cloud services</td><td class="wrap-cell">Authorisation state is recorded per connector and re-verified each monthly run.</td></tr>
+            <tr><td>ISO/IEC 27001:2022 A.8.9</td><td>Configuration management</td><td class="wrap-cell">Skills and plugins are version-tracked; the monthly snapshot is immutable and diffed.</td></tr>
+            <tr><td>ISO/IEC 27001:2022 A.8.16</td><td>Monitoring activities</td><td class="wrap-cell">Usage telemetry is ingested into an append-only ledger keyed on event UUID.</td></tr>
+            <tr><td>ISO/IEC 27001:2022 A.8.28 / A.8.31</td><td>Secure coding; separation of environments</td><td class="wrap-cell">Repository visibility is recorded, and public repositories are flagged Tier 1.</td></tr>
+            <tr><td>NIST SP 800-53 Rev.5 CM-8</td><td>System component inventory</td><td class="wrap-cell">Register is machine-generated from source captures, not maintained by hand.</td></tr>
+            <tr><td>NIST CSF 2.0 ID.AM-02</td><td>Software platforms and applications inventoried</td><td class="wrap-cell">Inventory regenerates monthly with lifecycle diff against the prior snapshot.</td></tr>
+            <tr><td>Jamaica DPA 2020, First Schedule, Standard 7</td><td>Appropriate security measures</td><td class="wrap-cell">Tier 1 connectors are identified so security review is directed where personal data is reachable.</td></tr>
+            <tr><td>Jamaica DPA 2020, First Schedule, Standard 8</td><td>Transfer of personal data outside Jamaica</td><td class="wrap-cell">Every connector is an overseas cloud processor; the register makes that population explicit.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Data provenance <span class="cap">Every figure traces to a captured file</span></h3>
+      <div class="tablewrap">
+        <table id="provTable">
+          <thead><tr><th>File</th><th>Source</th><th>Captured</th><th>Age</th><th>Freshness</th><th>Bytes</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Declared limitations <span class="cap">Read before citing these figures</span></h3>
+      <div id="limitations"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Revision history</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Version</th><th>Date</th><th>Author</th><th>Change</th></tr></thead>
+          <tbody id="revHistory"></tbody>
+        </table>
+      </div>
+      <p class="hint">Each monthly run writes an immutable snapshot to
+        <code>data/snapshots/&lt;YYYY-MM&gt;.json</code>. The lifecycle column on the register is
+        produced by diffing the current inventory against the most recent prior snapshot, so
+        "new" is an observed change rather than an assertion.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span>AI Asset &amp; Usage Register v__VERSION__ &middot; __CLASSIFICATION__ &middot; Owner: Wade Howell</span>
+  <span>Generated __GENERATED__ &middot; Reporting period __PERIOD__</span>
+</footer>
+</div>
+
+<script>
+"use strict";
+const DATA = /*__PAYLOAD__*/null;
+const PAL = ["--c1","--c2","--c3","--c4","--c5","--c6"];
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const live = DATA.assets.filter(a => a.lifecycle !== "RETIRED");
+
+/* ---------- tiny SVG helpers ------------------------------------------ */
+function svgEl(tag, attrs, text){
+  const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  if(text != null) e.textContent = text;
+  return e;
+}
+function newSvg(w,h){
+  return svgEl("svg",{viewBox:`0 0 ${w} ${h}`,width:w,height:h,role:"img"});
+}
+/* Usable pixel width of a chart host. Falls back when the host is in a hidden
+   tab (clientWidth 0), and charts re-render on tab switch anyway. */
+function hostWidth(host, fallback){
+  const w = host.clientWidth || (host.parentElement && host.parentElement.clientWidth) || 0;
+  return Math.max(280, w ? w - 2 : (fallback||520));
+}
+
+/* Horizontal bars: [{label,value,color}] */
+function hBars(host, rows, opts){
+  opts = opts||{};
+  host.innerHTML = "";
+  if(!rows.length){ host.innerHTML = '<p class="hint">No data for this view.</p>'; return; }
+  const labelW = opts.labelW || 150, rowH = 26, gap = 7, padR = 46;
+  const w = Math.max(hostWidth(host, opts.width), labelW+180), h = rows.length*(rowH+gap)+8;
+  const max = Math.max(1, ...rows.map(r=>r.value));
+  const barW = w - labelW - padR;
+  const s = newSvg(w,h);
+  rows.forEach((r,i)=>{
+    const y = i*(rowH+gap)+4;
+    s.appendChild(svgEl("text",{x:labelW-10,y:y+rowH/2+4,"text-anchor":"end"},r.label));
+    s.appendChild(svgEl("rect",{x:labelW,y:y,width:barW,height:rowH,rx:4,fill:cssv("--line-2")}));
+    const bw = Math.max(2, (r.value/max)*barW);
+    s.appendChild(svgEl("rect",{x:labelW,y:y,width:bw,height:rowH,rx:4,fill:r.color}));
+    const t = svgEl("text",{x:labelW+bw+8,y:y+rowH/2+4,class:"val"}, r.value + (opts.suffix||""));
+    s.appendChild(t);
+  });
+  host.appendChild(s);
+}
+
+/* Stacked horizontal bars: rows=[{label, parts:[{key,value}]}] */
+function stackedBars(host, rows, keys, colors, opts){
+  opts = opts||{};
+  host.innerHTML = "";
+  const labelW = opts.labelW||110, rowH = 24, gap = 8, padR = 40;
+  const w = Math.max(hostWidth(host, opts.width), labelW+200), h = rows.length*(rowH+gap)+8;
+  const max = Math.max(1, ...rows.map(r=>r.parts.reduce((a,p)=>a+p.value,0)));
+  const barW = w - labelW - padR;
+  const s = newSvg(w,h);
+  rows.forEach((r,i)=>{
+    const y = i*(rowH+gap)+4;
+    s.appendChild(svgEl("text",{x:labelW-10,y:y+rowH/2+4,"text-anchor":"end"},r.label));
+    let x = labelW, total = 0;
+    r.parts.forEach(p=>{
+      if(p.value<=0) return;
+      const pw = (p.value/max)*barW;
+      const rect = svgEl("rect",{x:x,y:y,width:Math.max(1,pw),height:rowH,rx:2,fill:colors[keys.indexOf(p.key)%colors.length]});
+      rect.appendChild(svgEl("title",null,`${r.label} — ${p.key}: ${p.value}`));
+      s.appendChild(rect);
+      if(pw>26) s.appendChild(svgEl("text",{x:x+pw/2,y:y+rowH/2+4,"text-anchor":"middle",class:"val",fill:"#fff"},p.value));
+      x += pw; total += p.value;
+    });
+    s.appendChild(svgEl("text",{x:labelW+ (total/max)*barW + 8, y:y+rowH/2+4, class:"val"}, total));
+  });
+  host.appendChild(s);
+}
+
+/* Grouped/stacked columns over months */
+function columns(host, months, series, colors, opts){
+  opts = opts||{};
+  host.innerHTML = "";
+  if(!months.length){ host.innerHTML = '<p class="hint">No data for this view.</p>'; return; }
+  const padL = 40, padB = 34, padT = 14;
+  const avail = hostWidth(host, opts.width);
+  /* Fill the card when there are few months; fall back to a scrollable
+     minimum column width when there are many. */
+  const colW = Math.max(opts.minColW||36,
+                Math.floor((avail - padL - 16) / months.length));
+  const w = padL + months.length*colW + 16, h = (opts.height||220);
+  const plotH = h - padB - padT;
+  const totals = months.map((m,i)=>series.reduce((a,s)=>a+(s.values[i]||0),0));
+  const max = Math.max(1, ...totals);
+  const s = newSvg(w,h);
+  /* gridlines + y labels */
+  const ticks = 4;
+  for(let t=0;t<=ticks;t++){
+    const v = Math.round(max*t/ticks), y = padT+plotH-(v/max)*plotH;
+    s.appendChild(svgEl("line",{x1:padL,y1:y,x2:w-8,y2:y,class:"grid-line"}));
+    s.appendChild(svgEl("text",{x:padL-8,y:y+3.5,"text-anchor":"end",class:"axis"},v));
+  }
+  months.forEach((m,i)=>{
+    /* Columns spread across the full card, but a bar never grows absurdly
+       wide when there are only a few months — cap it and centre it. */
+    const bw = Math.min(colW*0.68, opts.maxBar||64);
+    const x = padL + i*colW + (colW-bw)/2;
+    let y = padT + plotH;
+    series.forEach((se,si)=>{
+      const v = se.values[i]||0;
+      if(v<=0) return;
+      const bh = (v/max)*plotH;
+      y -= bh;
+      const rect = svgEl("rect",{x:x,y:y,width:bw,height:bh,fill:colors[si%colors.length]});
+      rect.appendChild(svgEl("title",null,`${m} — ${se.name}: ${v}`));
+      s.appendChild(rect);
+    });
+    if(totals[i]>0) s.appendChild(svgEl("text",{x:x+bw/2,y:y-5,"text-anchor":"middle",class:"val"},totals[i]));
+    s.appendChild(svgEl("text",{x:x+bw/2,y:h-14,"text-anchor":"middle",class:"axis"},m.slice(5)));
+    if(i===0||m.slice(5)==="01")
+      s.appendChild(svgEl("text",{x:x+bw/2,y:h-3,"text-anchor":"middle",class:"axis"},m.slice(0,4)));
+  });
+  host.appendChild(s);
+}
+
+function legend(host, items){
+  host.innerHTML = items.map(i =>
+    `<span><i style="background:${i.color}"></i>${esc(i.label)}</span>`).join("");
+}
+
+/* ---------- KPI strip -------------------------------------------------- */
+function renderKpis(){
+  const byClass = {};
+  live.forEach(a => byClass[a.asset_class] = (byClass[a.asset_class]||0)+1);
+  const conns = live.filter(a=>a.asset_class==="Connector");
+  const active = conns.filter(a=>a.rag==="Green").length;
+  const repos = live.filter(a=>a.asset_class==="Repository");
+  const activeRepos = repos.filter(a=>a.rag==="Green").length;
+  const newCount = live.filter(a=>a.lifecycle==="NEW").length;
+  const retired = DATA.assets.filter(a=>a.lifecycle==="RETIRED").length;
+  const inv = DATA.facts.filter(f=>f.metric==="invocations").reduce((a,f)=>a+f.value,0);
+  const commits = DATA.facts.filter(f=>f.metric==="commits").reduce((a,f)=>a+f.value,0);
+  const tier1All = live.filter(a=>String(a.risk_tier)==="1");
+  const tier1 = tier1All.length;
+  const t1conn = tier1All.filter(a=>a.asset_class==="Connector").length;
+  const t1repo = tier1All.filter(a=>a.asset_class==="Repository").length;
+  const t1note = [
+    t1conn ? `${t1conn} connectors reaching personal data` : "",
+    t1repo ? `${t1repo} public ${t1repo===1?"repository":"repositories"}` : ""
+  ].filter(Boolean).join(" · ");
+
+  const cards = [
+    {lbl:"Total AI assets", val:live.length, note:`${byClass.Connector||0} connectors · ${byClass.Skill||0} skills · ${byClass.Repository||0} repositories`, bar:"--c1"},
+    {lbl:"New this period", val:newCount, note:newCount? "Entered the register in "+DATA.meta.period : (DATA.meta.prior_period? "No additions since "+DATA.meta.prior_period : "First run — no prior snapshot to diff"), bar:"--c2"},
+    {lbl:"Connectors active", val:`${active}/${conns.length}`, note:`${conns.length-active} authorised but not enabled, or unverified`, bar:"--c3"},
+    {lbl:"Repositories active", val:`${activeRepos}/${repos.length}`, note:`${repos.length-activeRepos} empty or not retrievable`, bar:"--c4"},
+    {lbl:"Commits measured", val:commits.toLocaleString(), note:"Across all months with retrievable history", bar:"--c5"},
+    {lbl:"Tier 1 assets", val:tier1, note:t1note, bar:"--c6"}
+  ];
+  if(retired) cards.push({lbl:"Retired", val:retired, note:"Present in prior snapshot, absent now", bar:"--c4"});
+
+  document.getElementById("kpis").innerHTML = cards.map(c=>`
+    <div class="kpi" style="--bar:var(${c.bar})">
+      <div class="lbl">${esc(c.lbl)}</div>
+      <div class="val num">${esc(c.val)}</div>
+      <div class="note">${esc(c.note)}</div>
+    </div>`).join("");
+}
+
+/* ---------- charts ----------------------------------------------------- */
+function renderCharts(){
+  const C = PAL.map(cssv);
+
+  /* composition */
+  const comp = {};
+  live.forEach(a=>comp[a.asset_class]=(comp[a.asset_class]||0)+1);
+  const compRows = Object.entries(comp).sort((a,b)=>b[1]-a[1])
+    .map(([k,v],i)=>({label:k,value:v,color:C[i%C.length]}));
+  hBars(document.getElementById("chartComposition"), compRows, {labelW:110,width:480});
+  legend(document.getElementById("legendComposition"),
+    compRows.map(r=>({label:`${r.label} (${r.value})`,color:r.color})));
+
+  /* lifecycle */
+  const states = ["NEW","EXISTING","BASELINE","RETIRED"];
+  const lcColors = [cssv("--green"),cssv("--c5"),cssv("--c2"),cssv("--red")];
+  const classes = [...new Set(DATA.assets.map(a=>a.asset_class))];
+  const lcRows = classes.map(c=>({
+    label:c,
+    parts: states.map(s=>({key:s, value: DATA.assets.filter(a=>a.asset_class===c&&a.lifecycle===s).length}))
+  }));
+  stackedBars(document.getElementById("chartLifecycle"), lcRows, states, lcColors, {labelW:100,width:480});
+  legend(document.getElementById("legendLifecycle"),
+    states.map((s,i)=>({label:s,color:lcColors[i]})));
+  const nBase = DATA.assets.filter(a=>a.lifecycle==="BASELINE").length;
+  document.getElementById("lifecycleHint").textContent = DATA.meta.prior_period
+    ? `Diffed against the ${DATA.meta.prior_period} snapshot. NEW means the asset was absent from that snapshot.`
+    : `First run: no prior snapshot exists, so ${nBase} assets that expose no provisioning date are marked BASELINE rather than reported as new. Skills and repositories carry a real date and are cohorted from it. From next month, NEW is a measured diff.`;
+
+  /* monthly trend by metric */
+  const months = DATA.meta.months;
+  const metrics = [...new Set(DATA.facts.map(f=>f.metric))];
+  const mSeries = metrics.map(m=>({
+    name:m,
+    values: months.map(mo => DATA.facts.filter(f=>f.month===mo&&f.metric===m).reduce((a,f)=>a+f.value,0))
+  }));
+  const mColors = [C[0],C[1],C[2],C[3]];
+  columns(document.getElementById("chartTrend"), months, mSeries, mColors, {height:240});
+  legend(document.getElementById("legendTrend"),
+    mSeries.map((s,i)=>({label:`${s.name} (${s.values.reduce((a,b)=>a+b,0)})`,color:mColors[i%mColors.length]})));
+
+  /* connector risk */
+  const conns = live.filter(a=>a.asset_class==="Connector");
+  const tierColors = {1:cssv("--red"),2:cssv("--amber"),3:cssv("--green")};
+  const riskRows = [1,2,3].map(t=>({
+    label:`Tier ${t}`,
+    value: conns.filter(a=>String(a.risk_tier)===String(t)).length,
+    color: tierColors[t]
+  })).filter(r=>r.value>0);
+  hBars(document.getElementById("chartRisk"), riskRows, {labelW:70,width:440});
+  legend(document.getElementById("legendRisk"),[
+    {label:"Tier 1 — personal data reachable",color:tierColors[1]},
+    {label:"Tier 2 — business content",color:tierColors[2]},
+    {label:"Tier 3 — non-sensitive",color:tierColors[3]}]);
+
+  /* repository commits by month */
+  const repoFacts = DATA.facts.filter(f=>f.metric==="commits");
+  const repoNames = [...new Set(repoFacts.map(f=>f.asset_name))];
+  const rMonths = months.filter(mo => repoFacts.some(f=>f.month===mo));
+  const rSeries = repoNames.map(n=>({
+    name:n.split("/").pop(),
+    values: rMonths.map(mo => repoFacts.filter(f=>f.month===mo&&f.asset_name===n).reduce((a,f)=>a+f.value,0))
+  }));
+  columns(document.getElementById("chartRepo"), rMonths, rSeries, C, {height:210});
+  legend(document.getElementById("legendRepo"),
+    rSeries.map((s,i)=>({label:`${s.name} (${s.values.reduce((a,b)=>a+b,0)})`,color:C[i%C.length]})));
+
+  /* skill cohorts */
+  const skillFacts = DATA.facts.filter(f=>f.metric==="provisioned");
+  const sMonths = months.filter(mo => skillFacts.some(f=>f.month===mo));
+  columns(document.getElementById("chartSkill"), sMonths,
+    [{name:"skills",values:sMonths.map(mo=>skillFacts.filter(f=>f.month===mo).length)}],
+    [C[1]], {height:210});
+}
+
+/* ---------- tables ----------------------------------------------------- */
+function ragCell(r){ return `<span class="dot ${esc(r)}"><i></i>${esc(r)}</span>`; }
+
+function renderInstr(){
+  const tb = document.querySelector("#instrTable tbody");
+  tb.innerHTML = DATA.instrumentation.map(r=>`
+    <tr><td>${esc(r.asset_class)}</td><td class="num">${r.total}</td><td class="num">${r.observed}</td>
+    <td class="num">${r.coverage_pct}%</td><td>${ragCell(r.rag)}</td></tr>`).join("");
+}
+
+function tableController(tableId, rows, render, filters, countEl){
+  let sortKey = null, dir = 1;
+  const tbody = document.querySelector("#"+tableId+" tbody");
+  function apply(){
+    let out = rows.filter(r => filters.every(f => f(r)));
+    if(sortKey) out = out.slice().sort((a,b)=>{
+      const x=a[sortKey], y=b[sortKey];
+      const nx=Number(x), ny=Number(y);
+      if(!isNaN(nx)&&!isNaN(ny)&&x!==""&&y!=="") return (nx-ny)*dir;
+      return String(x).localeCompare(String(y))*dir;
+    });
+    tbody.innerHTML = out.map(render).join("");
+    if(countEl) countEl.textContent = `${out.length} of ${rows.length} rows`;
+  }
+  document.querySelectorAll("#"+tableId+" thead th[data-k]").forEach(th=>{
+    th.addEventListener("click",()=>{
+      const k = th.dataset.k;
+      dir = (sortKey===k) ? -dir : 1;
+      sortKey = k;
+      document.querySelectorAll("#"+tableId+" thead th").forEach(o=>o.removeAttribute("data-dir"));
+      th.setAttribute("data-dir", dir===1?"asc":"desc");
+      apply();
+    });
+  });
+  return apply;
+}
+
+function renderRegister(){
+  const q = document.getElementById("q");
+  const fClass = document.getElementById("fClass"), fLife = document.getElementById("fLife"), fRag = document.getElementById("fRag");
+  const fill = (sel, vals) => vals.forEach(v => sel.insertAdjacentHTML("beforeend",`<option>${esc(v)}</option>`));
+  fill(fClass,[...new Set(DATA.assets.map(a=>a.asset_class))].sort());
+  fill(fLife,[...new Set(DATA.assets.map(a=>a.lifecycle))].sort());
+  fill(fRag,["Green","Amber","Red"]);
+
+  const row = a => `<tr>
+    <td class="num">${esc(a.asset_id)}</td>
+    <td>${esc(a.asset_class)}</td>
+    <td><strong>${esc(a.asset_name)}</strong></td>
+    <td>${esc(a.provider)}</td>
+    <td><span class="tag ${esc(a.lifecycle)}">${esc(a.lifecycle)}</span></td>
+    <td class="wrap-cell">${esc(a.status)}</td>
+    <td>${ragCell(a.rag)}</td>
+    <td class="num">${esc(a.risk_tier)}</td>
+    <td class="num">${esc(a.first_observed||"—")}</td>
+    <td class="num">${esc(a.last_changed||"—")}</td></tr>`;
+
+  const apply = tableController("registerTable", DATA.assets, row, [
+    a => !q.value || (a.asset_name+" "+a.provider+" "+a.status+" "+a.asset_id+" "+a.description)
+          .toLowerCase().includes(q.value.toLowerCase()),
+    a => !fClass.value || a.asset_class===fClass.value,
+    a => !fLife.value  || a.lifecycle===fLife.value,
+    a => !fRag.value   || a.rag===fRag.value
+  ], document.getElementById("rowCount"));
+  [q,fClass,fLife,fRag].forEach(el=>el.addEventListener("input",apply));
+  apply();
+}
+
+function renderFacts(){
+  const fMetric = document.getElementById("fMetric"), fCls = document.getElementById("fFactClass");
+  [...new Set(DATA.facts.map(f=>f.metric))].sort().forEach(v=>fMetric.insertAdjacentHTML("beforeend",`<option>${esc(v)}</option>`));
+  [...new Set(DATA.facts.map(f=>f.asset_class))].sort().forEach(v=>fCls.insertAdjacentHTML("beforeend",`<option>${esc(v)}</option>`));
+  const row = f => `<tr><td class="num">${esc(f.month)}</td><td>${esc(f.asset_class)}</td>
+    <td>${esc(f.asset_name)}</td><td>${esc(f.metric)}</td>
+    <td class="num">${esc(f.value)}</td><td>${esc(f.basis)}</td></tr>`;
+  const apply = tableController("factTable", DATA.facts, row, [
+    f => !fMetric.value || f.metric===fMetric.value,
+    f => !fCls.value || f.asset_class===fCls.value
+  ], document.getElementById("factCount"));
+  [fMetric,fCls].forEach(el=>el.addEventListener("input",apply));
+  apply();
+}
+
+function renderGovernance(){
+  const m = DATA.meta;
+  document.getElementById("docMeta").innerHTML = [
+    ["Document","AI Asset &amp; Usage Register"],
+    ["Version", esc(m.version)],
+    ["Classification", esc(m.classification)],
+    ["Owner", esc(m.owner)],
+    ["Reporting period", esc(m.period)],
+    ["Prior period compared", esc(m.prior_period || "None — first run, baseline established")],
+    ["Generated (UTC)", esc(m.generated_at)],
+    ["Regeneration cadence","Monthly, 1st of month (GitHub Actions + Claude Routine)"],
+    ["Next scheduled run", nextRun(m.period)],
+    ["Review trigger","Monthly; also on connector addition, or after any security incident"]
+  ].map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
+
+  document.querySelector("#provTable tbody").innerHTML = DATA.provenance.map(p=>`
+    <tr><td><code>${esc(p.file)}</code></td><td class="wrap-cell">${esc(p.source)}</td>
+    <td class="num">${esc(p.captured_at||"—")}</td>
+    <td class="num">${p.age_days==null?"—":p.age_days+"d"}</td>
+    <td>${p.stale?'<span class="dot Amber"><i></i>Stale</span>':'<span class="dot Green"><i></i>Fresh</span>'}</td>
+    <td class="num">${p.bytes.toLocaleString()}</td></tr>`).join("");
+
+  const gaps = DATA.instrumentation.filter(r=>r.rag!=="Green");
+  const notes = [];
+  notes.push(`<div class="note"><strong>Invocation telemetry is partial.</strong> claude.ai exposes no
+    usage-analytics API to this pipeline. Invocation counts are therefore read from local Claude
+    session transcripts (<code>~/.claude/projects/**/*.jsonl</code>), which cover only sessions run on
+    the machine executing this report. Counts are a floor, not a total.</div>`);
+  if(gaps.length) notes.push(`<div class="note"><strong>Coverage gaps this period:</strong>
+    ${gaps.map(g=>`${esc(g.asset_class)} at ${g.coverage_pct}%`).join(", ")}. Treat any
+    "zero usage" reading for these classes as unmeasured rather than unused.</div>`);
+  notes.push(`<div class="note"><strong>Connector install dates are not exposed.</strong> The
+    connector registry returns no provisioning timestamp, so connectors are seeded as BASELINE on
+    the first run. Their NEW/RETIRED status becomes a measured diff from the second run onward.</div>`);
+  const stale = DATA.provenance.filter(p=>p.stale);
+  if(stale.length) notes.push(`<div class="note"><strong>Stale source captures.</strong>
+    ${stale.map(p=>`<code>${esc(p.file)}</code> (${p.age_days} days old)`).join(", ")} exceeded the
+    45-day freshness threshold. A re-render alone cannot refresh connector or skill inventory —
+    that needs a Claude session to re-query the registries. Treat the affected sections as
+    last-known-good, not current.</div>`);
+  notes.push(`<div class="note ok"><strong>No estimated figures appear in this report.</strong>
+    Every value carries basis <code>measured</code> and traces to a file listed under Data
+    provenance. Where a figure could not be obtained it is recorded as unavailable and the affected
+    asset is flagged Amber, never filled with a placeholder.</div>`);
+  document.getElementById("limitations").innerHTML = notes.join("");
+
+  document.getElementById("revHistory").innerHTML = `
+    <tr><td class="num">1.0.0</td><td class="num">${esc(m.generated_at.slice(0,10))}</td>
+    <td>${esc(m.owner)}</td><td class="wrap-cell">Initial baseline. Inventory established across
+    connectors, skills and repositories; telemetry ledger opened; monthly regeneration scheduled.</td></tr>`;
+}
+
+function nextRun(period){
+  let [y,mo] = period.split("-").map(Number);
+  mo += 1; if(mo===13){ y+=1; mo=1; }
+  return `${y}-${String(mo).padStart(2,"0")}-01 (06:12 UTC)`;
+}
+
+/* ---------- shell ------------------------------------------------------ */
+function initTabs(){
+  const btns = [...document.querySelectorAll("nav.tabs button")];
+  function show(tab, push){
+    const b = btns.find(x=>x.dataset.tab===tab) || btns[0];
+    btns.forEach(o=>o.setAttribute("aria-selected", String(o===b)));
+    document.querySelectorAll("section[role=tabpanel]").forEach(s=>{
+      s.hidden = (s.id !== "tab-"+b.dataset.tab);
+    });
+    /* Charts sized to a hidden container measure zero, so redraw on reveal. */
+    renderCharts();
+    if(push && location.hash.slice(1) !== b.dataset.tab) history.replaceState(null,"","#"+b.dataset.tab);
+  }
+  btns.forEach(b=>b.addEventListener("click",()=>show(b.dataset.tab,true)));
+  window.addEventListener("hashchange",()=>show(location.hash.slice(1),false));
+  show(location.hash.slice(1) || "overview", false);
+}
+function initTheme(){
+  const btn = document.getElementById("themeBtn");
+  const set = t => {
+    document.documentElement.setAttribute("data-theme", t);
+    btn.textContent = t === "dark" ? "Light" : "Dark";
+    renderCharts();
+  };
+  let cur = "dark";
+  try{ cur = localStorage.getItem("aiassets-theme") || cur; }catch(e){}
+  set(cur);
+  btn.addEventListener("click", ()=>{
+    cur = cur === "dark" ? "light" : "dark";
+    try{ localStorage.setItem("aiassets-theme", cur); }catch(e){}
+    set(cur);
+  });
+}
+
+renderKpis();
+renderInstr();
+renderRegister();
+renderFacts();
+renderGovernance();
+initTabs();
+initTheme();
+document.getElementById("printBtn").addEventListener("click", ()=>window.print());
+window.addEventListener("resize", (()=>{ let t; return ()=>{ clearTimeout(t); t=setTimeout(renderCharts,180); }; })());
+</script>
+</body>
+</html>

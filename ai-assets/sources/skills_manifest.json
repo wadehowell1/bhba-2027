@@ -1,0 +1,320 @@
+{
+  "lastUpdated": 1788809829048,
+  "skills": [
+    {
+      "skillId": "skill_0197LUyGZ4YUVMQvxi8pnzw3",
+      "name": "performance-report",
+      "description": "Build a marketing performance report with key metrics, trend analysis, wins and misses, and prioritized optimization recommendations. Use when wrapping a campaign, when preparing weekly, monthly, or quarterly channel summaries for stakeholders, or when you need data translated into an executive summary with next-period priorities.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T02:07:39.211454Z"
+    },
+    {
+      "skillId": "skill_012GM1TUcxBnmrVMyNMyJQee",
+      "name": "review-animations",
+      "description": "Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy. Default to flagging; approval is earned.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T02:09:07.866410Z"
+    },
+    {
+      "skillId": "skill_014At1Z9z7bkJfTZ2fZja2V5",
+      "name": "analysis-assumptions-log",
+      "description": "Track and document analytical assumptions and decisions. Use when making analytical choices, documenting trade-offs, ensuring transparency, or creating audit trails for analytical work.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T02:07:06.811498Z"
+    },
+    {
+      "skillId": "skill_018Pg8xTtFACuCkiHAjkAo7U",
+      "name": "animation-vocabulary",
+      "description": "Reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term (\"the bouncy thing when a popover opens\" → Pop in; \"the iOS rubber-band scroll\" → Rubber-banding). Use when the user asks \"what's it called when…\", or describes a motion effect without knowing its name and wants the right word to prompt an AI or designer with. For naming an effect, not designing or building one.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T02:08:30.232549Z"
+    },
+    {
+      "skillId": "skill_01HCx2jUCh8bqdA9gdssJjXs",
+      "name": "emil-design-eng",
+      "description": "This skill encodes Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T02:08:49.387210Z"
+    },
+    {
+      "skillId": "skill_011ukTvzdwaCYgTbYns3HgQ2",
+      "name": "pdf-ocr-extraction",
+      "description": "Extract text from scanned PDFs using optical character recognition",
+      "source": "custom",
+      "updatedAt": "2026-08-19T02:07:20.248013Z"
+    },
+    {
+      "skillId": "skill_01Q1AVHZRnUCgtjxTpTmoDzD",
+      "name": "seo-audit",
+      "description": "When the user wants to audit, review, or diagnose SEO issues on their site. Also use when the user mentions \"SEO audit,\" \"technical SEO,\" \"why am I not ranking,\" \"SEO issues,\" \"on-page SEO,\" \"meta tags review,\" \"SEO health check,\" \"my traffic dropped,\" \"lost rankings,\" \"not showing up in Google,\" \"site isn't ranking,\" \"Google update hit me,\" \"page speed,\" \"core web vitals,\" \"crawl errors,\" or \"indexing issues.\" Use this even if the user just says something vague like \"my SEO is bad\" or \"help with SEO\" — start with an audit. For building pages at scale to target keywords, see programmatic-seo. For adding structured data, see schema. For AI search optimization, see ai-seo.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:58:00.617997Z"
+    },
+    {
+      "skillId": "skill_01RU5KPBzQa9sHvarrkwc5ii",
+      "name": "page-cro",
+      "description": "When the user wants to optimize, improve, or increase conversions on any marketing page — including homepage, landing pages, pricing pages, feature pages, or blog posts. Also use when the user says \"CRO,\" \"conversion rate optimization,\" \"this page isn't converting,\" \"improve conversions,\" or \"why isn't this page working.\" For signup/registration flows, see signup-flow-cro. For post-signup activation, see onboarding-cro. For forms outside of signup, see form-cro. For popups/modals, see popup-cro.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:55.516949Z"
+    },
+    {
+      "skillId": "skill_011PPMsFF9JAPR5TcALVMHzo",
+      "name": "aeo",
+      "description": "Answer Engine Optimization (AEO) skill — optimize content to be cited by AI language models (ChatGPT, Perplexity, Claude, Gemini, Mistral) as authoritative sources. Distinct from SEO — AEO optimizes for citation in LLM-generated responses, not search rankings. Use when planning content for AI-first search audiences, auditing existing content for E-E-A-T signals, tracking which pages get cited by which LLMs, or building a citation-friendly content strategy. Triggers — 'AEO audit', 'optimize for ChatGPT', 'get cited by Perplexity', 'LLM citation strategy', 'answer engine optimization', 'content for AI search', 'E-E-A-T audit'. Output is a markdown audit report (default) or JSON for pipeline integration. Stdlib-only Python tools.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:57.654831Z"
+    },
+    {
+      "skillId": "skill_01X3LNBthVuBFZGtDNnTr6xc",
+      "name": "cold-email",
+      "description": "When the user wants to write, improve, or build a sequence of B2B cold outreach emails to prospects who haven't asked to hear from them. Use when the user mentions 'cold email,' 'cold outreach,' 'prospecting emails,' 'SDR emails,' 'sales emails,' 'first touch email,' 'follow-up sequence,' or 'email prospecting.' Also use when they share an email draft that sounds too sales-y and needs to be humanized. Distinct from email-sequence (lifecycle/nurture to opted-in subscribers) — this is unsolicited outreach to new prospects. NOT for lifecycle emails, newsletters, or drip campaigns (use email-sequence).",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:55.725474Z"
+    },
+    {
+      "skillId": "skill_01REWgpR1SWL6mMY5Sg8BUHR",
+      "name": "frontend-design",
+      "description": "Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T02:03:32.882192Z"
+    },
+    {
+      "skillId": "skill_01F5S6qF6m4uauaywYQeHdDw",
+      "name": "copywriting",
+      "description": "When the user wants to write, rewrite, or improve marketing copy for any page — including homepage, landing pages, pricing pages, feature pages, about pages, or product pages. Also use when the user says \"write copy for,\" \"improve this copy,\" \"rewrite this page,\" \"marketing copy,\" \"headline help,\" or \"CTA copy.\" For email copy, see email-sequence. For popup copy, see popup-cro.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:56.180798Z"
+    },
+    {
+      "skillId": "skill_01CiFkGxcK3cMqMUatv1r43w",
+      "name": "pricing-strategy",
+      "description": "Design, optimize, and communicate SaaS pricing — tier structure, value metrics, pricing pages, and price increase strategy. Use when building a pricing model from scratch, redesigning existing pricing, planning a price increase, or improving a pricing page. Trigger keywords: pricing tiers, pricing page, price increase, packaging, value metric, per seat pricing, usage-based pricing, freemium, good-better-best, pricing strategy, monetization, pricing page conversion, Van Westendorp. NOT for broader product strategy — use product-strategist for that. NOT for customer success or renewals — use customer-success-manager for expansion revenue.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:58.110452Z"
+    },
+    {
+      "skillId": "skill_018qZQxXZ2zQw3MyT522igvH",
+      "name": "launch-strategy",
+      "description": "When the user wants to plan a product launch, feature announcement, or release strategy. Also use when the user mentions 'launch,' 'Product Hunt,' 'feature release,' 'announcement,' 'go-to-market,' 'beta launch,' 'early access,' 'waitlist,' 'product update,' 'GTM plan,' 'launch checklist,' or 'launch momentum.' This skill covers phased launches, channel strategy, and ongoing launch momentum.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:59.770569Z"
+    },
+    {
+      "skillId": "skill_01A4cBiAzXjdf6wwfFvM61zq",
+      "name": "content-strategy",
+      "description": "When the user wants to plan a content strategy, decide what content to create, or figure out what topics to cover. Also use when the user mentions \"content strategy,\" \"what should I write about,\" \"content ideas,\" \"blog strategy,\" \"topic clusters,\" \"content planning,\" \"editorial calendar,\" \"content marketing,\" \"content roadmap,\" \"what content should I create,\" \"blog topics,\" \"content pillars,\" or \"I don't know what to write.\" Use this whenever someone needs help deciding what content to produce, not just writing it. For writing individual pieces, see copywriting. For SEO-specific audits, see seo-audit. For social media content specifically, see social.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:58:00.025180Z"
+    },
+    {
+      "skillId": "skill_01HrvcqiQ5GsjLQE9Kj5s3W5",
+      "name": "data-visualization",
+      "description": "Create effective data visualizations with Python (matplotlib, seaborn, plotly). Use when building charts, choosing the right chart type for a dataset, creating publication-quality figures, or applying design principles like accessibility and color theory.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:10.066280Z"
+    },
+    {
+      "skillId": "skill_01YLEhjh4z6FqJ5YbwVjEpth",
+      "name": "chief-of-staff",
+      "description": "C-suite orchestration layer. Routes founder questions to the right advisor role(s), triggers multi-role board meetings for complex decisions, synthesizes outputs, and tracks decisions. Every C-suite interaction starts here. Loads company context automatically. Use when a founder question needs routing to the right advisor — e.g. 'should we raise now or cut burn?' — or when a multi-domain decision needs a board meeting convened.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:45.825257Z"
+    },
+    {
+      "skillId": "skill_011pL12MLbmTD4qFnYeH4sM7",
+      "name": "scenario-war-room",
+      "description": "Cross-functional what-if modeling for cascading multi-variable scenarios. Unlike single-assumption stress testing, this models compound adversity across all business functions simultaneously. Use when facing complex risk scenarios, strategic decisions with major downside, or when the user asks 'what if X AND Y both happen?'",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:47.600901Z"
+    },
+    {
+      "skillId": "skill_01V3zBT6ySxWL4Ca7gXyDtT8",
+      "name": "data-context-extractor",
+      "description": "Generate or improve a company-specific data analysis skill by extracting tribal knowledge from analysts.\nBOOTSTRAP MODE - Triggers: \"Create a data context skill\", \"Set up data analysis for our warehouse\", \"Help me create a skill for our database\", \"Generate a data skill for [company]\" → Discovers schemas, asks key questions, generates initial skill with reference files\nITERATION MODE - Triggers: \"Add context about [domain]\", \"The skill needs more info about [topic]\", \"Update the data skill with [metrics/tables/terminology]\", \"Improve the [domain] reference\" → Loads existing skill, asks targeted questions, appends/updates reference files\nUse when data analysts want Claude to understand their company's specific data warehouse, terminology, metrics definitions, and common query patterns.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:10.574857Z"
+    },
+    {
+      "skillId": "skill_01UVByEdx29o52QMAyd8Byon",
+      "name": "ceo-advisor",
+      "description": "Executive leadership guidance for strategic decision-making, organizational development, and stakeholder management. Use when planning strategy, preparing board presentations, managing investors, developing organizational culture, making executive decisions, fundraising, or when user mentions CEO, strategic planning, board meetings, investor updates, organizational leadership, or executive strategy.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:45.367508Z"
+    },
+    {
+      "skillId": "skill_012SYt7duZzF6L6HgccTV2JL",
+      "name": "build-dashboard",
+      "description": "Build an interactive HTML dashboard with charts, filters, and tables. Use when creating an executive overview with KPI cards, turning query results into a shareable self-contained report, building a team monitoring snapshot, or needing multiple charts with filters in one browser-openable file.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:07.644435Z"
+    },
+    {
+      "skillId": "skill_01FSr9qros9r7sSrSuoLsbuZ",
+      "name": "create-viz",
+      "description": "Create publication-quality visualizations with Python. Use when turning query results or a DataFrame into a chart, selecting the right chart type for a trend or comparison, generating a plot for a report or presentation, or needing an interactive chart with hover and zoom.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:08.563793Z"
+    },
+    {
+      "skillId": "skill_01RAt4GtnEiZWqGUaQxJVnUc",
+      "name": "validate-data",
+      "description": "QA an analysis before sharing -- methodology, accuracy, and bias checks. Use when reviewing an analysis before a stakeholder presentation, spot-checking calculations and aggregation logic, verifying a SQL query's results look right, or assessing whether conclusions are actually supported by the data.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:06.720587Z"
+    },
+    {
+      "skillId": "skill_018yQGJhuD8AiR3pczMwjnLw",
+      "name": "statistical-analysis",
+      "description": "Apply statistical methods including descriptive stats, trend analysis, outlier detection, and hypothesis testing. Use when analyzing distributions, testing for significance, detecting anomalies, computing correlations, or interpreting statistical results.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:06.281405Z"
+    },
+    {
+      "skillId": "skill_01TVghHAoAW7ruABsNiJ9RW6",
+      "name": "analyze",
+      "description": "Answer data questions -- from quick lookups to full analyses. Use when looking up a single metric, investigating what's driving a trend or drop, comparing segments over time, or preparing a formal data report for stakeholders.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:01.765364Z"
+    },
+    {
+      "skillId": "skill_017Rza1u1y7nja6Ba99CSKpi",
+      "name": "write-query",
+      "description": "Write optimized SQL for your dialect with best practices. Use when translating a natural-language data need into SQL, building a multi-CTE query with joins and aggregations, optimizing a query against a large partitioned table, or getting dialect-specific syntax for Snowflake, BigQuery, Postgres, etc.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:05.016028Z"
+    },
+    {
+      "skillId": "skill_01FQRQvjnL3pgfTofETfMNDZ",
+      "name": "agent-designer",
+      "description": "Use when the user asks to design a multi-agent system, pick an orchestration pattern (supervisor/swarm/pipeline), generate tool schemas for agents, or evaluate agent execution logs for cost, latency, and failure bottlenecks. Examples: 'design an agent architecture for research automation', 'generate Anthropic tool schemas from these tool descriptions', 'analyze these agent run logs for bottlenecks'. NOT for Claude Code workflow files (use workflow-builder) or single-agent prompt design (use agent-workflow-designer).",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:57:44.998263Z"
+    },
+    {
+      "skillId": "skill_01Nvkbrj1FPREfE2f6ggJgN6",
+      "name": "explore-data",
+      "description": "Profile and explore a dataset to understand its shape, quality, and patterns. Use when encountering a new table or file, checking null rates and column distributions, spotting data quality issues like duplicates or suspicious values, or deciding which dimensions and metrics to analyze.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:02.980612Z"
+    },
+    {
+      "skillId": "morning",
+      "name": "morning",
+      "description": "Render the user's morning brief as a styled HTML artifact, or set it up as a recurring weekday task. Use only when the user explicitly asks to run, see, or set up their morning brief, or if they invoke /morning by name. A question about their day, schedule, or calendar is not by itself a request for the brief; answer it directly instead.",
+      "source": "anthropic-example",
+      "updatedAt": "2026-09-07T04:18:16.767280Z"
+    },
+    {
+      "skillId": "skill_01BZtNC1dbry6NsnVujDFmFA",
+      "name": "sql-queries",
+      "description": "Write correct, performant SQL across all major data warehouse dialects (Snowflake, BigQuery, Databricks, PostgreSQL, etc.). Use when writing queries, optimizing slow SQL, translating between dialects, or building complex analytical queries with CTEs, window functions, or aggregations.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:49:04.337706Z"
+    },
+    {
+      "skillId": "import-memory",
+      "name": "import-memory",
+      "description": "Import a memory export from another AI assistant into Claude's memory — conversationally, additively, and with the content treated as data.",
+      "source": "anthropic-example",
+      "updatedAt": "2026-09-07T04:18:16.791012Z"
+    },
+    {
+      "skillId": "skill_0176icjAApcC9TKMyoZ4BSaD",
+      "name": "impeccable",
+      "description": "Use when the user wants to design, redesign, shape, critique, audit, polish, clarify, distill, harden, optimize, adapt, animate, colorize, extract, or otherwise improve a frontend interface. Covers websites, landing pages, dashboards, product UI, app shells, components, forms, settings, onboarding, and empty states. Handles UX review, visual hierarchy, information architecture, cognitive load, accessibility, performance, responsive behavior, theming, anti-patterns, typography, fonts, spacing, layout, alignment, color, motion, micro-interactions, UX copy, error states, edge cases, i18n, and reusable design systems or tokens. Also use for bland designs that need to become bolder or more delightful, loud designs that should become quieter, live browser iteration on UI elements, or ambitious visual effects that should feel technically extraordinary. Not for backend-only or non-UI tasks.",
+      "source": "custom",
+      "updatedAt": "2026-08-19T01:25:13.874478Z"
+    },
+    {
+      "skillId": "web-artifacts-builder",
+      "name": "web-artifacts-builder",
+      "description": "Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind CSS, shadcn/ui). Use for complex artifacts requiring state management, routing, or shadcn/ui components - not for simple single-file HTML/JSX artifacts.",
+      "source": "anthropic-example",
+      "updatedAt": "2026-09-07T04:18:16.357297Z"
+    },
+    {
+      "skillId": "brand-guidelines",
+      "name": "brand-guidelines",
+      "description": "Applies Anthropic's official brand colors and typography to any sort of artifact that may benefit from having Anthropic's look-and-feel. Use it when brand colors or style guidelines, visual formatting, or company design standards apply.",
+      "source": "anthropic-example",
+      "updatedAt": "2026-09-07T04:18:16.368898Z"
+    },
+    {
+      "skillId": "mcp-builder",
+      "name": "mcp-builder",
+      "description": "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK).",
+      "source": "anthropic-example",
+      "updatedAt": "2026-09-07T04:18:16.402984Z"
+    },
+    {
+      "skillId": "skill_01XSBJmwiz3bvztNDXJ3GaUN",
+      "name": "share",
+      "description": "Publish, update, or remove HTML pages on sharable.link. Use when the user says \"share this\", \"publish this\", \"make this shareable\", \"share link\", \"/share\", \"update shared page\", \"update link\", \"/update\", \"unshare\", \"/unshare\", or \"remove shared page\". Supports optional password protection.",
+      "source": "custom",
+      "updatedAt": "2026-05-29T02:30:10.005495Z"
+    },
+    {
+      "skillId": "skill_018RrGfKrM7YPyAWYrgxD7mM",
+      "name": "humanize-report",
+      "description": "Line-edits a document to remove AI-typical writing tics — em dashes used as punctuation, filler/hedge phrases, throat-clearing transitions, triplet padding, empty intensifiers, mechanical parallelism, and inspirational-sounding closers — without touching facts, figures, citations, or structure. Use whenever the user asks to \"humanize,\" \"de-AI-ify,\" remove \"AI slop,\" clean up em dashes, cut filler, or make a Claude-drafted report read less like it was written by an AI, especially for final/board-ready/government deliverables where this kind of tic causes reader discomfort or undermines credibility.",
+      "source": "custom",
+      "updatedAt": "2026-07-03T01:28:58.532091Z"
+    },
+    {
+      "skillId": "skill-creator",
+      "name": "skill-creator",
+      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
+      "source": "anthropic-example",
+      "updatedAt": "2026-09-07T04:18:16.319362Z"
+    },
+    {
+      "skillId": "skill_01EFALCGGqQzJKLpMxCQjRvH",
+      "name": "nomad-scout",
+      "description": "High-efficiency short-term rental identification and deal analysis.",
+      "source": "custom",
+      "updatedAt": "2026-05-30T13:02:54.396561Z"
+    },
+    {
+      "skillId": "skill_01Ev3Yk1qW2ibXU6sa3m1qHW",
+      "name": "flight-tracker",
+      "description": "Aggregates and scores flight options across airlines, GDS/NDC aggregators (Duffel, Amadeus, Kiwi/Tequila), and metasearch partners (Google Flights via SerpAPI) for any origin-destination-date combination, then returns a ranked, audit-defensible shortlist with a transparent weighted scoring breakdown. Use this skill whenever the user asks to find, compare, track, monitor, price-watch, or identify the \"best\" flight option(s) for any route, including round-trip, one-way, multi-city, long-stay/relocation, or open-jaw itineraries (e.g. depart one city, return to another), even if they don't say \"flight tracker\" or \"flight skill\" explicitly. Also trigger for fare-alert and price-drop monitoring setup, layover/connection comparison, booking-window feasibility checks (is this date even bookable yet), or any travel-agency/travel-business workflow that needs repeatable, scored flight sourcing logic rather than a single ad-hoc search.",
+      "source": "custom",
+      "updatedAt": "2026-06-19T03:00:01.014527Z"
+    },
+    {
+      "skillId": "pdf",
+      "name": "pdf",
+      "description": "Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill.",
+      "source": "anthropic",
+      "updatedAt": "2026-07-10T19:23:15.432550Z"
+    },
+    {
+      "skillId": "xlsx",
+      "name": "xlsx",
+      "description": "Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .xltx, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like \"the xlsx in my downloads\") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved.",
+      "source": "anthropic",
+      "updatedAt": "2026-08-29T01:00:31.073935Z"
+    },
+    {
+      "skillId": "pptx",
+      "name": "pptx",
+      "description": "Use this skill any time a .pptx or .potx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations as PowerPoint (.pptx) files; reading, parsing, or extracting text from any .pptx or .potx file (even if the extracted content will be used elsewhere, like in an email, summary, or creating a different type of slide deck); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates (.potx), layouts, speaker notes, or comments. Trigger whenever the user asks for a PowerPoint or .pptx file, or references a .pptx or .potx filename, regardless of what they plan to do with the content afterward. However, when the user asks for a deck, slides, a slide deck, or a presentation without naming a file format, default to using a dedicated slide-deck artifact type or a separate slides skill if this session offers one; otherwise, use this skill.",
+      "source": "anthropic",
+      "updatedAt": "2026-08-28T02:00:39.535636Z"
+    },
+    {
+      "skillId": "docx",
+      "name": "docx",
+      "description": "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx) or Word templates (.dotx). Triggers include: any mention of 'Word doc', 'word document', '.docx', '.dotx', or requests to produce professional documents with formatting like tables of contents, page numbers, or letterheads. Also use when extracting or reorganizing content from .docx or .dotx files, inserting or replacing images in documents, find-and-replace in Word files, working with tracked changes or comments, or converting content into a polished Word document. If the user asks for a 'report', 'memo', 'letter', 'template', or similar deliverable as a Word or .docx file (to download, email or print), use this skill. However, if they ask for a document, page, report, memo, or notes WITHOUT naming a file format and the session offers a dedicated document or page skill or connector, use that instead. Do NOT use for PDFs, spreadsheets, Google Docs, or coding unrelated to document generation.",
+      "source": "anthropic",
+      "updatedAt": "2026-08-31T20:00:31.499122Z"
+    },
+    {
+      "skillId": "canvas-design",
+      "name": "canvas-design",
+      "description": "Create beautiful visual art in .png and .pdf documents using design philosophy. You should use this skill when the user asks to create a poster, piece of art, design, or other static piece. Create original visual designs, never copying existing artists' work to avoid copyright violations.",
+      "source": "anthropic-example",
+      "updatedAt": "2026-09-07T04:18:16.380297Z"
+    }
+  ]
+}
