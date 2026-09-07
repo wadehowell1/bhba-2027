@@ -155,22 +155,33 @@ check("email.prefers_recruitment_mailbox",
 check("profile.open_questions_tracked", len(open_questions()) == 9, str(len(open_questions())))
 
 # --- confidence gate --------------------------------------------------------
-disputed = TailoringPlan.from_json({"job_title": "x", "company": "y", "headline": "h",
-    "summary": "Clean.", "competencies": [],
-    "roles": [{"employment_id": "EMP-01", "achievement_ids": ["ACH-001"]}]})
-check("confidence.disputed_detected",
-      any(f.endswith(":CHECK") for f in low_confidence_claims(disputed)))
-check("confidence.disputed_blocks_autosend",
+# VN-01 was resolved 2026-09-07 (USD 45M+ confirmed), so no CHECK records remain
+# in the bank. The gate's CHECK behaviour is therefore tested with a synthetic
+# input, and detection is tested against the medium-confidence records that do exist.
+check("confidence.check_blocks_autosend",
       decide(posting_text="Send CV to careers@t.com", company="ZZConf1", score_total=90,
              ats_passed=True, fabrication_flags=[],
-             low_confidence=low_confidence_claims(disputed)).route == DRAFT)
-clean = TailoringPlan.from_json({"job_title": "x", "company": "y", "headline": "h",
-    "summary": "Clean.", "competencies": [],
-    "roles": [{"employment_id": "EMP-01", "achievement_ids": ["ACH-002"]}]})
-check("confidence.clean_allows_autosend",
+             low_confidence=["ACH-XXX:CHECK"]).route == DRAFT)
+check("confidence.medium_does_not_block",
       decide(posting_text="Send CV to careers@t.com", company="ZZConf2", score_total=90,
              ats_passed=True, fabrication_flags=[],
-             low_confidence=low_confidence_claims(clean)).route == AUTO_SEND)
+             low_confidence=["ACH-XXX:medium"]).route == AUTO_SEND)
+
+medium_plan = TailoringPlan.from_json({"job_title": "x", "company": "y", "headline": "h",
+    "summary": "Clean.", "competencies": [],
+    "roles": [{"employment_id": "EMP-02", "achievement_ids": ["ACH-023"]}]})
+check("confidence.medium_detected",
+      any(f.endswith(":medium") for f in low_confidence_claims(medium_plan)),
+      str(low_confidence_claims(medium_plan)))
+
+high_plan = TailoringPlan.from_json({"job_title": "x", "company": "y", "headline": "h",
+    "summary": "Clean.", "competencies": [],
+    "roles": [{"employment_id": "EMP-01", "achievement_ids": ["ACH-001", "ACH-002"]}]})
+check("confidence.resolved_claim_is_high", low_confidence_claims(high_plan) == [],
+      str(low_confidence_claims(high_plan)))
+check("confidence.vn01_resolved",
+      any(n["id"] == "VN-01" and n["status"].startswith("RESOLVED")
+          for n in b.get("verification_notes", [])))
 
 # --- report -----------------------------------------------------------------
 print(f"\n{'='*62}\n  JOB APPLICATION AGENT — REGRESSION SUITE\n{'='*62}")
