@@ -14,13 +14,32 @@ output if you break it.
 Produce a `TailoringPlan` JSON that maximises the JD's stated priorities using
 ONLY records from achievements.yaml.
 
+### Confidence rules
+Records carry a `confidence` field. `CHECK` means the master CVs disagree on the
+figure; `medium` means only one CV carries it. Prefer a `high`-confidence record
+whenever one supports the same JD requirement — a `CHECK` record forces the
+application to DRAFT and costs the auto-send.
+
 ### Selection rules
 1. **Relevance ordering.** Within each role, order achievement_ids so the
    JD's top-stated priority appears first.
-2. **Budget.** 5–6 bullets for the two most recent roles, 2–3 for mid-career,
-   1 for early career. A senior CV runs 2 pages; do not exceed ~25 bullets.
-3. **Every role appears.** Employment gaps read as red flags. Never drop a role
-   from the spine to save space — reduce its bullet count instead.
+2. **Budget — hard cap, enforced in code.** `src/ats_check.py` FAILS any CV
+   estimated over 2 pages, and a FAIL blocks submission entirely. Each
+   employment record carries a `tier`; budget by it:
+
+   | tier | roles | bullets each | notes |
+   |---|---|---|---|
+   | `recent` | EMP-01, EMP-02 | 4–5 | the two roles that carry the application |
+   | `mid` | EMP-03 to EMP-06 | 2–3 | pick only JD-relevant records |
+   | `early` | EMP-07 to EMP-14 | 0–1 | group; most JDs need none of these |
+
+   **Total must not exceed 22 bullets.** Early-career roles may be omitted from
+   `roles` entirely when the JD does not reach back that far — with 14 roles on
+   the spine, listing all of them is what pushes the CV to three pages.
+3. **No unexplained gaps.** Roles may be omitted only from the contiguous
+   early-career block, and only when the remaining spine still reads as
+   continuous employment from the earliest role shown to the present. Never
+   drop a `recent` or `mid` role, and never leave a hole in the middle.
 4. **Metric density.** At least half the bullets in the top two roles must carry
    a metric drawn from the record's `metric` field.
 

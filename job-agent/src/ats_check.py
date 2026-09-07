@@ -23,6 +23,7 @@ class AtsReport:
     extracted_chars: int = 0
     bullet_count_source: int = 0
     bullet_count_extracted: int = 0
+    estimated_pages: int = 1
 
     def fail(self, m): self.passed = False; self.errors.append(m)
     def warn(self, m): self.warnings.append(m)
@@ -81,6 +82,13 @@ def validate(docx_path: Path) -> AtsReport:
                f"{r.bullet_count_extracted} recovered")
     if r.bullet_count_source < 8:
         r.warn(f"only {r.bullet_count_source} bullets — thin for a senior CV")
+
+    # 4b. Length. A senior CV runs two pages; recruiters do not read a third.
+    est_pages = max(1, round(r.extracted_chars / 3200))
+    r.estimated_pages = est_pages
+    if est_pages > 2:
+        r.fail(f"CV runs ~{est_pages} pages ({r.extracted_chars} chars, "
+               f"{r.bullet_count_source} bullets) — trim to 2")
 
     # 5. Reading order
     if text.find("PROFESSIONAL SUMMARY") > text.find("PROFESSIONAL EXPERIENCE"):

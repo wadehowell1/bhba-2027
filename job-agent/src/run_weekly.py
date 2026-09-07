@@ -19,7 +19,7 @@ from pathlib import Path
 from .prefilter import Posting, prefilter, to_dict
 from .ingest import parse_alert
 from .score import deterministic_score
-from .render_cv import TailoringPlan, render, FabricationError
+from .render_cv import TailoringPlan, render, FabricationError, low_confidence_claims
 from .render_pdf import render_pdf
 from .ats_check import validate
 from .gate import decide, AUTO_SEND, DRAFT, REJECT
@@ -100,11 +100,13 @@ def stage2(scored_path: Path) -> dict:
 
         cv_path = pdf_path = ""
         flags: list[str] = []
+        low_conf: list[str] = []
         ats_ok = False
         ats_detail = "not_run"
 
         try:
             plan = TailoringPlan.from_json(it["plan"])
+            low_conf = low_confidence_claims(plan)
             safe = _slug(f"{company}_{title}")
             d, fl = render(plan, OUT / "cv" / f"{rid}_{safe}.docx")
             cv_path, flags = str(d), fl
@@ -123,7 +125,8 @@ def stage2(scored_path: Path) -> dict:
         g = decide(posting_text=jd, company=company,
                    score_total=float(it.get("score_total", 0)),
                    ats_passed=ats_ok, fabrication_flags=flags,
-                   apply_email=post.get("apply_email"))
+                   apply_email=post.get("apply_email"),
+                   low_confidence=low_conf)
 
         row = {
             "run_id": rid, "job_key": key, "source": post.get("source", ""),
@@ -135,6 +138,7 @@ def stage2(scored_path: Path) -> dict:
             "questions_raised": " | ".join(g.questions),
             "cv_path": cv_path, "pdf_path": pdf_path,
             "ats_result": ats_detail[:300], "fabrication_flags": ";".join(flags),
+            "low_confidence_claims": ";".join(low_conf),
             "sent_at": "", "gmail_message_id": "", "outcome": "pending",
             "outcome_at": "", "notes": "",
         }

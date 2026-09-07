@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.prefilter import Posting, prefilter
 from src.ingest import parse_alert
 from src.score import deterministic_score
-from src.render_cv import TailoringPlan, render, verify_plan
+from src.render_cv import TailoringPlan, render, verify_plan, low_confidence_claims
 from src.render_pdf import render_pdf
 from src.ats_check import validate
 from src.gate import decide, extract_apply_email, AUTO_SEND, DRAFT, REJECT
@@ -28,7 +28,10 @@ def check(name: str, cond: bool, detail: str = "") -> None:
 
 # --- bank -------------------------------------------------------------------
 b = load_bank()
-check("bank.records", len(b["achievements"]) == 24, str(len(b["achievements"])))
+check("bank.records", len(b["achievements"]) == 40, str(len(b["achievements"])))
+check("bank.employment", len(b["employment"]) == 14, str(len(b["employment"])))
+check("bank.credentials", len(b["credentials"]) == 10, str(len(b["credentials"])))
+check("bank.verification_notes_present", len(b.get("verification_notes", [])) == 4)
 check("bank.every_achievement_has_id_and_statement",
       all(a.get("id") and a.get("statement") for a in b["achievements"]))
 check("bank.employment_ids_resolve",
@@ -112,7 +115,8 @@ with tempfile.TemporaryDirectory() as td:
     check("pdf.headings", all(h in u for h in
           ["PROFESSIONAL SUMMARY", "CORE COMPETENCIES", "PROFESSIONAL EXPERIENCE"]))
     check("pdf.reading_order", u.find("PROFESSIONAL SUMMARY") < u.find("PROFESSIONAL EXPERIENCE"))
-    check("pdf.metrics_recovered", all(m in t for m in ["45M", "150+", "500K"]))
+    check("pdf.metrics_recovered", all(m in t for m in ["500K", "250+", "23 countries", "45%"]),
+          "missing: " + ",".join(m for m in ["500K", "250+", "23 countries", "45%"] if m not in t))
 
 # --- gate -------------------------------------------------------------------
 g = decide(posting_text="Send CV to careers@maersk.com", company="ZZTestA", score_total=81,
@@ -149,6 +153,24 @@ check("email.prefers_recruitment_mailbox",
 
 # --- memory -----------------------------------------------------------------
 check("profile.open_questions_tracked", len(open_questions()) == 9, str(len(open_questions())))
+
+# --- confidence gate --------------------------------------------------------
+disputed = TailoringPlan.from_json({"job_title": "x", "company": "y", "headline": "h",
+    "summary": "Clean.", "competencies": [],
+    "roles": [{"employment_id": "EMP-01", "achievement_ids": ["ACH-001"]}]})
+check("confidence.disputed_detected",
+      any(f.endswith(":CHECK") for f in low_confidence_claims(disputed)))
+check("confidence.disputed_blocks_autosend",
+      decide(posting_text="Send CV to careers@t.com", company="ZZConf1", score_total=90,
+             ats_passed=True, fabrication_flags=[],
+             low_confidence=low_confidence_claims(disputed)).route == DRAFT)
+clean = TailoringPlan.from_json({"job_title": "x", "company": "y", "headline": "h",
+    "summary": "Clean.", "competencies": [],
+    "roles": [{"employment_id": "EMP-01", "achievement_ids": ["ACH-002"]}]})
+check("confidence.clean_allows_autosend",
+      decide(posting_text="Send CV to careers@t.com", company="ZZConf2", score_total=90,
+             ats_passed=True, fabrication_flags=[],
+             low_confidence=low_confidence_claims(clean)).route == AUTO_SEND)
 
 # --- report -----------------------------------------------------------------
 print(f"\n{'='*62}\n  JOB APPLICATION AGENT — REGRESSION SUITE\n{'='*62}")

@@ -11,7 +11,8 @@ SEEN = ROOT / "data" / "seen.json"
 FIELDS = ["run_id", "decided_at", "job_key", "source", "company", "job_title",
           "country", "url", "apply_email", "score_total", "score_breakdown",
           "route", "route_reasons", "questions_raised", "cv_path", "pdf_path",
-          "ats_result", "fabrication_flags", "sent_at", "gmail_message_id",
+          "ats_result", "fabrication_flags", "low_confidence_claims",
+          "sent_at", "gmail_message_id",
           "outcome", "outcome_at", "notes"]
 
 

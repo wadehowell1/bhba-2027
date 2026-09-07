@@ -56,6 +56,26 @@ class FabricationError(ValueError):
     pass
 
 
+def low_confidence_claims(plan: "TailoringPlan") -> list[str]:
+    """Records used by the plan whose figures are disputed or single-sourced.
+
+    Not fabrication — the claim exists in the bank — but it has not been
+    confirmed by the candidate, so it must never leave without review.
+    `CHECK` means the master CVs disagree; `medium` means one source only.
+    """
+    ach = achievement_index()
+    out: list[str] = []
+    for role in plan.roles:
+        for aid in role.achievement_ids:
+            rec = ach.get(aid)
+            if not rec:
+                continue
+            c = rec.get("confidence", "high")
+            if c in ("CHECK", "medium"):
+                out.append(f"{aid}:{c}")
+    return out
+
+
 def verify_plan(plan: TailoringPlan) -> list[str]:
     """Reject any plan that invents evidence. Returns list of flags; empty == clean."""
     flags: list[str] = []
@@ -165,9 +185,15 @@ def render(plan: TailoringPlan, out_path: Path, strict: bool = True) -> tuple[Pa
             doc.add_paragraph(text, style="List Bullet")
 
     _heading(doc, "Education & Certifications")
-    for c in bank["credentials"]:
+    core = [c for c in bank["credentials"] if c.get("tier", "core") == "core"]
+    extra = [c for c in bank["credentials"] if c.get("tier", "core") != "core"]
+    for c in core:
         line = c["name"] + (f" — {c['issuer']}" if c.get("issuer") else "")
         doc.add_paragraph(line, style="List Bullet")
+    if extra:
+        # Supplementary training belongs on one line, not as ten more bullets.
+        doc.add_paragraph("Further professional development: "
+                          + "; ".join(c["name"] for c in extra))
 
     _heading(doc, "Additional Information")
     svc = [a for a in bank["achievements"] if a["id"] == "ACH-060"]

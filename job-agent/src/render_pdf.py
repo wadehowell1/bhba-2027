@@ -100,8 +100,14 @@ def render_pdf(plan: TailoringPlan, out_path: Path, strict: bool = True) -> tupl
 
     _h(pdf, "Education & Certifications")
     pdf.set_font("Helvetica", "", 9.5)
-    for c in bank["credentials"]:
+    core = [c for c in bank["credentials"] if c.get("tier", "core") == "core"]
+    extra = [c for c in bank["credentials"] if c.get("tier", "core") != "core"]
+    for c in core:
         _bullet(pdf, c["name"] + (f" - {c['issuer']}" if c.get("issuer") else ""))
+    if extra:
+        pdf.set_x(pdf.l_margin)
+        pdf.multi_cell(0, 4.4, _s("Further professional development: "
+                                  + "; ".join(c["name"] for c in extra)))
 
     _h(pdf, "Additional Information")
     pdf.set_font("Helvetica", "", 9.5)

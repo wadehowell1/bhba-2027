@@ -20,49 +20,40 @@
     {
       "employment_id": "EMP-01",
       "achievement_ids": [
-        "ACH-001",
-        "ACH-003",
         "ACH-002",
-        "ACH-004",
+        "ACH-006",
+        "ACH-003",
         "ACH-005"
       ]
     },
     {
       "employment_id": "EMP-02",
       "achievement_ids": [
-        "ACH-011",
-        "ACH-010",
-        "ACH-012",
-        "ACH-013",
-        "ACH-014",
-        "ACH-015"
+        "ACH-021",
+        "ACH-020",
+        "ACH-022",
+        "ACH-024"
       ]
     },
     {
       "employment_id": "EMP-03",
       "achievement_ids": [
-        "ACH-020",
-        "ACH-021"
-      ]
-    },
-    {
-      "employment_id": "EMP-04",
-      "achievement_ids": [
-        "ACH-030",
-        "ACH-031",
-        "ACH-033"
+        "ACH-040",
+        "ACH-041"
       ]
     },
     {
       "employment_id": "EMP-05",
       "achievement_ids": [
-        "ACH-040"
+        "ACH-060",
+        "ACH-061"
       ]
     },
     {
       "employment_id": "EMP-06",
       "achievement_ids": [
-        "ACH-050"
+        "ACH-070",
+        "ACH-071"
       ]
     }
   ]

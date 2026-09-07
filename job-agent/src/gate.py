@@ -82,7 +82,8 @@ def extract_apply_email(posting_text: str, company: str = "") -> str | None:
 
 def decide(*, posting_text: str, company: str, score_total: float,
            ats_passed: bool, fabrication_flags: list[str],
-           apply_email: str | None = None) -> GateDecision:
+           apply_email: str | None = None,
+           low_confidence: list[str] | None = None) -> GateDecision:
     prof = load_profile()
     pol = prof["submission_policy"]
     d = GateDecision(route=DRAFT)
@@ -115,6 +116,15 @@ def decide(*, posting_text: str, company: str, score_total: float,
             for f in fields:
                 if f in unanswered:
                     d.questions.append(f"Posting requires an answer for `{f}`")
+
+    # --- Unconfirmed claims ------------------------------------------------
+    # A disputed figure (CHECK) blocks auto-send outright. A single-sourced one
+    # (medium) is surfaced but does not block, since it is still on a master CV.
+    for item in (low_confidence or []):
+        if item.endswith(":CHECK"):
+            d.questions.append(
+                f"CV uses {item.split(':')[0]}, whose figure differs between your master CVs "
+                f"— confirm before this is sent")
 
     # --- Per-role escalations ---------------------------------------------
     if NEEDS_ESSAY.search(posting_text):
