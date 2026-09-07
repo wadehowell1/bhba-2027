@@ -1,0 +1,58 @@
+# VERIFIED ACHIEVEMENTS BANK — TEMPLATE
+# Copy to data/achievements.yaml (gitignored) and populate from the master CV.
+#
+# GOVERNING RULE: the tailoring engine may only re-order, re-word and select
+# from records here. It may NEVER originate a number, date, employer, title,
+# scope or outcome. Enforced by src/render_cv.py::verify_plan().
+
+meta:
+  candidate: ASK
+  credentials_suffix: ASK
+  source_document: ASK
+  bank_version: '0.1'
+  last_updated: ASK
+employment:
+- id: EMP-01
+  employer: ASK
+  title: ASK
+  start: YYYY-MM
+  end: present
+  location: ASK
+  sector:
+  - ASK
+achievements:
+- id: ACH-001
+  employment_id: EMP-01
+  verified: true
+  metric: the ONLY place a number may appear
+  statement: One verifiable accomplishment, traceable to the master CV.
+  xyz:
+    x: what was accomplished
+    y: as measured by
+    z: by doing
+  tags:
+  - keyword
+  - for
+  - jd
+  - matching
+  seniority: senior manager
+credentials:
+- id: CRED-EXAMPLE
+  name: ASK
+  issuer: ASK
+  verified: true
+  tags:
+  - ASK
+skills:
+  methodology:
+  - ASK
+  leadership:
+  - ASK
+  technology:
+  - ASK
+  domain:
+  - ASK
+  commercial:
+  - ASK
+known_gaps:
+- Declared honestly. Never papered over.

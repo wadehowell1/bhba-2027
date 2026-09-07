@@ -1,0 +1,23 @@
+# ---------------------------------------------------------------------------
+# PRIVACY BOUNDARY — this repository is PUBLIC.
+# Nothing identifying the candidate beyond what he already publishes is committed.
+# Templates (*.example.yaml) carry the full structure with placeholder values.
+# ---------------------------------------------------------------------------
+
+# Real personal data — never committed
+private/
+config/profile.yaml
+data/achievements.yaml
+
+# Job-search activity is private
+data/applications.csv
+data/seen.json
+
+# Generated artefacts — regenerated every run
+out/
+*.docx
+*.pdf
+
+__pycache__/
+*.pyc
+.ats_soffice_profile/

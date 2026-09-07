@@ -1,0 +1,190 @@
+# =============================================================================
+# CANDIDATE PROFILE — TEMPLATE
+# Copy to config/profile.yaml (gitignored) and fill in. Values below are placeholders.
+# Version: 1.0 | Last Updated: 2026-09-07 | Classification: CONFIDENTIAL
+# -----------------------------------------------------------------------------
+# This file IS the agent's memory. Rules enforced by src/gate.py:
+#   - A field with value "ASK" is UNANSWERED. If a posting requires it, the
+#     application is routed to DRAFT and the question is raised to the candidate.
+#   - Once the candidate answers, the value is written here and never asked again.
+#   - Fields marked `per_role: true` are re-asked for every application
+#     regardless of stored value (they are role-specific by nature).
+# =============================================================================
+
+identity:
+  full_name: "ASK"
+  preferred_name: "ASK"
+  credentials_suffix: "ASK"
+  email: "candidate@example.com"
+  phone: "+1 (000) 000-0000"
+  location_city: "ASK"
+  location_country: "ASK"
+  linkedin: "ASK"          # public LinkedIn profile URL
+  portfolio_url: null
+  pronouns_for_agent_use: "they/them"   # used only in agent-authored prose about the candidate
+
+# -----------------------------------------------------------------------------
+# WORK AUTHORISATION — the single most common auto-reject field. Critical.
+# -----------------------------------------------------------------------------
+work_authorisation:
+  citizenships: ["ASK"]
+  additional_passports: "ASK"           # e.g. UK/CAN/US — materially changes eligible market
+  current_right_to_work: ["ASK"]
+  requires_sponsorship_outside: true    # assumed true outside Jamaica until confirmed
+  open_to_relocation: true
+  relocation_notice_required: "ASK"     # weeks needed to physically relocate
+  criminal_record: "none"
+  security_clearance_held: "none"
+  clearance_eligible: true              # JCCF officer, no record
+
+# -----------------------------------------------------------------------------
+# GEOGRAPHY — the candidate is location agnostic; English-capability is the hard filter
+# -----------------------------------------------------------------------------
+geography:
+  mode: "location_agnostic"
+  language_constraint: "Work must be executable in English. Any role requiring
+                        professional working proficiency in a non-English language
+                        is auto-rejected at pre-filter."
+  tier_1_english_native:
+    [Jamaica, United States, United Kingdom, Canada, Ireland, Australia,
+     New Zealand, Trinidad and Tobago, Barbados, Bahamas, Cayman Islands,
+     Bermuda, Guyana, Belize, Antigua and Barbuda, Saint Lucia, Grenada,
+     Dominica, Saint Kitts and Nevis, Saint Vincent and the Grenadines]
+  tier_2_english_business_language:
+    [United Arab Emirates, Qatar, Saudi Arabia, Bahrain, Kuwait, Oman,
+     Singapore, Hong Kong, Malaysia, Malta, Cyprus, Netherlands, Denmark,
+     Sweden, Norway, Finland, Iceland, Luxembourg, Switzerland, Germany,
+     South Africa, Kenya, Nigeria, Ghana, Botswana, Rwanda, Mauritius,
+     India, Philippines, Israel, Estonia, Portugal]
+  tier_3_conditional:
+    # Accepted ONLY where the posting itself is in English AND states English
+    # as the working language. Never assumed.
+    [Japan, South Korea, Taiwan, Thailand, Vietnam, Indonesia, Poland,
+     Czechia, Romania, Hungary, Spain, France, Italy, Brazil, Mexico,
+     Chile, Colombia, Costa Rica, Panama, Argentina]
+  excluded: []
+  remote_preference: "open"   # open | remote_only | onsite_ok
+
+# -----------------------------------------------------------------------------
+# ROLE TARGETING
+# -----------------------------------------------------------------------------
+targeting:
+  seniority_floor: "senior manager"
+  seniority_ceiling: "vp"
+  accepted_seniority_tokens:
+    [senior manager, head of, director, associate director, assistant vice president,
+     avp, vice president, vp, general manager, gm, principal, lead, chief of staff]
+  target_titles:
+    - "Continuous Improvement"
+    - "Operational Excellence"
+    - "Process Excellence"
+    - "Business Transformation"
+    - "Transformation"
+    - "Lean"
+    - "Six Sigma"
+    - "Business Process"
+    - "Programme Management"
+    - "Program Management"
+    - "PMO"
+    - "Portfolio"
+    - "Change Management"
+    - "Global Business Services"
+    - "Shared Services"
+    - "Operations"
+    - "Service Delivery"
+    - "Business Improvement"
+    - "Performance Improvement"
+    - "Innovation"
+    - "Digital Transformation"
+    - "Chief of Staff"
+  target_sectors:
+    [banking, financial services, insurance, fintech, professional services,
+     global business services, shared services, consulting, telecommunications,
+     technology, healthcare operations, logistics, energy, government]
+  hard_exclusions:
+    titles: [intern, graduate, apprentice, junior, assistant to, entry level,
+             analyst i, analyst ii, coordinator, clerk, technician, sales representative,
+             field sales, nurse, physician, driver, teacher, engineer ii, software engineer,
+             developer, data scientist]
+    keywords: [commission only, unpaid, equity only, must be currently enrolled,
+               "security clearance required", "active ts/sci", "us citizens only",
+               "citizens only", "native speaker"]
+
+# -----------------------------------------------------------------------------
+# COMPENSATION — required by many application forms
+# -----------------------------------------------------------------------------
+compensation:
+  current_currency: "USD"
+  expected_base_min: "ASK"        # annual, USD
+  expected_base_target: "ASK"
+  disclose_current_salary: false  # agent NEVER discloses current salary
+  standard_answer_when_asked: "Negotiable and benchmarked to the role, market and total package."
+  notice_period: "ASK"            # e.g. "1 month", "3 months"
+  earliest_start_date: "ASK"
+
+# -----------------------------------------------------------------------------
+# APPLICATION-FORM STANDING ANSWERS
+# -----------------------------------------------------------------------------
+standing_answers:
+  willing_to_relocate: "Yes"
+  willing_to_travel: "ASK"                    # e.g. "Up to 25%"
+  currently_employed: "Yes"
+  may_we_contact_current_employer: "No — not until an offer stage is reached."
+  reason_for_leaving: "ASK"
+  how_did_you_hear: "Online job posting"
+  referred_by: null
+  previously_applied_to_this_company: "No"    # overridden by ledger lookup
+  previously_employed_by_this_company: "No"
+  related_to_current_employee: "No"
+  requires_visa_now: "Depends on jurisdiction — holds Jamaican citizenship."
+  eeo_gender: "Decline to self-identify"
+  eeo_ethnicity: "Decline to self-identify"
+  eeo_veteran: "Decline to self-identify"
+  eeo_disability: "Decline to self-identify"
+  agrees_to_background_check: "Yes"
+  agrees_to_drug_test: "Yes"
+
+# -----------------------------------------------------------------------------
+# PER-ROLE QUESTIONS — always escalated to the candidate, never auto-answered
+# -----------------------------------------------------------------------------
+per_role_always_ask:
+  - "Any question asking for a written response longer than 200 words"
+  - "Any question about willingness to accept a specific named salary figure"
+  - "Any question requiring a claim not supported by achievements.yaml"
+  - "Any question about immediate availability tied to a specific date"
+  - "Any assessment, coding test, timed exercise or video interview link"
+  - "Any question referencing a named individual the candidate would be reporting to"
+
+# -----------------------------------------------------------------------------
+# SUBMISSION POLICY — the Stage 2 routing contract
+# -----------------------------------------------------------------------------
+submission_policy:
+  auto_send_target_ratio: 0.90
+  auto_send_requires_all_of:
+    - "A named application email address published in the posting itself"
+    - "Total score >= auto_send_score_threshold"
+    - "Zero unanswered ASK fields required by this posting"
+    - "Zero fabrication flags from the tailoring engine"
+    - "ATS validation PASS on the generated .docx"
+    - "No prior application to this company within cooloff_days"
+  auto_send_score_threshold: 72
+  draft_score_threshold: 62
+  cooloff_days: 90
+  max_auto_sends_per_week: 12
+  max_drafts_per_week: 10
+  # Email harvesting policy: the agent uses ONLY an application address that the
+  # employer published in the posting. It does not guess, pattern-match, or buy
+  # personal addresses. This is both a deliverability decision and a DPA 2020 /
+  # GDPR Art.6 lawful-basis decision.
+  email_sourcing: "published_in_posting_only"
+
+# -----------------------------------------------------------------------------
+# SENDING IDENTITY
+# -----------------------------------------------------------------------------
+sending:
+  from_account: "candidate@example.com"
+  bcc_self: true
+  signature: |
+    ASK
+  attach_formats: ["docx", "pdf"]
+  subject_template: "Application — {job_title} ({job_ref}) — {candidate_name}"
