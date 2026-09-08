@@ -49,3 +49,6 @@ month,asset_class,asset_name,metric,value,basis
 2026-08,Skill,pptx,provisioned,1,measured
 2026-08,Skill,docx,provisioned,1,measured
 2026-09,Skill,canvas-design,provisioned,1,measured
+2026-09,Connector,Gmail,invocations,1,measured
+2026-09,Connector,Google Calendar,invocations,1,measured
+2026-09,Connector,Google Drive,invocations,1,measured
