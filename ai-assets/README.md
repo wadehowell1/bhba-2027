@@ -14,7 +14,7 @@
 
 ## 1. Executive summary
 
-This register enumerates every AI asset in the estate — MCP connectors, Claude skills, plugins and code repositories — classifies each as new or existing against the prior month, and reports the usage that can actually be measured. It regenerates monthly without manual input. The September 2026 baseline covers **64 assets**: 14 connectors, 45 skills, 5 repositories, 0 plugins. Invocation telemetry for connectors and skills is not yet accumulating, because no usage-analytics API exists for them; the mechanism that will accumulate it is built, tested and running, and is described in §6.
+This register enumerates every AI asset in the estate — MCP connectors, Claude skills, plugins and code repositories — classifies each as new or existing against the prior month, and reports the usage that can actually be measured. It regenerates monthly without manual input. The September 2026 baseline covers **64 assets**: 14 connectors, 45 skills, 5 repositories, 0 plugins. Invocation telemetry has been proven end-to-end against live connector calls but holds almost no history yet, because no usage-analytics API exists and the only measurable record is the local session transcript. §6 explains what that means for reading a zero.
 
 ---
 
@@ -84,12 +84,14 @@ The Actions run refreshes private repositories only if the optional `AI_ASSETS_T
 |---|---|---|---|
 | Repository commits per month | Git history, all refs | Measured | Green — complete for 3 of 5 repositories |
 | Skill provisioning per month | `updatedAt` in the skills manifest | Measured | Green — all 45 skills dated |
-| Connector / skill invocations | Session transcripts, tool-use events | Measured | Red — mechanism live, no events yet |
+| Connector / skill invocations | Session transcripts, tool-use events | Measured | Red — proven on live data; 3 of 14 connectors, 0 of 45 skills observed |
 | Asset lifecycle (new / existing / retired) | Snapshot diff | Measured | Baseline established; a real diff from October |
 
 **Why invocation counts read zero.** claude.ai exposes no usage-analytics API. The only measurable record of connector and skill use is the local session transcript, which logs every tool call with a timestamp. `generate.py` parses those transcripts, maps `mcp__<Server>__*` calls to connectors and `Skill` calls to skills, and appends them to a UUID-deduplicated ledger. Platform tooling (GitHub, the Claude Code control plane) is excluded so it cannot inflate connector figures.
 
-The ledger reads zero because the container this baseline was produced in was created fresh and holds one session, in which no connector or skill was invoked. Run the pipeline on the machine where day-to-day Claude work happens and it will pick up that history. The parser is proven against a fixture in `selftest.py` §2 rather than assumed to work.
+The mechanism is proven twice: against a fixture in `selftest.py` §2, and against live data — three read-only connector calls (Gmail `list_labels`, Calendar `list_calendars`, Drive `list_recent_files`) made during the baseline session were picked up correctly, while twelve platform calls in the same transcript were excluded as designed.
+
+Coverage is nonetheless 3 of 14 connectors and 0 of 45 skills, because the container this baseline ran in holds a single session. **Run the pipeline on the machine where day-to-day Claude work happens** and it will ingest that history; the ledger is append-only and deduplicated on event UUID, so re-running is always safe and history accumulates across machines once committed. Usage inside the claude.ai web app is not captured — no local transcript exists for it.
 
 **Treat a zero in this report as unmeasured, not unused.** The dashboard states this on the Governance tab and flags affected classes Red on the instrumentation panel.
 
@@ -102,7 +104,7 @@ The ledger reads zero because the container this baseline was produced in was cr
 | R1 | Stale inventory is read as current | Medium | High | Every source is aged; captures over 45 days old are flagged Stale on the dashboard and named in the limitations panel | Asset owner |
 | R2 | Telemetry never accumulates because the pipeline runs somewhere without transcripts | High | Medium | Ledger is append-only and committed, so history survives ephemeral containers; §6 states the requirement plainly | Asset owner |
 | R3 | Tier 1 connector authorised without review | Medium | High | Register flags all Tier 1 assets; monthly diff surfaces additions as NEW | Asset owner |
-| R4 | A public repository receives sensitive content | Low | High | `wadehowell1/bhba-2027` is public and flagged Tier 1 with an explicit exposure note | Asset owner |
+| R4 | A public repository receives sensitive content | **Realised** | High | **Open.** This register is committed to `wadehowell1/bhba-2027`, which is public, so the rendered dashboard and CSVs are world-readable — they name private repositories and enumerate connector authorisation state. Remediation is pending an owner decision; see §8.6 | Asset owner |
 | R5 | Scheduled job silently stops | Medium | Medium | Two independent mechanisms; a missing monthly snapshot file is the detection signal | Asset owner |
 | R6 | Register drifts from reality between runs | Medium | Low | Out-of-cycle review is triggered by connector addition or security incident, not only by the calendar | Asset owner |
 
@@ -128,6 +130,7 @@ The ledger reads zero because the container this baseline was produced in was cr
 3. **`wadehowell1/job-agent` is inventory-only.** Attaching it to the session was denied by policy, so its commit history could not be retrieved. It is recorded with that reason attached, not omitted and not estimated.
 4. **`wadehowell1/BHBA2027` is empty.** GitHub returns 409 for it — zero commits, flagged Red.
 5. **Risk tiers are a considered judgement, not a vendor assertion.** They are set in `CONNECTOR_RISK` in `generate.py` and should be reviewed if a connector's scope changes.
+6. **The register currently sits in a public repository.** `wadehowell1/bhba-2027` is public, so `ai-assets/data/` and the rendered dashboard are readable by anyone without authentication. No credentials, tokens or message content are exposed, but the private repository names, connector inventory and risk tiers are — in a document classified INTERNAL USE. This is a live, unremediated finding, tracked as R4. The Artifact route in §7a is unaffected: artifacts are private to the account.
 
 ---
 
