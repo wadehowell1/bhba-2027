@@ -1,0 +1,244 @@
+# ==============================================================================
+# BHBA 2027 Tournament Operations Portal — Repository Ignore Rules
+# Version: 1.0 | Last Updated: 2026-09-08 | Classification: INTERNAL USE
+#
+# Purpose: prevent credentials, machine-local agent state and environment
+# artefacts from entering version control.
+#
+# Control mapping:
+#   ISO/IEC 27001:2022 A.5.17  — Authentication information
+#   ISO/IEC 27001:2022 A.8.12  — Data leakage prevention
+#   ISO/IEC 27001:2022 A.8.31  — Separation of dev/test/production environments
+#   OWASP Top 10 2021 A05      — Security Misconfiguration
+#   Jamaica Data Protection Act 2020, Eighth Standard — security of personal data
+#
+# NOTE: this file is preventive only. It does not remove secrets already
+# present in git history. See SECURITY.md for the remediation procedure.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. SECRETS AND CREDENTIALS  (highest priority — never relax these)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.env
+secrets.json
+secrets.yml
+secrets.yaml
+credentials.json
+client_secret*.json
+service-account*.json
+service_account*.json
+apikeys.json
+api_keys.json
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.asc
+*.gpg
+id_rsa
+id_rsa.*
+id_ecdsa
+id_ecdsa.*
+id_ed25519
+id_ed25519.*
+*.ppk
+.htpasswd
+.netrc
+.npmrc
+.pypirc
+
+# Cloud and platform credential caches
+.azure/
+.aws/
+.gcloud/
+gha-creds-*.json
+*.publishsettings
+*.azurePubxml
+appsettings.Development.json
+appsettings.Local.json
+local.settings.json
+
+# Google Apps Script / clasp — deployment identifiers and tokens
+.clasprc.json
+.clasp.json
+
+# ------------------------------------------------------------------------------
+# 2. AI CODING AGENT STATE
+# Skills and shared configuration under .claude/ ARE tracked deliberately.
+# Only per-machine state and anything credential-bearing is excluded.
+# ------------------------------------------------------------------------------
+.claude/settings.local.json
+.claude/*.local.json
+.claude/local/
+.claude/history/
+.claude/todos/
+.claude/shell-snapshots/
+.claude/statsig/
+.claude/.credentials.json
+.aider*
+.cursor/
+.continue/
+.codeium/
+.github-copilot/
+
+# Spec Kit machine-local state (.specify/.gitignore also covers this;
+# duplicated here so the rule survives a Spec Kit refresh)
+.specify/feature.json
+.specify/extensions/*/local-config.yml
+
+# ------------------------------------------------------------------------------
+# 3. OPERATING SYSTEM ARTEFACTS
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.AppleDouble
+.LSOverride
+Icon?
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+.directory
+.Trash-*
+.nfs*
+
+# ------------------------------------------------------------------------------
+# 4. EDITOR AND IDE
+# ------------------------------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+.vs/
+.idea/
+*.iml
+*.ipr
+*.iws
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*.swn
+*~
+.\#*
+\#*\#
+.project
+.settings/
+.classpath
+nbproject/
+
+# ------------------------------------------------------------------------------
+# 5. DEPENDENCIES AND BUILD OUTPUT
+# ------------------------------------------------------------------------------
+node_modules/
+jspm_packages/
+bower_components/
+vendor/
+dist/
+build/
+out/
+.output/
+.parcel-cache/
+.cache/
+.next/
+.nuxt/
+.svelte-kit/
+.turbo/
+.vite/
+*.tsbuildinfo
+
+# Python (Spec Kit tooling runs on Python via uv/uvx)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.tox/
+.nox/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.Python
+pip-log.txt
+
+# ------------------------------------------------------------------------------
+# 6. LOGS, TEMPORARY AND SCRATCH FILES
+# ------------------------------------------------------------------------------
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.pid
+*.seed
+*.pid.lock
+tmp/
+temp/
+scratch/
+.scratchpad/
+
+# ------------------------------------------------------------------------------
+# 7. SECURITY TOOLING OUTPUT
+# Scan reports may quote matched secret material — keep them out of the repo.
+# ------------------------------------------------------------------------------
+security-scan-report.txt
+security-scan-report.json
+gitleaks-report.json
+trivy-report.json
+semgrep-report.json
+.security-scan-cache/
+
+# ------------------------------------------------------------------------------
+# 8. DATA EXTRACTS CONTAINING PERSONAL DATA
+# Jamaica Data Protection Act 2020 — personal data must not enter a public
+# repository. Team, official and registrant extracts are excluded by default.
+# ------------------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+data/export/
+data/private/
+exports/
+*-roster-export.csv
+*-officials-export.csv
+*-registrants-export.csv
+*-personal-data.csv
+*-personal-data.json
+*-pii.csv
+*-pii.json
+
+# ------------------------------------------------------------------------------
+# 9. ARCHIVES AND LARGE BINARIES
+# ------------------------------------------------------------------------------
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.iso
+*.dmg
