@@ -1,8 +1,9 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--ARTIFACT-BEGIN-->
 <title>AI Asset &amp; Usage Register</title>
 <meta name="description" content="Monthly register of AI connectors, skills and repositories with measured usage.">
 <style>
@@ -20,7 +21,21 @@
   --shadow:0 1px 2px rgba(16,28,42,.06),0 8px 24px -12px rgba(16,28,42,.18);
   --radius:10px;
 }
-html[data-theme="dark"]{
+/* Three theme states: the bare :root above is the complete light palette;
+   the media query serves viewers on the default "system" setting (no
+   data-theme stamped); the attribute block lets an explicit choice win in
+   either direction. Tokens are only ever redefined, never components. */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+  --bg:#0d1117; --panel:#151b23; --panel-2:#1a212b; --ink:#e6edf5; --ink-2:#9fb0c4;
+  --ink-3:#6d7f94; --line:#252e3a; --line-2:#1e262f; --accent:#3fbfae; --accent-soft:#123b37;
+  --green:#4ac68a; --amber:#e0a94a; --red:#e9736d;
+  --green-bg:#12291f; --amber-bg:#2c2210; --red-bg:#2e1817;
+  --c1:#3fbfae; --c2:#6c8cff; --c3:#e0a94a; --c4:#e9736d; --c5:#8899ad; --c6:#a98ae0;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
   --bg:#0d1117; --panel:#151b23; --panel-2:#1a212b; --ink:#e6edf5; --ink-2:#9fb0c4;
   --ink-3:#6d7f94; --line:#252e3a; --line-2:#1e262f; --accent:#3fbfae; --accent-soft:#123b37;
   --green:#4ac68a; --amber:#e0a94a; --red:#e9736d;
@@ -175,8 +190,27 @@ footer.foot{
   header.top{padding:14px}
 }
 </style>
+<!--ARTIFACT-ONLY-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Public Sans is the US Web Design System face - civic, plain-spoken, and
+     apt for a compliance register. Archivo carries the headings with a little
+     more authority; IBM Plex Mono sets asset IDs, dates and counts so columns
+     of figures align and an ID never reads as prose. */
+  body{font-family:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  h1,h2,h3,.kpi .val,nav.tabs button{font-family:"Archivo","Public Sans",-apple-system,Arial,sans-serif}
+  .kpi .lbl,.chip,thead th{font-family:"Archivo","Public Sans",-apple-system,Arial,sans-serif}
+  .num,code,dl.kv dd,td.num,.tag{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  .kpi .val{letter-spacing:-.03em}
+  thead th{letter-spacing:.06em}
+</style>
+<!--/ARTIFACT-ONLY-->
+<!--/HEAD-->
 </head>
 <body>
+<!--BODY-BEGIN-->
 <div class="wrap">
 
 <header class="top">
@@ -192,7 +226,7 @@ footer.foot{
     <span class="chip period">Period __PERIOD__</span>
     <span class="chip">v__VERSION__</span>
     <span class="chip" id="genChip">__GENERATED__</span>
-    <button class="btn" id="themeBtn" type="button">Light</button>
+    <!--NO-ARTIFACT--><button class="btn" id="themeBtn" type="button">Light</button><!--/NO-ARTIFACT-->
     <button class="btn" id="printBtn" type="button">Print / PDF</button>
   </div>
 </header>
@@ -797,18 +831,24 @@ function initTabs(){
 }
 function initTheme(){
   const btn = document.getElementById("themeBtn");
-  const set = t => {
-    document.documentElement.setAttribute("data-theme", t);
-    btn.textContent = t === "dark" ? "Light" : "Dark";
+  const mq  = window.matchMedia("(prefers-color-scheme: dark)");
+  /* Redraw on host theme change: chart colours are read from CSS tokens. */
+  mq.addEventListener("change", renderCharts);
+  if(!btn) return;               /* artifact variant - the host owns the theme */
+  let choice = null;
+  try{ choice = localStorage.getItem("aiassets-theme"); }catch(e){}
+  function apply(){
+    const root = document.documentElement;
+    if(choice) root.setAttribute("data-theme", choice);
+    else root.removeAttribute("data-theme");
+    btn.textContent = (choice || (mq.matches ? "dark" : "light")) === "dark" ? "Light" : "Dark";
     renderCharts();
-  };
-  let cur = "dark";
-  try{ cur = localStorage.getItem("aiassets-theme") || cur; }catch(e){}
-  set(cur);
+  }
+  apply();
   btn.addEventListener("click", ()=>{
-    cur = cur === "dark" ? "light" : "dark";
-    try{ localStorage.setItem("aiassets-theme", cur); }catch(e){}
-    set(cur);
+    choice = (choice || (mq.matches ? "dark" : "light")) === "dark" ? "light" : "dark";
+    try{ localStorage.setItem("aiassets-theme", choice); }catch(e){}
+    apply();
   });
 }
 
@@ -822,5 +862,6 @@ initTheme();
 document.getElementById("printBtn").addEventListener("click", ()=>window.print());
 window.addEventListener("resize", (()=>{ let t; return ()=>{ clearTimeout(t); t=setTimeout(renderCharts,180); }; })());
 </script>
+<!--ARTIFACT-END-->
 </body>
 </html>

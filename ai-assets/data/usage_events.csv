@@ -2,3 +2,4 @@ uuid,timestamp,month,asset_class,asset_name,tool,session_id,cwd
 46073c81-1ff0-4568-b197-b1c0fb944b12#0,2026-09-08T00:29:18.389Z,2026-09,Connector,Gmail,mcp__Gmail__list_labels,9930d757-d103-5138-84b3-8f2786e9e56e,/home/user/bhba-2027
 bf2ae025-30ed-4436-8cfb-0fc85c370cb1#0,2026-09-08T00:29:18.400Z,2026-09,Connector,Google Calendar,mcp__Google_Calendar__list_calendars,9930d757-d103-5138-84b3-8f2786e9e56e,/home/user/bhba-2027
 49de3670-a8f3-4e6d-9e2d-0225af74818e#0,2026-09-08T00:29:18.796Z,2026-09,Connector,Google Drive,mcp__Google_Drive__list_recent_files,9930d757-d103-5138-84b3-8f2786e9e56e,/home/user/bhba-2027
+f39e5414-adeb-4a3c-8180-cae23f89c00f#0,2026-09-08T00:33:35.692Z,2026-09,Skill,artifact-design,Skill,9930d757-d103-5138-84b3-8f2786e9e56e,/home/user/bhba-2027

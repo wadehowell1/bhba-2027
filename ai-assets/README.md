@@ -22,7 +22,8 @@ This register enumerates every AI asset in the estate — MCP connectors, Claude
 
 | Output | Purpose |
 |---|---|
-| `ai_assets_dashboard.html` | Standalone dashboard. No build step, no CDN, no external fetches. Opens from disk in any browser; ~86 KB. |
+| `ai_assets_dashboard.html` | Standalone dashboard. No build step, no CDN, no external fetches. Opens from disk in any browser; ~88 KB. |
+| `ai_assets_dashboard.artifact.html` | Same page, cut from the same template for the claude.ai Artifact host, which supplies the document skeleton and owns the theme. Published privately at <https://claude.ai/code/artifact/a7d130d1-2c72-4b79-8d9d-4889ef2a7518>. |
 | `data/asset_register.csv` | One row per asset with lifecycle, RAG status, risk tier, data exposure and control reference. |
 | `data/usage_monthly.csv` | Tidy long format — one row per month/asset/metric. Loads into Power BI or Excel without reshaping. |
 | `data/usage_events.csv` | Append-only telemetry ledger, deduplicated on event UUID. Grows month over month. |
@@ -104,6 +105,19 @@ The ledger reads zero because the container this baseline was produced in was cr
 | R4 | A public repository receives sensitive content | Low | High | `wadehowell1/bhba-2027` is public and flagged Tier 1 with an explicit exposure note | Asset owner |
 | R5 | Scheduled job silently stops | Medium | Medium | Two independent mechanisms; a missing monthly snapshot file is the detection signal | Asset owner |
 | R6 | Register drifts from reality between runs | Medium | Low | Out-of-cycle review is triggered by connector addition or security incident, not only by the calendar | Asset owner |
+
+---
+
+## 7a. Accessing the dashboard on demand
+
+| Route | Best for |
+|---|---|
+| **Artifact** — <https://claude.ai/code/artifact/a7d130d1-2c72-4b79-8d9d-4889ef2a7518> | Phone or laptop, any time. Private to the account; shareable only from the page's own share menu. |
+| Local file — `open ai-assets/ai_assets_dashboard.html` | Offline, or reading it alongside the CSVs. |
+| GitHub Actions run artifact | A specific historical month; 90-day retention. |
+| `data/snapshots/<YYYY-MM>.json` | Reconstructing any past period exactly. |
+
+**Do not serve this dashboard from GitHub Pages while `bhba-2027` is public.** The register names private repositories and enumerates connector authorisation state; it is classified INTERNAL USE and belongs behind an account boundary.
 
 ---
 

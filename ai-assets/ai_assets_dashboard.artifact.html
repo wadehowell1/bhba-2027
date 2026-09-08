@@ -1,9 +1,3 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<!--ARTIFACT-BEGIN-->
 <title>AI Asset &amp; Usage Register</title>
 <meta name="description" content="Monthly register of AI connectors, skills and repositories with measured usage.">
 <style>
@@ -190,10 +184,24 @@ footer.foot{
   header.top{padding:14px}
 }
 </style>
-<!--/HEAD-->
-</head>
-<body>
-<!--BODY-BEGIN-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Public Sans is the US Web Design System face - civic, plain-spoken, and
+     apt for a compliance register. Archivo carries the headings with a little
+     more authority; IBM Plex Mono sets asset IDs, dates and counts so columns
+     of figures align and an ID never reads as prose. */
+  body{font-family:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  h1,h2,h3,.kpi .val,nav.tabs button{font-family:"Archivo","Public Sans",-apple-system,Arial,sans-serif}
+  .kpi .lbl,.chip,thead th{font-family:"Archivo","Public Sans",-apple-system,Arial,sans-serif}
+  .num,code,dl.kv dd,td.num,.tag{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  .kpi .val{letter-spacing:-.03em}
+  thead th{letter-spacing:.06em}
+</style>
+
+
 <div class="wrap">
 
 <header class="top">
@@ -209,7 +217,7 @@ footer.foot{
     <span class="chip period">Period 2026-09</span>
     <span class="chip">v1.0.0</span>
     <span class="chip" id="genChip">2026-09-08T00:35:51Z</span>
-    <!--NO-ARTIFACT--><button class="btn" id="themeBtn" type="button">Light</button><!--/NO-ARTIFACT-->
+    
     <button class="btn" id="printBtn" type="button">Print / PDF</button>
   </div>
 </header>
@@ -845,6 +853,3 @@ initTheme();
 document.getElementById("printBtn").addEventListener("click", ()=>window.print());
 window.addEventListener("resize", (()=>{ let t; return ()=>{ clearTimeout(t); t=setTimeout(renderCharts,180); }; })());
 </script>
-<!--ARTIFACT-END-->
-</body>
-</html>

@@ -52,3 +52,4 @@ month,asset_class,asset_name,metric,value,basis
 2026-09,Connector,Gmail,invocations,1,measured
 2026-09,Connector,Google Calendar,invocations,1,measured
 2026-09,Connector,Google Drive,invocations,1,measured
+2026-09,Skill,artifact-design,invocations,1,measured

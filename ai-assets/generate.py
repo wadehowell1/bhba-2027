@@ -49,6 +49,11 @@ DATA = os.path.join(HERE, "data")
 SNAPSHOTS = os.path.join(DATA, "snapshots")
 TEMPLATE = os.path.join(HERE, "dashboard_template.html")
 OUTPUT = os.path.join(HERE, "ai_assets_dashboard.html")
+# Artifact variant: same page, but the claude.ai Artifact host supplies the
+# document skeleton and owns the theme, so the wrapper tags and the local
+# theme toggle are stripped. Both variants render from the one template so
+# they cannot drift apart between monthly runs.
+OUTPUT_ARTIFACT = os.path.join(HERE, "ai_assets_dashboard.artifact.html")
 
 VERSION = "1.0.0"
 CLASSIFICATION = "INTERNAL USE"
@@ -517,6 +522,7 @@ def main():
     print(f"facts             : {len(facts)}")
     print(f"telemetry events  : {len(events)} ({new_events} new this run)")
     print(f"dashboard         : {OUTPUT} ({os.path.getsize(OUTPUT)/1024:.1f} KB)")
+    print(f"artifact variant  : {OUTPUT_ARTIFACT} ({os.path.getsize(OUTPUT_ARTIFACT)/1024:.1f} KB)")
 
 
 def render(assets, facts, events, snapshot, period, generated_at, prior):
@@ -545,13 +551,41 @@ def render(assets, facts, events, snapshot, period, generated_at, prior):
         "provenance": provenance_rows(),
     }
 
-    out = tpl.replace("/*__PAYLOAD__*/null", json.dumps(payload, separators=(",", ":")))
-    out = out.replace("__PERIOD__", html.escape(period))
-    out = out.replace("__GENERATED__", html.escape(generated_at))
-    out = out.replace("__VERSION__", VERSION)
-    out = out.replace("__CLASSIFICATION__", CLASSIFICATION)
+    filled = tpl.replace("/*__PAYLOAD__*/null", json.dumps(payload, separators=(",", ":")))
+    for token, value in (
+        ("__PERIOD__", html.escape(period)),
+        ("__GENERATED__", html.escape(generated_at)),
+        ("__VERSION__", VERSION),
+        ("__CLASSIFICATION__", CLASSIFICATION),
+    ):
+        filled = filled.replace(token, value)
+
+    # Order matters: the artifact variant is cut from the filled template while
+    # the webfont block is still present, because that block is exactly what
+    # the artifact keeps and the standalone drops.
+    with open(OUTPUT_ARTIFACT, "w", encoding="utf-8") as fh:
+        fh.write(to_artifact(filled))
+
+    # The standalone file must reference nothing external, so the webfont block
+    # goes; its self-test asserts the absence.
+    standalone = re.sub(r"<!--ARTIFACT-ONLY-->.*?<!--/ARTIFACT-ONLY-->\s*", "", filled, flags=re.S)
     with open(OUTPUT, "w", encoding="utf-8") as fh:
-        fh.write(out)
+        fh.write(standalone)
+
+
+def to_artifact(html_doc: str) -> str:
+    """Strip the document skeleton and the theme toggle for the Artifact host."""
+    head = html_doc[html_doc.index("<!--ARTIFACT-BEGIN-->") + len("<!--ARTIFACT-BEGIN-->"):
+                    html_doc.index("<!--/HEAD-->")]
+    body = html_doc[html_doc.index("<!--BODY-BEGIN-->") + len("<!--BODY-BEGIN-->"):
+                    html_doc.index("<!--ARTIFACT-END-->")]
+    out = head + body
+    out = re.sub(r"<!--NO-ARTIFACT-->.*?<!--/NO-ARTIFACT-->", "", out, flags=re.S)
+    out = out.replace("<!--ARTIFACT-ONLY-->", "").replace("<!--/ARTIFACT-ONLY-->", "")
+    for tag in ("<!doctype html>", "<html", "</html>", "<head>", "</head>", "<body>", "</body>"):
+        if tag in out.lower():
+            raise ValueError("artifact variant still carries a skeleton tag: " + tag)
+    return out.strip() + "\n"
 
 
 def instrumentation_summary(assets, events):
