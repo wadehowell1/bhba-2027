@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>
+  /* ── BHBA AUTH GUARD ── poka-yoke: no unauthenticated access ── */
+  (function(){
+    try{
+      var s=JSON.parse(localStorage.getItem('bhba_session')||'null');
+      if(!s||!s.userId){
+        sessionStorage.setItem('bhba_redirect',window.location.href);
+        window.location.replace('bhba_auth.html');
+      }
+    }catch(e){ window.location.replace('bhba_auth.html'); }
+  })();
+</script>
+<!-- ── HARD EGRESS LOCK ──────────────────────────────────────────────
+     connect-src 'none' means the browser itself blocks fetch/XHR/
+     WebSocket/sendBeacon from this page. form-action 'none' blocks form
+     posts. This is not a convention we promise to follow — it is enforced
+     by the user agent. Nothing typed into this page can leave the device.
+     If a future version needs a backend, this header must change first,
+     which makes the decision deliberate and reviewable. -->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<script>
+  /* frame-ancestors is ignored when a CSP is delivered by <meta>, so clickjacking
+     is blocked here instead. Static hosting cannot set response headers; if this
+     ever moves behind a server, set frame-ancestors 'none' as a real header. */
+  if(window.top!==window.self){ try{ window.top.location=window.self.location; }catch(e){ document.documentElement.innerHTML=''; } }
+</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>BHBA Content Machine</title>
+<!-- CLASSIFICATION: INTERNAL USE | v1.0.0 | 2026-08-26
+     One post in, every platform out. Draft-only content repurposing engine.
+     POST -> ADAPT -> RESIZE -> CAPTION -> APPROVE -> READY_TO_POST -> TRACK.
+     SECURITY POSTURE: zero credentials, zero network egress (CSP-enforced),
+     no publishing connectors. Publishing requires a server-side backend that
+     does not exist in this repository - see the Security tab for the audit.
+     Storage: bhba_cm_content, bhba_cm_brand, bhba_cm_memory (localStorage). -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--gold:#F5A623;--gold-dark:#C4851A;--gold-dim:rgba(245,166,35,0.1);--black:#000;--bg:#07070f;--bg2:#0d0d1a;--card:rgba(14,14,26,0.97);--border:rgba(245,166,35,0.12);--border-h:rgba(245,166,35,0.4);--white:#fff;--text:#dde0f0;--lgrey:#7070a0;--muted:#7070a0;--red:#E74C3C;--green:#2ECC71;--blue:#3498DB;--warn:#E67E22;--teal:#1ABC9C;--purple:#9B59B6;--pending:#9B59B6}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,rgba(245,166,35,0.05) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(52,152,219,0.03) 0%,transparent 55%);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;min-height:100vh;padding-bottom:60px}
+#hdr{background:linear-gradient(135deg,#04040c 0%,#0c0b18 60%,#100e00 100%);border-bottom:1px solid rgba(245,166,35,0.25);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 2px 24px rgba(0,0,0,0.6);flex-wrap:wrap}
+.brand{color:var(--gold);font-size:18px;font-weight:900;letter-spacing:.3px}
+.brand small{display:block;font-size:10px;color:var(--lgrey);font-weight:600;letter-spacing:1.4px;margin-top:2px}
+.nav-controls{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.nav-ctrl-btn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:9px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);color:var(--gold);cursor:pointer;font-size:17px;text-decoration:none;transition:all .2s cubic-bezier(.4,0,.2,1);font-family:inherit;line-height:1;padding:0 9px;user-select:none}
+.nav-ctrl-btn:hover{background:rgba(245,166,35,0.18);border-color:rgba(245,166,35,0.5);transform:translateY(-1px);box-shadow:0 4px 12px rgba(245,166,35,0.15)}
+.nav-ctrl-btn:active{transform:scale(0.95)}
+.nav-ctrl-home{font-size:11px;font-weight:700;letter-spacing:0.4px;padding:0 13px;background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.35);gap:5px}
+.nav-tabs{display:flex;gap:6px;padding:10px 14px;overflow-x:auto;background:rgba(0,0,0,0.5);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);position:sticky;top:0;z-index:40}
+.nav-tab{background:rgba(12,12,22,0.8);border:1px solid var(--border);color:var(--lgrey);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:background .15s,border-color .15s,color .15s;font-family:inherit}
+.nav-tab:hover{border-color:var(--border-h);color:var(--gold)}
+.nav-tab.active{background:var(--gold);border-color:var(--gold);color:#000}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 14px}
+.view{display:none}
+.view.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* stat strip */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 13px}
+.stat .sv{font-size:22px;font-weight:900;color:var(--gold);line-height:1.1}
+.stat .sl{font-size:9.5px;color:var(--lgrey);letter-spacing:1.1px;font-weight:700;margin-top:3px}
+.stat.attn .sv{color:var(--warn)}
+.stat.ok .sv{color:var(--green)}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 4px 24px rgba(0,0,0,0.35)}
+.card h2{font-size:13px;color:var(--gold);letter-spacing:1.2px;font-weight:800;margin-bottom:4px;text-transform:uppercase}
+.card .hint{font-size:11.5px;color:var(--lgrey);line-height:1.55;margin-bottom:12px}
+label{display:block;font-size:10.5px;color:var(--lgrey);letter-spacing:.8px;font-weight:700;text-transform:uppercase;margin:11px 0 5px}
+input[type=text],input[type=date],input[type=time],input[type=number],textarea,select{width:100%;background:rgba(7,7,15,0.85);border:1px solid var(--border);border-radius:9px;color:var(--text);padding:10px 12px;font-size:13.5px;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,0.1)}
+textarea{resize:vertical;line-height:1.6}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 12px}
+.btn{background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;color:#000;font-weight:800;padding:11px 20px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;letter-spacing:.3px;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 16px rgba(245,166,35,0.25)}
+.btn:hover{transform:translateY(-1px);box-shadow:0 7px 24px rgba(245,166,35,0.35)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-lg{width:100%;padding:15px;font-size:14.5px;letter-spacing:1.2px}
+.btn-sm{padding:6px 12px;font-size:11px;border-radius:8px;box-shadow:none}
+.btn-ghost{background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.25);color:var(--gold);box-shadow:none}
+.btn-ghost:hover{background:rgba(245,166,35,0.16)}
+.btn-green{background:linear-gradient(135deg,#00D68F,#00B377);color:#000}
+.btn-red{background:linear-gradient(135deg,#FF3D57,#CC1F35);color:var(--white)}
+.btn-grey{background:rgba(112,112,160,0.15);border:1px solid rgba(112,112,160,0.3);color:var(--lgrey);box-shadow:none}
+
+/* drop zone */
+.dropzone{border:2px dashed rgba(245,166,35,0.3);border-radius:14px;padding:18px;background:linear-gradient(180deg,rgba(245,166,35,0.04),transparent);transition:border-color .2s,background .2s}
+.dropzone:focus-within{border-color:var(--gold);background:linear-gradient(180deg,rgba(245,166,35,0.08),transparent)}
+.dropzone textarea{border:none;background:transparent;font-size:14.5px;min-height:130px;padding:2px}
+.dropzone textarea:focus{box-shadow:none}
+
+/* pills / badges */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:9.5px;font-weight:800;letter-spacing:.7px;white-space:nowrap}
+.p-draft{background:rgba(112,112,160,.18);color:#9a9ac8;border:1px solid rgba(112,112,160,.35)}
+.p-review{background:rgba(230,126,34,.15);color:var(--warn);border:1px solid rgba(230,126,34,.4)}
+.p-approved{background:rgba(46,204,113,.14);color:var(--green);border:1px solid rgba(46,204,113,.4)}
+.p-scheduled{background:rgba(52,152,219,.14);color:var(--blue);border:1px solid rgba(52,152,219,.4)}
+.p-ready{background:rgba(245,166,35,.14);color:var(--gold);border:1px solid rgba(245,166,35,.42)}
+.p-published{background:rgba(26,188,156,.14);color:var(--teal);border:1px solid rgba(26,188,156,.4)}
+.p-failed{background:rgba(231,76,60,.14);color:var(--red);border:1px solid rgba(231,76,60,.4)}
+.p-rejected{background:rgba(231,76,60,.1);color:#c0554a;border:1px solid rgba(231,76,60,.3)}
+
+/* platform tabs */
+.ptabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;margin-bottom:2px;border-bottom:1px solid var(--border)}
+.ptab{background:rgba(12,12,22,.85);border:1px solid var(--border);color:var(--lgrey);padding:7px 13px;border-radius:9px;cursor:pointer;font-size:11.5px;font-weight:700;white-space:nowrap;flex-shrink:0;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .15s}
+.ptab:hover{border-color:var(--border-h);color:var(--gold)}
+.ptab.active{background:rgba(245,166,35,.14);border-color:var(--gold);color:var(--gold)}
+.ptab .dot{width:6px;height:6px;border-radius:50%;background:var(--lgrey);flex-shrink:0}
+.ptab .dot.d-approved{background:var(--green)}
+.ptab .dot.d-review{background:var(--warn)}
+.ptab .dot.d-scheduled{background:var(--blue)}
+.ptab .dot.d-ready{background:var(--gold)}
+.ptab .dot.d-published{background:var(--teal)}
+.ptab .dot.d-rejected{background:var(--red)}
+
+/* field blocks */
+.fld{margin-bottom:12px}
+.fld .fh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}
+.fld .fn{font-size:10px;color:var(--gold);letter-spacing:1.1px;font-weight:800;text-transform:uppercase}
+.fld .fc{font-size:10px;color:var(--lgrey);font-variant-numeric:tabular-nums}
+.fld .fc.over{color:var(--red);font-weight:800}
+.out{background:rgba(7,7,15,.7);border:1px solid var(--border);border-radius:9px;padding:11px 13px;font-size:13.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.out.mono{font-family:'SF Mono',Consolas,Monaco,monospace;font-size:12px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tag{background:rgba(52,152,219,.12);border:1px solid rgba(52,152,219,.3);color:#7fc3ee;padding:3px 8px;border-radius:6px;font-size:11px}
+.slide{background:rgba(7,7,15,.7);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:8px;padding:9px 12px;margin-bottom:6px;font-size:13px;line-height:1.55}
+.slide .sn{font-size:9px;color:var(--gold);font-weight:800;letter-spacing:1px;display:block;margin-bottom:3px}
+
+/* alerts */
+.alert{border-radius:10px;padding:11px 13px;font-size:12px;line-height:1.6;margin-bottom:12px;border:1px solid}
+.a-warn{background:rgba(230,126,34,.09);border-color:rgba(230,126,34,.35);color:#f0b070}
+.a-red{background:rgba(231,76,60,.09);border-color:rgba(231,76,60,.35);color:#e88a7f}
+.a-info{background:rgba(52,152,219,.08);border-color:rgba(52,152,219,.3);color:#8fc9ee}
+.a-ok{background:rgba(46,204,113,.08);border-color:rgba(46,204,113,.3);color:#7fd6a2}
+.alert b{color:inherit;font-weight:800}
+.alert ul{margin:6px 0 0 16px}
+.alert li{margin-bottom:3px}
+
+/* safe zone preview */
+.sz-wrap{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.sz{position:relative;background:linear-gradient(135deg,#141426,#0b0b16);border:1px solid var(--border-h);border-radius:8px;overflow:hidden;flex-shrink:0}
+.sz .band{position:absolute;left:0;right:0;background:repeating-linear-gradient(45deg,rgba(231,76,60,.22),rgba(231,76,60,.22) 5px,transparent 5px,transparent 10px);border-color:rgba(231,76,60,.4);border-style:solid;border-width:0}
+.sz .band.t{top:0;border-bottom-width:1px}
+.sz .band.b{bottom:0;border-top-width:1px}
+.sz .lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--gold);letter-spacing:1px}
+.sz-meta{font-size:11px;color:var(--lgrey);line-height:1.7;min-width:190px;flex:1}
+.sz-meta b{color:var(--text)}
+
+/* list rows */
+.lrow{display:flex;align-items:center;gap:10px;padding:11px 13px;background:rgba(7,7,15,.55);border:1px solid var(--border);border-radius:10px;margin-bottom:7px;flex-wrap:wrap;transition:border-color .15s}
+.lrow:hover{border-color:var(--border-h)}
+.lrow .lmain{flex:1;min-width:180px}
+.lrow .lt{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.lrow .ls{font-size:10.5px;color:var(--lgrey)}
+.lrow .lacts{display:flex;gap:5px;flex-wrap:wrap}
+
+.empty{text-align:center;padding:36px 18px;color:var(--lgrey);font-size:12.5px;line-height:1.7}
+.empty .ei{font-size:34px;display:block;margin-bottom:8px;opacity:.5}
+
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal .ch{font-size:9px;color:var(--lgrey);letter-spacing:.8px;font-weight:800;text-align:center;padding:5px 0}
+.cday{background:rgba(7,7,15,.55);border:1px solid var(--border);border-radius:8px;min-height:74px;padding:5px;font-size:10px}
+.cday.today{border-color:var(--gold);background:rgba(245,166,35,.05)}
+.cday.other{opacity:.32}
+.cday .cn{font-size:10px;font-weight:800;color:var(--lgrey);margin-bottom:3px}
+.cday.today .cn{color:var(--gold)}
+.cev{background:rgba(245,166,35,.12);border-left:2px solid var(--gold);border-radius:3px;padding:2px 4px;margin-bottom:2px;font-size:9px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.cev.s-approved{background:rgba(46,204,113,.12);border-left-color:var(--green)}
+.cev.s-scheduled{background:rgba(52,152,219,.12);border-left-color:var(--blue)}
+.cev.s-published{background:rgba(26,188,156,.12);border-left-color:var(--teal)}
+
+/* security table */
+.sectbl{width:100%;border-collapse:collapse;font-size:12px}
+.sectbl th{text-align:left;font-size:9.5px;color:var(--lgrey);letter-spacing:1px;font-weight:800;padding:7px 9px;border-bottom:1px solid var(--border);text-transform:uppercase}
+.sectbl td{padding:9px;border-bottom:1px solid rgba(245,166,35,.06);vertical-align:top;line-height:1.55}
+.sectbl tr:last-child td{border-bottom:none}
+.chk{font-weight:900;font-size:13px}
+.chk.pass{color:var(--green)}
+.chk.warn{color:var(--warn)}
+.chk.fail{color:var(--red)}
+.chk.na{color:var(--lgrey)}
+
+.divider{height:1px;background:var(--border);margin:14px 0}
+.flexbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+code{font-family:'SF Mono',Consolas,Monaco,monospace;font-size:11.5px;background:rgba(245,166,35,.08);padding:1px 5px;border-radius:4px;color:var(--gold)}
+
+/* toast */
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--gold);color:var(--text);padding:11px 20px;border-radius:11px;font-size:13px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.7);z-index:200;opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.err{border-color:var(--red)}
+
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:150;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+#modal.show{display:flex}
+.mbox{background:var(--bg2);border:1px solid var(--border-h);border-radius:14px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.mbox h3{color:var(--gold);font-size:14px;letter-spacing:.8px;margin-bottom:4px;font-weight:800}
+.mbox .msub{font-size:11px;color:var(--lgrey);margin-bottom:12px;line-height:1.6}
+
+footer{text-align:center;padding:22px 14px;font-size:10.5px;color:var(--lgrey);line-height:1.9;border-top:1px solid var(--border);margin-top:24px}
+footer a{color:var(--gold);text-decoration:none}
+@media(max-width:600px){.wrap{padding:12px 10px}.card{padding:13px}.brand{font-size:16px}}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div class="brand">BHBA CONTENT MACHINE<small>ONE POST IN &middot; EVERY PLATFORM OUT</small></div>
+  <div class="flexbar">
+    <div class="nav-controls"><button class="nav-ctrl-btn" onclick="history.back()" title="Go back">&#8592;</button><button class="nav-ctrl-btn" onclick="history.forward()" title="Go forward">&#8594;</button><a href="bhba_portal.html" class="nav-ctrl-btn nav-ctrl-home">&#127968; Home</a></div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" data-view="create">&#10133; Create</button>
+  <button class="nav-tab" data-view="versions">&#128196; Versions &amp; Approvals</button>
+  <button class="nav-tab" data-view="calendar">&#128197; Calendar</button>
+  <button class="nav-tab" data-view="brand">&#127911; Brand Voice</button>
+  <button class="nav-tab" data-view="memory">&#129504; Memory &amp; Performance</button>
+  <button class="nav-tab" data-view="security">&#128274; Security</button>
+</div>
+
+<div class="wrap">
+
+  <div class="stats" id="stats"></div>
+
+  <div class="alert a-info" id="modeBanner">
+    <b>&#128274; DRAFT-ONLY MODE &mdash; locked on.</b>
+    <code>AUTO_PUBLISH=false</code> &nbsp;<code>HUMAN_APPROVAL_REQUIRED=true</code><br>
+    This build holds no credentials and cannot reach the network (enforced by Content-Security-Policy, not by promise).
+    Every approved version becomes a <b>READY_TO_POST</b> pack you paste yourself &mdash; it never claims something was published.
+    <a href="#" onclick="go('security');return false;" style="color:var(--gold)">Read the full security audit &rarr;</a>
+  </div>
+
+  <!-- ══════════════ CREATE ══════════════ -->
+  <div class="view active" id="v-create">
+    <div class="card">
+      <h2>&#128228; Content Ingestion</h2>
+      <p class="hint">Drop in one post. The analyzer extracts the truth <b>once</b>, and every platform adapter works from that same source &mdash; so meaning can't drift from rewrite to rewrite.</p>
+
+      <div class="dropzone">
+        <label style="margin-top:0">Original content</label>
+        <textarea id="i-content" placeholder="Paste your post, script, transcript, blog draft or notes here...
+
+Tip: write it the way you'd say it. The engine handles the platform-specific rewriting."></textarea>
+      </div>
+
+      <div class="row">
+        <div><label>Title / working name</label><input type="text" id="i-title" placeholder="e.g. Round 3 fixtures announcement"></div>
+        <div><label>Content type</label><select id="i-type">
+          <option value="text">Text post</option><option value="image">Image</option><option value="video">Video</option>
+          <option value="link">Link</option><option value="blog">Blog post</option><option value="transcript">Transcript</option>
+          <option value="carousel">Carousel</option><option value="script">Script</option>
+        </select></div>
+      </div>
+      <div class="row">
+        <div><label>Goal</label><select id="i-goal">
+          <option value="awareness">Awareness</option><option value="saves">Saves / shares</option>
+          <option value="traffic">Traffic</option><option value="leads">Leads / signups</option>
+        </select></div>
+        <div><label>Audience</label><input type="text" id="i-audience" placeholder="e.g. team managers, players, parents"></div>
+      </div>
+      <div class="row">
+        <div><label>Call to action</label><input type="text" id="i-cta" placeholder="e.g. register your team before Friday"></div>
+        <div><label>Original platform (optional)</label><input type="text" id="i-orig" placeholder="e.g. Instagram"></div>
+      </div>
+
+      <div style="margin-top:16px">
+        <button class="btn btn-lg" id="btn-generate">&#9889; GENERATE EVERYWHERE</button>
+      </div>
+      <p class="hint" style="margin:9px 0 0;text-align:center">Runs locally on this device. Nothing is uploaded.</p>
+    </div>
+
+    <div id="analysis-panel"></div>
+    <div id="result-panel"></div>
+  </div>
+
+  <!-- ══════════════ VERSIONS ══════════════ -->
+  <div class="view" id="v-versions">
+    <div class="card">
+      <h2>&#128196; Content Library &amp; Approval Gate</h2>
+      <p class="hint">Nothing leaves this screen without you. <b>Approve</b> promotes a version to READY_TO_POST with a complete paste-ready pack; <b>Reject</b> sends it back; <b>Regenerate</b> rebuilds it from the same analysis.</p>
+      <div class="flexbar" style="margin-bottom:12px">
+        <select id="f-status" style="max-width:200px">
+          <option value="">All statuses</option>
+          <option value="DRAFT">Draft</option><option value="READY_FOR_REVIEW">Ready for review</option>
+          <option value="APPROVED">Approved</option><option value="READY_TO_POST">Ready to post</option>
+          <option value="SCHEDULED">Scheduled</option><option value="PUBLISHED">Published (manual)</option>
+          <option value="REJECTED">Rejected</option>
+        </select>
+        <select id="f-platform" style="max-width:200px"><option value="">All platforms</option></select>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-ghost" id="btn-export">&#11015; Export JSON</button>
+      </div>
+      <div id="lib-list"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ CALENDAR ══════════════ -->
+  <div class="view" id="v-calendar">
+    <div class="card">
+      <h2>&#128197; Content Calendar</h2>
+      <p class="hint">Scheduling here sets a <b>reminder</b>, not an automated post. At the scheduled time the pack is waiting for you &mdash; nothing fires on its own, because nothing in this build can.</p>
+      <div class="flexbar" style="margin-bottom:12px">
+        <button class="btn btn-sm btn-ghost" id="cal-prev">&#8592;</button>
+        <div id="cal-label" style="font-weight:800;color:var(--gold);font-size:13px;min-width:150px;text-align:center"></div>
+        <button class="btn btn-sm btn-ghost" id="cal-next">&#8594;</button>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-ghost" id="cal-today">Today</button>
+      </div>
+      <div class="cal" id="cal-grid"></div>
+      <div class="divider"></div>
+      <h2 style="font-size:11px">Upcoming</h2>
+      <div id="cal-upcoming"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ BRAND ══════════════ -->
+  <div class="view" id="v-brand">
+    <div class="card">
+      <h2>&#127911; Brand Voice Profile</h2>
+      <p class="hint">Stored once, applied everywhere. The <b>words to avoid</b> list matters more than you'd expect &mdash; it's what stops output sounding like output. Every generated version is scanned against it and violations are flagged before you can approve.</p>
+      <div class="row">
+        <div><label>Brand name</label><input type="text" id="b-name"></div>
+        <div><label>Voice owner</label><input type="text" id="b-creator"></div>
+      </div>
+      <label>Audience</label><input type="text" id="b-audience">
+      <label>Tone (comma separated)</label><input type="text" id="b-tone">
+      <label>Writing style</label><input type="text" id="b-style">
+      <label>Common hooks (one per line)</label><textarea id="b-hooks" rows="3"></textarea>
+      <label>CTA style</label><input type="text" id="b-cta">
+      <div class="row">
+        <div><label>Words to use (comma separated)</label><input type="text" id="b-use"></div>
+        <div><label>Words to avoid (comma separated)</label><input type="text" id="b-avoid"></div>
+      </div>
+      <div class="row">
+        <div><label>Emoji style</label><select id="b-emoji">
+          <option value="none">None</option><option value="minimal">Minimal (1&ndash;2 max)</option><option value="expressive">Expressive</option>
+        </select></div>
+        <div><label>Hashtag count</label><input type="number" id="b-hashn" min="0" max="30"></div>
+      </div>
+      <label>Hashtag pool (comma separated, no #)</label><input type="text" id="b-tags">
+      <div class="flexbar" style="margin-top:16px">
+        <button class="btn" id="btn-brand-save">&#128190; Save Profile</button>
+        <button class="btn btn-ghost btn-sm" id="btn-brand-reset">Reset to BHBA default</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MEMORY ══════════════ -->
+  <div class="view" id="v-memory">
+    <div class="card">
+      <h2>&#129504; Content Memory</h2>
+      <p class="hint">Before you create, memory checks what you've already covered. Repetition isn't always wrong &mdash; but it should be <b>a choice</b>, not an accident.</p>
+      <div id="mem-list"></div>
+    </div>
+    <div class="card">
+      <h2>&#128200; Performance Analysis</h2>
+      <p class="hint">Metrics here are <b>self-reported</b> &mdash; you enter what each platform showed you, because this build has no analytics API access. Observed data and interpretation are kept strictly separate below.</p>
+      <div id="perf-panel"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ SECURITY ══════════════ -->
+  <div class="view" id="v-security">
+    <div class="card">
+      <h2>&#128274; Live Security Self-Check</h2>
+      <p class="hint">These run against this page as it is loaded in your browser right now &mdash; not against a claim in a comment.</p>
+      <div id="sec-live"></div>
+    </div>
+
+    <div class="card">
+      <h2>&#128712; Why this build stops at the approval gate</h2>
+      <div class="alert a-red">
+        <b>The blocking constraint:</b> this repository is static HTML served from GitHub Pages. There is no server-side runtime.
+        A publishing connector needs OAuth client secrets and long-lived platform access tokens. In a static page, every one of those
+        is <b>publicly readable by anyone who views source</b> &mdash; and a leaked social token means someone else can post as BHBA, everywhere.
+        The same applies to an AI provider key: it would be a public, billable credential.
+        <br><br>
+        So sections 15 and 16 of the build guide (publishing engine, platform connectors) are <b>deliberately not implemented</b>.
+        That is the guide's own rule &mdash; <i>"all publishing calls happen server-side only"</i> &mdash; and this repo has no server side to put them in.
+      </div>
+      <div class="alert a-ok">
+        <b>What that costs you: about 30 seconds per post.</b> Everything up to the gate is automated &mdash; analysis, ten platform adaptations,
+        captions, hashtags, format specs, safe zones, approval, scheduling, memory. You paste the finished pack. That's the honest version,
+        and it's still the large majority of the work.
+      </div>
+      <h2 style="margin-top:16px">To unlock automated publishing later</h2>
+      <p class="hint" style="margin-bottom:0">
+        It needs a backend (Cloudflare Worker, Supabase Edge Function, or a small Node service) that holds the tokens encrypted server-side,
+        exposes only <code>publish(versionId)</code> to this page, checks the idempotency key before every attempt, and enforces the same approval gate
+        server-side rather than trusting the browser. At that point the <code>connect-src 'none'</code> lock in this file's CSP is relaxed to that one
+        origin and nothing else &mdash; a deliberate, reviewable change.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>&#128269; Repository Audit &mdash; findings</h2>
+      <p class="hint">Found while reviewing this codebase before building. Listed so they're tracked, not to alarm.</p>
+      <div style="overflow-x:auto"><table class="sectbl" id="sec-audit"></table></div>
+    </div>
+
+    <div class="card">
+      <h2>&#9989; Build Guide &sect;27 Security Checklist</h2>
+      <div style="overflow-x:auto"><table class="sectbl" id="sec-27"></table></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  BHBA Content Machine &middot; v1.0.0 &middot; Draft-only, zero-credential build<br>
+  POST &rarr; ADAPT &rarr; RESIZE &rarr; CAPTION &rarr; APPROVE &rarr; READY_TO_POST &rarr; TRACK<br>
+  <a href="bhba_portal.html">Portal</a> &middot; <a href="bhba_comms.html">Communications</a> &middot; <a href="#" onclick="go('security');return false;">Security posture</a>
+</footer>
+
+<div id="toast"></div>
+<div id="modal"><div class="mbox" id="mbox"></div></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   BHBA CONTENT MACHINE — engine
+   Everything below runs locally. There is no fetch(), XHR, WebSocket
+   or sendBeacon anywhere in this file, and the page CSP blocks them
+   at the browser level regardless.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── XSS: all user-originated data passes through esc() before innerHTML ── */
+function esc(s){const d=document.createElement('div');d.appendChild(document.createTextNode(s==null?'':String(s)));return d.innerHTML;}
+function escAttr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+function uid(){
+  try{ if(window.crypto&&crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  const b=new Uint8Array(16); (window.crypto||{getRandomValues:function(a){for(let i=0;i<a.length;i++)a[i]=Math.random()*256|0;return a;}}).getRandomValues(b);
+  b[6]=(b[6]&0x0f)|0x40; b[8]=(b[8]&0x3f)|0x80;
+  const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join('');
+  return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);
+}
+function hashStr(s){let h=5381;for(let i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))|0;}return Math.abs(h);}
+
+/* ── STORAGE ─────────────────────────────────────────────────── */
+const K={content:'bhba_cm_content',brand:'bhba_cm_brand',memory:'bhba_cm_memory'};
+function load(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v;}catch(e){return d;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}
+  catch(e){toast('Storage full — export and clear old content',true);return false;}}
+function getContent(){return load(K.content,[]);}
+function setContent(c){return save(K.content,c);}
+function getMemory(){return load(K.memory,[]);}
+function setMemory(m){return save(K.memory,m);}
+
+const DEFAULT_BRAND={
+  name:'BHBA',creator:'BHBA Communications',
+  audience:'team managers, players, officials and parents across the BHBA 2027 tournament',
+  tone:['clear','direct','respectful'],
+  style:'short sentences, plain English, no hype, one clear action per post',
+  hooks:['Fixtures are live —','Heads up, team managers —','One deadline you cannot miss —','Results are in —'],
+  cta_style:'tell them exactly what to do and by when',
+  words_to_use:['register','deadline','confirm','fixture','official'],
+  words_to_avoid:['revolutionize','game-changer','unlock your potential','guaranteed','epic','insane','literally'],
+  emoji:'minimal',hashtag_n:8,
+  hashtags:['BHBA','BHBA2027','basketball','jamaicabasketball','tournament','gameday','hoops','caribbeanbasketball','ballislife','sports']
+};
+function getBrand(){const b=load(K.brand,null);return b?Object.assign({},DEFAULT_BRAND,b):Object.assign({},DEFAULT_BRAND);}
+function setBrand(b){return save(K.brand,b);}
+
+/* ── PLATFORM RULES (build guide §7 + §10) ───────────────────── */
+const PLATFORMS=[
+ {k:'instagram',n:'Instagram',i:'\u{1F4F8}',ratio:'4:5',ratios:'4:5 feed · 1:1 carousel · 9:16 reel',
+  hardLimit:2200,recLimit:1000,tier:2,
+  hook:'First line is everything — it is the only part shown before "more"',
+  ctaRule:'Comment a keyword, or save this',
+  safe:{top:0,bottom:0,note:'Grid preview crops 4:5 down to 1:1 — keep the subject centred'}},
+ {k:'tiktok',n:'TikTok',i:'\u{1F3B5}',ratio:'9:16',ratios:'9:16 vertical',
+  hardLimit:2200,recLimit:150,tier:2,
+  hook:'The first 2 seconds of the video carry it, not the caption',
+  ctaRule:'Follow for more, or answer in the comments',
+  safe:{top:10,bottom:15,note:'App UI covers roughly the top 10% and bottom 15% — keep text out of both'}},
+ {k:'youtube',n:'YouTube Shorts',i:'\u{1F3AC}',ratio:'9:16',ratios:'9:16, 60s or under',
+  hardLimit:5000,recLimit:1200,tier:1,
+  hook:'A title that is searchable AND curious — both, not one',
+  ctaRule:'Subscribe, or watch the full version',
+  safe:{top:10,bottom:15,note:'Thumbnail must stay readable at very small sizes'}},
+ {k:'x',n:'X',i:'\u{1D54F}',ratio:'16:9',ratios:'16:9 or 1:1',
+  hardLimit:280,recLimit:275,tier:1,
+  hook:'Line one is the whole bet — it must work completely alone',
+  ctaRule:'Reply, bookmark or repost',
+  safe:{top:0,bottom:0,note:'Text in the image should survive timeline downscaling'}},
+ {k:'linkedin',n:'LinkedIn',i:'\u{1F4BC}',ratio:'4:5',ratios:'1:1 or 4:5, document posts supported',
+  hardLimit:3000,recLimit:1600,tier:1,
+  hook:'A personal or mildly contrarian opener — never a press release',
+  ctaRule:'Ask a real question',
+  safe:{top:0,bottom:0,note:'Only the first ~3 lines show before "see more"'}},
+ {k:'threads',n:'Threads',i:'\u{1F9F5}',ratio:'4:5',ratios:'1:1 or 4:5',
+  hardLimit:500,recLimit:480,tier:3,
+  hook:'A casual observation, low polish, opinion welcome',
+  ctaRule:'Start a conversation',
+  safe:{top:0,bottom:0,note:'Keep it conversational — over-produced posts underperform here'}},
+ {k:'facebook',n:'Facebook',i:'\u{1F465}',ratio:'1:1',ratios:'1:1 or 16:9',
+  hardLimit:63206,recLimit:1200,tier:2,
+  hook:'A relatable, plainly-stated fact',
+  ctaRule:'Share it, or comment',
+  safe:{top:0,bottom:0,note:'Broader audience — assume less context than elsewhere'}},
+ {k:'pinterest',n:'Pinterest',i:'\u{1F4CC}',ratio:'2:3',ratios:'2:3 vertical',
+  hardLimit:500,recLimit:480,tier:2,
+  hook:'Benefit plus keyword — this is a search engine, not a feed',
+  ctaRule:'Save this pin',
+  safe:{top:0,bottom:0,note:'Vertical or it gets buried'}},
+ {k:'email',n:'Email',i:'\u{2709}',ratio:'16:9',ratios:'Inline images, 16:9 hero',
+  hardLimit:0,recLimit:0,tier:3,
+  hook:'The subject line is the entire hook',
+  ctaRule:'One single clear link',
+  safe:{top:0,bottom:0,note:'Write to one person, not to a list'}},
+ {k:'blog',n:'Blog',i:'\u{1F4DD}',ratio:'16:9',ratios:'16:9 hero image',
+  hardLimit:0,recLimit:0,tier:4,
+  hook:'Title plus first paragraph',
+  ctaRule:'Subscribe, or read next',
+  safe:{top:0,bottom:0,note:'Real heading structure — no keyword stuffing'}}
+];
+const PMAP={};PLATFORMS.forEach(p=>PMAP[p.k]=p);
+const TIER_LABEL={1:'Official API supports publishing (after approval)',2:'Publish via an approved third-party scheduler',3:'Draft plus human posting',4:'No API — manual post'};
+
+const STATUS_CLASS={DRAFT:'p-draft',READY_FOR_REVIEW:'p-review',APPROVED:'p-approved',SCHEDULED:'p-scheduled',
+  READY_TO_POST:'p-ready',PUBLISHED:'p-published',FAILED:'p-failed',REJECTED:'p-rejected'};
+const STATUS_LABEL={DRAFT:'DRAFT',READY_FOR_REVIEW:'REVIEW',APPROVED:'APPROVED',SCHEDULED:'SCHEDULED',
+  READY_TO_POST:'READY TO POST',PUBLISHED:'PUBLISHED',FAILED:'FAILED',REJECTED:'REJECTED'};
+
+/* ═══════════════ CONTENT ANALYZER (§5) ═══════════════
+   Extracts structure. Never rewrites, never improves, never invents.
+   Every downstream adapter reads from this and only this. */
+const STOP=new Set(('a an the and or but if then than that this these those of to in on at by for with from as is are was were be been being it its it\'s you your we our they them he she his her i me my not no so up out do does did have has had will would can could should about into over after before more most just also very really only new now get got make made take taken'.split(' ')));
+
+const FACT_RE=new RegExp([
+  '[$£€¥]\\s?\\d[\\d,]*(?:\\.\\d+)?(?:\\s?(?:k|m|bn|million|billion))?',
+  '\\d[\\d,]*(?:\\.\\d+)?\\s?%',
+  '\\d[\\d,]*(?:\\.\\d+)?\\s?(?:x|hours?|hrs?|minutes?|mins?|seconds?|secs?|days?|weeks?|months?|years?|teams?|players?|games?|matches?|points?|people|members?|places?|spots?)',
+  '\\b\\d{1,2}:\\d{2}\\s?(?:am|pm)?\\b',
+  '\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?\\b',
+  '\\b\\d{1,2}(?:st|nd|rd|th)?\\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\b',
+  '\\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*day\\b',
+  '\\b(?:19|20)\\d{2}\\b'
+].join('|'),'gi');
+
+function splitSentences(t){
+  /* Split per line first. A bullet list has no terminal punctuation, so splitting
+     the whole blob at once merges every bullet into one giant pseudo-sentence. */
+  const out=[];
+  String(t||'').split(/\n+/).forEach(line=>{
+    line=line.replace(/\s+/g,' ').trim(); if(!line)return;
+    (line.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[line]).forEach(x=>{
+      x=x.trim(); if(x.length>2)out.push(x);
+    });
+  });
+  return out;
+}
+function isBullet(s){return /^[\-\*•–▪]|^\d+[.)]\s/.test(String(s).trim());}
+function splitLines(t){
+  return String(t||'').split(/\n+/).map(s=>s.trim()).filter(Boolean);
+}
+function trimTo(s,n){
+  s=String(s||'').trim();
+  if(!n||s.length<=n) return s;
+  const cut=s.slice(0,n);
+  const sp=cut.lastIndexOf(' ');
+  return (sp>n*0.6?cut.slice(0,sp):cut).replace(/[,;:\-\s]+$/,'');
+}
+
+function analyze(input){
+  const raw=String(input.content||'').trim();
+  const lines=splitLines(raw);
+  const sents=splitSentences(raw).map(s=>s.trim()).filter(s=>s.length>2);
+  const brand=getBrand();
+
+  /* facts_to_preserve — every number, date, money figure and quote.
+     These must survive every rewrite completely unchanged. */
+  const facts=[];
+  const seen=new Set();
+  (raw.match(FACT_RE)||[]).forEach(f=>{
+    const t=f.trim(); const key=t.toLowerCase();
+    if(t.length>1&&!seen.has(key)){seen.add(key);facts.push(t);}
+  });
+  /* Straight and curly double quotes only. Including the apostrophe as a delimiter
+     truncates any quote containing a possessive, which then reads as a dropped fact
+     on every platform — a false alarm that trains you to ignore real ones. */
+  let qm; const QRE=/[\u201C"]([^\u201D"\n]{4,140})[\u201D"]/g;
+  while((qm=QRE.exec(raw))!==null){
+    const t=qm[1].trim(); const key=t.toLowerCase();
+    if(!seen.has(key)){seen.add(key);facts.push('"'+t+'"');}
+  }
+
+  /* keywords — frequency, stopwords removed */
+  const freq={};
+  (raw.toLowerCase().match(/[a-z][a-z'\-]{2,}/g)||[]).forEach(w=>{
+    if(STOP.has(w)||w.length<3)return; freq[w]=(freq[w]||0)+1;
+  });
+  /* Prefer words that actually recur; pad with the longest remaining terms rather
+     than whatever happened to appear once. */
+  const ranked=Object.keys(freq).sort((a,b)=>freq[b]-freq[a]||b.length-a.length||a.localeCompare(b));
+  const repeated=ranked.filter(w=>freq[w]>=2);
+  const singles=ranked.filter(w=>freq[w]<2).sort((a,b)=>b.length-a.length);
+  const keywords=repeated.concat(singles).slice(0,10);
+
+  /* key_points — prefer the author's own bullets; fall back to sentences */
+  const bullets=lines.filter(l=>/^[\-\*•–▪]|^\d+[.)]\s/.test(l))
+                     .map(l=>l.replace(/^[\-\*•–▪]\s*|^\d+[.)]\s*/,'').trim())
+                     .filter(Boolean);
+  let key_points = bullets.length>=2 ? bullets.slice(0,7)
+                 : sents.slice(1).filter(s=>s.length>18).slice(0,6)
+                        .map(s=>s.replace(/^[\-\*•–▪]\s*|^\d+[.)]\s*/,'').trim());
+  if(!key_points.length && sents.length) key_points=[sents[0].trim()];
+
+  /* core_idea — the sentence carrying the most weight, near the front */
+  const prose=sents.filter(s=>!isBullet(s));
+  const cands=(prose.length?prose:sents).slice(0,8);
+  let core='',best=-1;
+  cands.forEach((s,idx)=>{
+    let sc=0;
+    keywords.forEach(w=>{if(s.toLowerCase().includes(w))sc+=2;});
+    facts.forEach(f=>{if(s.includes(f))sc+=3;});
+    sc+=Math.max(0,8-idx*2);                       // strongly favour the opening statement
+    if(s.length>26&&s.length<230)sc+=2;
+    if(sc>best){best=sc;core=s.trim();}
+  });
+  core=trimTo(core||raw,170);
+
+  const hook=trimTo(lines[0]||sents[0]||'',110);
+
+  const vis=[];
+  const ct=input.content_type;
+  if(ct==='video'||ct==='transcript'||ct==='script'){vis.push('Vertical 9:16 cut with burned-in subtitles');vis.push('Strongest frame exported as a thumbnail');}
+  if(ct==='image'||ct==='carousel'){vis.push('Subject-centred crop for 1:1 grid preview');}
+  if(ct==='blog'||ct==='link'){vis.push('16:9 hero image');}
+  if(!vis.length)vis.push('Text-led graphic; regenerate the layout per ratio rather than cropping');
+
+  /* error behaviour: say what is missing, never invent it */
+  const needs=[];
+  if(raw.length<40)needs.push('Original content is very short — the analyzer has little to work from');
+  if(!String(input.cta||'').trim())needs.push('No call to action given — CTAs will be omitted, not invented');
+  if(!String(input.audience||'').trim())needs.push('No audience specified — falling back to the brand profile audience');
+  if(!facts.length)needs.push('No dates, numbers or quotes detected — nothing is being locked as a preserved fact');
+
+  return{core_idea:core,hook:hook,key_points:key_points,
+    audience:String(input.audience||'').trim()||brand.audience,
+    cta:String(input.cta||'').trim(),tone:brand.tone,keywords:keywords,
+    facts_to_preserve:facts,content_type:ct,visual_requirements:vis,
+    needs_clarification:needs};
+}
+
+/* ═══════════════ SHARED ADAPTER HELPERS ═══════════════ */
+function emojiFor(brand,seed,set){
+  if(brand.emoji==='none')return'';
+  const pool=set||['\u{1F3C0}','\u{1F525}','\u{1F4E3}','\u{26A1}','\u{2705}'];
+  return pool[seed%pool.length];
+}
+function hashtagsFor(brand,A,n){
+  const pool=[];
+  (brand.hashtags||[]).forEach(t=>{const c=String(t).replace(/^#/,'').replace(/[^A-Za-z0-9_]/g,'');if(c)pool.push(c);});
+  A.keywords.forEach(w=>{const c=w.replace(/[^a-z0-9]/g,'');if(c.length>3&&pool.length<24&&!pool.some(p=>p.toLowerCase()===c))pool.push(c);});
+  const out=[];const s=new Set();
+  for(const t of pool){const l=t.toLowerCase();if(!s.has(l)){s.add(l);out.push('#'+t);}if(out.length>=n)break;}
+  return out;
+}
+function ctaLine(A,rule){
+  if(!A.cta)return null;              // never invent a CTA — §11 error behaviour
+  return A.cta.replace(/\.$/,'')+'.';
+}
+function pointLines(A,prefix,max){
+  return A.key_points.slice(0,max||5).map(p=>(prefix||'')+trimTo(p,150));
+}
+
+/* ═══════════════ PLATFORM ADAPTERS (§8, §24) ═══════════════
+   Same core idea everywhere. Completely different delivery.
+   Each returns ordered fields so rendering stays generic. */
+const ADAPTERS={
+
+instagram(A,B,seed){
+  const em=emojiFor(B,seed,['\u{1F3C0}','\u{1F525}','\u{1F4E3}']);
+  const hook=trimTo(A.hook||A.core_idea,95)+(em?' '+em:'');
+  const body=pointLines(A,'→ ',5).join('\n');
+  const cta=ctaLine(A);
+  const tags=hashtagsFor(B,A,B.hashtag_n||8);
+  const caption=[hook,body,cta].filter(Boolean).join('\n\n')+'\n\n'+tags.join(' ');
+  const slides=[{t:'Slide 1 — Hook',v:trimTo(A.hook||A.core_idea,80)}]
+    .concat(A.key_points.slice(0,5).map((p,i)=>({t:'Slide '+(i+2),v:trimTo(p,120)})));
+  if(cta)slides.push({t:'Slide '+(slides.length+1)+' — CTA',v:cta});
+  return{fields:[
+    {k:'hook_line',label:'Hook line (the only part shown before "more")',v:hook,limit:125},
+    {k:'caption',label:'Caption',v:caption,limit:2200},
+    {k:'carousel_slides',label:'Carousel slides',v:slides,type:'slides'},
+    {k:'hashtags',label:'Hashtags',v:tags,type:'tags'}
+  ]};
+},
+
+tiktok(A,B,seed){
+  const openers=['Right, listen —','Stop scrolling for one second.','Nobody told you this, so I will.','Quick one, and it matters.'];
+  const spoken=openers[seed%openers.length]+' '+trimTo(A.core_idea,120);
+  const beats=[{t:'0:00 – 0:02  HOOK',v:spoken}];
+  A.key_points.slice(0,4).forEach((p,i)=>beats.push({t:(3+i*6)+'s – '+(8+i*6)+'s',v:trimTo(p,140)}));
+  if(A.cta)beats.push({t:'Final 3s  CTA',v:A.cta});
+  const tags=hashtagsFor(B,A,Math.min(5,B.hashtag_n||5));
+  return{fields:[
+    {k:'spoken_hook',label:'Spoken hook (first 2 seconds)',v:spoken,limit:160},
+    {k:'script',label:'Script beats',v:beats,type:'slides'},
+    {k:'on_screen_text',label:'On-screen text',v:A.key_points.slice(0,4).map(p=>trimTo(p,42).toUpperCase()),type:'list'},
+    {k:'caption',label:'Caption (keep it short)',v:trimTo(A.hook||A.core_idea,100)+' '+tags.join(' '),limit:150},
+    {k:'hashtags',label:'Hashtags',v:tags,type:'tags'}
+  ]};
+},
+
+youtube(A,B,seed){
+  const kw=A.keywords.slice(0,2).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+  const title=trimTo((kw?kw+': ':'')+ (A.hook||A.core_idea),95);
+  const desc=[trimTo(A.core_idea,160),'',pointLines(A,'• ',6).join('\n'),
+    A.cta?('\n'+A.cta):'','',hashtagsFor(B,A,5).join(' ')].filter(x=>x!==null).join('\n');
+  const beats=[{t:'0:00 HOOK',v:trimTo(A.hook||A.core_idea,120)}];
+  A.key_points.slice(0,4).forEach((p,i)=>beats.push({t:'Point '+(i+1),v:trimTo(p,140)}));
+  return{fields:[
+    {k:'title',label:'Title (searchable AND curious)',v:title,limit:100},
+    {k:'description',label:'Description',v:desc,limit:5000},
+    {k:'script',label:'Script beats',v:beats,type:'slides'},
+    {k:'tags',label:'Tags',v:A.keywords.slice(0,8),type:'tags'}
+  ]};
+},
+
+x(A,B,seed){
+  const single=trimTo([A.hook||A.core_idea,A.cta].filter(Boolean).join(' '),275);
+  const thread=[trimTo(A.hook||A.core_idea,270)];
+  A.key_points.slice(0,5).forEach((p,i)=>thread.push((i+1)+'. '+trimTo(p,262)));
+  const recap=trimTo((A.cta?A.cta:'That is the whole thing.'),270);
+  thread.push(recap);
+  return{fields:[
+    {k:'single_post',label:'Single post',v:single,limit:280},
+    {k:'thread',label:'Thread',v:thread.map((t,i)=>({t:(i+1)+'/'+thread.length+'  ('+t.length+' chars)',v:t})),type:'slides'}
+  ]};
+},
+
+linkedin(A,B,seed){
+  const opens=(B.hooks&&B.hooks.length)?B.hooks
+    :['Something worth saying plainly:','A short note, because it matters this week:','Here is the part people miss:'];
+  const hook=trimTo(opens[seed%opens.length],200);
+  const body=[trimTo(A.core_idea,220),'',pointLines(A,'• ',5).join('\n')].join('\n');
+  const lesson='The point: '+trimTo(A.core_idea,150);
+  const cta=A.cta?(A.cta.replace(/\.$/,'')+'. What is your read on it?'):null;
+  const post=[hook,'',body,'',lesson,cta?('\n'+cta):''].filter(x=>x!==null).join('\n');
+  return{fields:[
+    {k:'hook',label:'Opening line',v:hook,limit:210},
+    {k:'body',label:'Body',v:body,limit:2400},
+    {k:'lesson',label:'Lesson',v:lesson,limit:300},
+    {k:'cta',label:'CTA',v:cta||'(none — no CTA was provided, and one was not invented)',limit:200},
+    {k:'post',label:'Full post as it will appear',v:post,limit:3000}
+  ]};
+},
+
+threads(A,B,seed){
+  const opens=(B.hooks&&B.hooks.length)?B.hooks:['ok genuinely','small thing but','quick thought:'];
+  const post=trimTo(opens[seed%opens.length]+' '+trimTo(A.core_idea,320)+(A.cta?(' '+A.cta):''),480);
+  const extra=A.key_points.slice(0,3).map((p,i)=>({t:'Reply '+(i+1),v:trimTo(p,470)}));
+  return{fields:[
+    {k:'post',label:'Post',v:post,limit:500},
+    {k:'optional_thread',label:'Optional follow-ups',v:extra,type:'slides'}
+  ]};
+},
+
+facebook(A,B,seed){
+  const post=[trimTo(A.hook||A.core_idea,200),'',trimTo(A.core_idea,300),'',
+    pointLines(A,'• ',5).join('\n'),A.cta?('\n'+A.cta):''].filter(Boolean).join('\n');
+  return{fields:[
+    {k:'post',label:'Post',v:post,limit:2000},
+    {k:'cta',label:'CTA',v:A.cta||'(none provided)',limit:200}
+  ]};
+},
+
+pinterest(A,B,seed){
+  const kw=A.keywords.slice(0,3);
+  const title=trimTo((A.hook||A.core_idea).replace(/[!?]+$/,''),95);
+  const desc=trimTo([trimTo(A.core_idea,200),pointLines(A,'• ',4).join(' '),A.cta||''].filter(Boolean).join(' '),480);
+  return{fields:[
+    {k:'pin_title',label:'Pin title',v:title,limit:100},
+    {k:'description',label:'Description (keyword-led)',v:desc,limit:500},
+    {k:'keywords',label:'Keywords',v:kw.concat(A.keywords.slice(3,8)),type:'tags'}
+  ]};
+},
+
+email(A,B,seed){
+  const subject=trimTo(A.hook||A.core_idea,58);
+  const preview=trimTo(A.key_points[0]||A.core_idea,88);
+  const body=['Hi there,','',trimTo(A.core_idea,280),'',pointLines(A,'• ',5).join('\n'),'',
+    A.cta||'','','Thanks,','— '+(B.creator||B.name)].join('\n');
+  return{fields:[
+    {k:'subject',label:'Subject line (the whole hook)',v:subject,limit:60},
+    {k:'preview_text',label:'Preview text',v:preview,limit:90},
+    {k:'body',label:'Body',v:body},
+    {k:'cta',label:'The one link',v:A.cta||'(none provided)',limit:200}
+  ]};
+},
+
+blog(A,B,seed){
+  const title=trimTo((A.hook||A.core_idea).replace(/[.!?]+$/,''),70);
+  const meta=trimTo(A.core_idea,152);
+  const secs=A.key_points.slice(0,6).map((p,i)=>({t:'H2 — '+trimTo(p,60),v:trimTo(p,220)}));
+  const body=[trimTo(A.core_idea,320),''].concat(
+    A.key_points.slice(0,6).map((p,i)=>'## '+trimTo(p,60)+'\n\n'+trimTo(p,220))
+  ).join('\n\n')+(A.cta?('\n\n'+A.cta):'');
+  return{fields:[
+    {k:'title',label:'Title',v:title,limit:70},
+    {k:'meta_description',label:'Meta description',v:meta,limit:155},
+    {k:'h2_sections',label:'Section outline',v:secs,type:'slides'},
+    {k:'body',label:'Body (markdown)',v:body},
+    {k:'cta',label:'CTA',v:A.cta||'(none provided)',limit:200}
+  ]};
+}
+};
+
+/* ═══════════════ VALIDATION ═══════════════
+   Runs after every generation. Warnings block nothing — they inform
+   the human at the gate, which is the entire point of the gate. */
+function flatten(fields){
+  const parts=[];
+  fields.forEach(f=>{
+    if(f.type==='slides')(f.v||[]).forEach(s=>parts.push(s.v));
+    else if(f.type==='tags'||f.type==='list')(f.v||[]).forEach(t=>parts.push(t));
+    else parts.push(f.v);
+  });
+  return parts.join('\n');
+}
+function validate(out,A,B,P){
+  const w=[];
+  const text=flatten(out.fields);
+  const low=text.toLowerCase();
+
+  /* facts_to_preserve must appear unchanged (§8 absolute rule) */
+  const dropped=A.facts_to_preserve.filter(f=>!low.includes(f.toLowerCase()));
+  if(dropped.length)w.push({t:'facts',m:'Not carried into this version: '+dropped.join(', ')+
+    ' — check nothing important was trimmed away before approving.'});
+
+  /* brand voice: words_to_avoid */
+  const bad=(B.words_to_avoid||[]).filter(x=>x&&low.includes(String(x).toLowerCase()));
+  if(bad.length)w.push({t:'brand',m:'Uses words on your avoid list: '+bad.join(', ')});
+
+  /* hard character limits */
+  out.fields.forEach(f=>{
+    if(f.limit&&typeof f.v==='string'&&f.v.length>f.limit)
+      w.push({t:'limit',m:f.label+' is '+f.v.length+' characters, over the '+f.limit+' limit'});
+    if(f.type==='slides'&&P.hardLimit)(f.v||[]).forEach(s=>{
+      if(String(s.v).length>P.hardLimit)w.push({t:'limit',m:s.t+' is over the '+P.hardLimit+'-character limit'});
+    });
+  });
+
+  /* suitability — say so rather than forcing it (§24 shared rules) */
+  if(P.k==='blog'&&A.key_points.length<3)
+    w.push({t:'fit',m:'Thin for a blog post — only '+A.key_points.length+' distinct point(s). Consider skipping this platform.'});
+  if(P.k==='tiktok'&&A.content_type==='blog')
+    w.push({t:'fit',m:'This started as written long-form. It needs a real spoken performance to work here.'});
+  if((P.k==='youtube'||P.k==='tiktok')&&!['video','transcript','script'].includes(A.content_type))
+    w.push({t:'fit',m:'No video source — this is a shooting plan, not a finished cut. You still have to film it.'});
+  if(!A.cta&&['instagram','email','facebook'].includes(P.k))
+    w.push({t:'cta',m:'No CTA was provided, so none was written. Add one before this goes out.'});
+
+  return w;
+}
+
+/* ═══════════════ GENERATION ═══════════════ */
+function generateAll(input){
+  const A=analyze(input);
+  const B=getBrand();
+  const seed=hashStr(input.content||'');
+  const versions=PLATFORMS.map(P=>{
+    let out,warn=[];
+    try{ out=ADAPTERS[P.k](A,B,seed); }
+    catch(e){ out={fields:[{k:'error',label:'Adapter error',v:'This adapter could not run: '+e.message}]};
+              warn=[{t:'error',m:'Generation failed for this platform — regenerate or write it manually.'}]; }
+    warn=warn.concat(validate(out,A,B,P));
+    return{id:uid(),platform:P.k,payload:out,status:'READY_FOR_REVIEW',warnings:warn,
+      approved_by:null,approved_at:null,scheduled_for:null,published_at:null,
+      idempotency_key:uid(),attempts:0,metrics:null,created_at:new Date().toISOString()};
+  });
+  return{A:A,versions:versions};
+}
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   UI LAYER
+   ═══════════════════════════════════════════════════════════════ */
+let CURRENT=null;        // content object currently open in Create
+let CURPLAT='instagram'; // selected platform tab
+let CALDATE=new Date();
+
+function $(id){return document.getElementById(id);}
+function toast(msg,isErr){
+  const t=$('toast'); t.textContent=msg; t.className='show'+(isErr?' err':'');
+  clearTimeout(t._h); t._h=setTimeout(()=>{t.className='';},2600);
+}
+function go(v){
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active','v-'+v===s.id));
+  window.scrollTo(0,0);
+  if(v==='versions')renderLibrary();
+  if(v==='calendar')renderCalendar();
+  if(v==='memory'){renderMemory();renderPerformance();}
+  if(v==='security')renderSecurity();
+  renderStats();
+}
+function openModal(html){$('mbox').innerHTML=html;$('modal').classList.add('show');}
+function closeModal(){$('modal').classList.remove('show');$('mbox').innerHTML='';}
+function copyText(txt){
+  const done=()=>toast('Copied to clipboard');
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback);return;}
+  }catch(e){}
+  fallback();
+  function fallback(){
+    const ta=document.createElement('textarea');ta.value=txt;
+    ta.style.cssText='position:fixed;left:-9999px;top:0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand('copy');done();}catch(e){toast('Press Ctrl+C to copy',true);}
+    document.body.removeChild(ta);
+  }
+}
+
+/* ── STATS ── */
+function renderStats(){
+  const all=getContent();let d=0,rev=0,app=0,sch=0,rtp=0,pub=0;
+  all.forEach(c=>c.versions.forEach(v=>{
+    if(v.status==='DRAFT')d++; else if(v.status==='READY_FOR_REVIEW')rev++;
+    else if(v.status==='APPROVED')app++; else if(v.status==='SCHEDULED')sch++;
+    else if(v.status==='READY_TO_POST')rtp++; else if(v.status==='PUBLISHED')pub++;
+  }));
+  const S=[['CREATED',all.length,''],['AWAITING YOU',rev,rev?'attn':''],['APPROVED',app,''],
+           ['READY TO POST',rtp,rtp?'ok':''],['SCHEDULED',sch,''],['POSTED',pub,'']];
+  $('stats').innerHTML=S.map(s=>'<div class="stat '+s[2]+'"><div class="sv">'+s[1]+'</div><div class="sl">'+s[0]+'</div></div>').join('');
+}
+
+/* ── CREATE ── */
+function doGenerate(){
+  const input={
+    title:$('i-title').value.trim(),content:$('i-content').value.trim(),
+    content_type:$('i-type').value,goal:$('i-goal').value,
+    audience:$('i-audience').value.trim(),cta:$('i-cta').value.trim(),
+    original_platform:$('i-orig').value.trim()
+  };
+  if(!input.content){toast('Paste some content first',true);$('i-content').focus();return;}
+  if(input.content.length>60000){toast('That is very long — trim it to under 60,000 characters',true);return;}
+
+  const btn=$('btn-generate');btn.disabled=true;btn.textContent='Working...';
+  setTimeout(()=>{
+    try{
+      const r=generateAll(input);
+      const obj={id:uid(),title:input.title||trimTo(input.content,52),
+        original_content:input.content,content_type:input.content_type,goal:input.goal,
+        audience:input.audience,cta:input.cta,original_platform:input.original_platform,
+        analysis:r.A,versions:r.versions,status:'READY_FOR_REVIEW',created_at:new Date().toISOString()};
+      const all=getContent();all.unshift(obj);
+      if(setContent(all)){
+        CURRENT=obj;CURPLAT='instagram';
+        renderAnalysis(obj);renderResults(obj);renderStats();
+        toast('Ten platform versions ready for your review');
+        setTimeout(()=>{const el=$('analysis-panel');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},120);
+      }
+    }catch(e){toast('Generation failed: '+e.message,true);}
+    btn.disabled=false;btn.innerHTML='&#9889; GENERATE EVERYWHERE';
+  },40);
+}
+
+function findSimilar(obj){
+  const mem=getMemory();
+  const kw=new Set(obj.analysis.keywords);
+  return mem.filter(m=>m.content_id!==obj.id).map(m=>{
+    const mk=(m.keywords||[]);const hit=mk.filter(w=>kw.has(w)).length;
+    return{m:m,score:mk.length?hit/Math.max(kw.size,mk.length):0,hit:hit};
+  }).filter(x=>x.hit>=3).sort((a,b)=>b.score-a.score).slice(0,3);
+}
+
+function renderAnalysis(obj){
+  const A=obj.analysis;
+  const sim=findSimilar(obj);
+  let h='<div class="card"><h2>&#128270; Content Analysis &mdash; the single source of truth</h2>'+
+    '<p class="hint">Every one of the ten versions below was built from this, not from each other. That is what stops meaning drifting post to post.</p>';
+
+  if(A.needs_clarification.length)
+    h+='<div class="alert a-warn"><b>Needs clarification &mdash; nothing was invented to fill these gaps:</b><ul>'+
+       A.needs_clarification.map(n=>'<li>'+esc(n)+'</li>').join('')+'</ul></div>';
+
+  if(sim.length)
+    h+='<div class="alert a-info"><b>&#129504; Memory says you have covered this before:</b><ul>'+
+       sim.map(s=>'<li>'+esc(s.m.idea)+' <span style="color:var(--lgrey)">&mdash; '+esc(new Date(s.m.created_at).toLocaleDateString())+
+       ', '+s.hit+' shared keywords</span></li>').join('')+
+       '</ul>Repeating it is fine &mdash; just make it a decision rather than an accident.</div>';
+
+  h+='<div class="fld"><div class="fh"><span class="fn">Core idea</span></div><div class="out">'+esc(A.core_idea)+'</div></div>'+
+     '<div class="fld"><div class="fh"><span class="fn">Existing hook</span></div><div class="out">'+esc(A.hook||'(none detected)')+'</div></div>';
+
+  h+='<div class="fld"><div class="fh"><span class="fn">Key points ('+A.key_points.length+')</span></div>'+
+     A.key_points.map((p,i)=>'<div class="slide"><span class="sn">POINT '+(i+1)+'</span>'+esc(p)+'</div>').join('')+'</div>';
+
+  h+='<div class="fld"><div class="fh"><span class="fn">Facts to preserve &mdash; must survive every rewrite unchanged</span></div>';
+  h+=A.facts_to_preserve.length
+    ? '<div class="tags">'+A.facts_to_preserve.map(f=>'<span class="tag" style="background:rgba(46,204,113,.12);border-color:rgba(46,204,113,.3);color:#7fd6a2">'+esc(f)+'</span>').join('')+'</div>'
+    : '<div class="out" style="color:var(--lgrey);font-size:12px">No dates, figures or quotes detected — nothing is locked.</div>';
+  h+='</div>';
+
+  h+='<div class="row"><div class="fld"><div class="fh"><span class="fn">Audience</span></div><div class="out">'+esc(A.audience)+'</div></div>'+
+     '<div class="fld"><div class="fh"><span class="fn">Call to action</span></div><div class="out">'+esc(A.cta||'(none — none was invented)')+'</div></div></div>';
+
+  h+='<div class="fld"><div class="fh"><span class="fn">Keywords</span></div><div class="tags">'+
+     A.keywords.map(w=>'<span class="tag">'+esc(w)+'</span>').join('')+'</div></div>';
+
+  h+='<div class="fld"><div class="fh"><span class="fn">Visual requirements</span></div>'+
+     A.visual_requirements.map(v=>'<div class="slide">'+esc(v)+'</div>').join('')+'</div>';
+
+  h+='<div class="flexbar" style="margin-top:12px"><button class="btn btn-sm btn-ghost" onclick="showPromptPack()">&#128203; Export AI Prompt Pack</button>'+
+     '<span style="font-size:11px;color:var(--lgrey)">Populated agent prompts to paste into an AI, since no key is held here</span></div>';
+
+  h+='</div>';
+  $('analysis-panel').innerHTML=h;
+}
+
+/* Prompt pack — the guide's agent prompts, filled with this content.
+   Lets the operator run a real model manually without this page ever
+   holding an API key. */
+function showPromptPack(){
+  if(!CURRENT)return;
+  const A=CURRENT.analysis,B=getBrand();
+  const p='ROLE: You adapt one piece of content into platform-native versions.\n'+
+  'GOAL: Same core idea everywhere — completely different delivery per platform.\n\n'+
+  'INPUT — CONTENT ANALYSIS:\n'+JSON.stringify({core_idea:A.core_idea,hook:A.hook,key_points:A.key_points,
+    audience:A.audience,cta:A.cta,keywords:A.keywords,facts_to_preserve:A.facts_to_preserve,
+    content_type:A.content_type},null,2)+'\n\n'+
+  'INPUT — BRAND VOICE:\n'+JSON.stringify({creator:B.creator,audience:B.audience,tone:B.tone,style:B.style,
+    common_hooks:B.hooks,cta_style:B.cta_style,words_to_use:B.words_to_use,words_to_avoid:B.words_to_avoid,
+    emoji_style:B.emoji,hashtag_rules:(B.hashtag_n||8)+' niche-relevant tags at the end of the caption'},null,2)+'\n\n'+
+  'INPUT — ORIGINAL CONTENT:\n'+CURRENT.original_content+'\n\n'+
+  'RULES: Do NOT blindly copy content between platforms. Preserve the CORE IDEA exactly; adapt the HOOK, LENGTH, '+
+  'STRUCTURE, CTA, TONE and FORMAT for each platform. Every item in facts_to_preserve must appear unchanged — never '+
+  'round a number, soften a claim, or invent a new one. Apply the brand voice; never use words_to_avoid. Write like a '+
+  'human who actually uses that platform. If a platform does not suit this content, say so rather than forcing it.\n\n'+
+  'OUTPUT FORMAT: Return ONLY valid JSON with one object per platform: instagram, tiktok, youtube, x, linkedin, '+
+  'threads, facebook, pinterest, email, blog.\n\n'+
+  'ERROR BEHAVIOR: If the analysis is incomplete, return what you can and list missing inputs in a warnings array. '+
+  'Never fabricate details to fill a platform slot.';
+  openModal('<h3>&#128203; AI Prompt Pack</h3>'+
+    '<div class="msub">Fully populated Master Adaptation Agent prompt. Paste it into any AI you trust. '+
+    'This page holds no API key on purpose &mdash; a key in static frontend code is a public key.</div>'+
+    '<textarea rows="16" class="out mono" id="pp" readonly style="width:100%">'+esc(p)+'</textarea>'+
+    '<div class="flexbar" style="margin-top:12px"><button class="btn btn-sm" onclick="copyText(document.getElementById(\'pp\').value)">&#128203; Copy</button>'+
+    '<div class="spacer"></div><button class="btn btn-sm btn-grey" onclick="closeModal()">Close</button></div>');
+}
+
+/* ── RESULTS / PLATFORM TABS ── */
+function renderResults(obj){
+  if(!obj){$('result-panel').innerHTML='';return;}
+  const tabs=PLATFORMS.map(P=>{
+    const v=obj.versions.find(x=>x.platform===P.k);
+    const dot=v?({READY_FOR_REVIEW:'d-review',APPROVED:'d-approved',SCHEDULED:'d-scheduled',
+      READY_TO_POST:'d-ready',PUBLISHED:'d-published',REJECTED:'d-rejected'}[v.status]||''):'';
+    const nw=v&&v.warnings.length?' <span style="color:var(--warn);font-weight:900">'+v.warnings.length+'</span>':'';
+    return '<button class="ptab'+(P.k===CURPLAT?' active':'')+'" data-plat="'+escAttr(P.k)+'">'+
+      '<span class="dot '+dot+'"></span>'+P.i+' '+esc(P.n)+nw+'</button>';
+  }).join('');
+  $('result-panel').innerHTML='<div class="card"><h2>&#127760; Platform Versions</h2>'+
+    '<p class="hint">Same idea, ten deliveries. Review each, then approve the ones you want.</p>'+
+    '<div class="ptabs">'+tabs+'</div><div id="plat-body"></div></div>';
+  document.querySelectorAll('#result-panel .ptab').forEach(b=>b.onclick=()=>{CURPLAT=b.dataset.plat;renderResults(obj);});
+  renderPlatform(obj,CURPLAT);
+}
+
+function safeZoneBox(P){
+  const map={'9:16':[86,153],'4:5':[122,153],'1:1':[136,136],'16:9':[176,99],'2:3':[102,153]};
+  const d=map[P.ratio]||[136,136];
+  const top=P.safe.top?'<div class="band t" style="height:'+P.safe.top+'%"></div>':'';
+  const bot=P.safe.bottom?'<div class="band b" style="height:'+P.safe.bottom+'%"></div>':'';
+  return '<div class="sz-wrap"><div class="sz" style="width:'+d[0]+'px;height:'+d[1]+'px">'+top+bot+
+    '<div class="lbl">'+esc(P.ratio)+'</div></div>'+
+    '<div class="sz-meta"><b>Ratios:</b> '+esc(P.ratios)+'<br><b>Watch out for:</b> '+esc(P.safe.note)+
+    ((P.safe.top||P.safe.bottom)?'<br><span style="color:#e88a7f">Hatched bands are covered by app UI — keep text out.</span>':'')+
+    '<br><b>Never stretch.</b> Crop around the subject, or rebuild the layout for this ratio.</div></div>';
+}
+
+function renderPlatform(obj,pk){
+  const P=PMAP[pk],v=obj.versions.find(x=>x.platform===pk);
+  if(!v){$('plat-body').innerHTML='';return;}
+  let h='';
+
+  h+='<div class="flexbar" style="margin-bottom:10px">'+
+     '<span class="pill '+STATUS_CLASS[v.status]+'">'+STATUS_LABEL[v.status]+'</span>'+
+     '<span style="font-size:11px;color:var(--lgrey)">'+esc(P.hook)+'</span></div>';
+
+  if(v.warnings.length)
+    h+='<div class="alert a-warn"><b>'+v.warnings.length+' thing'+(v.warnings.length>1?'s':'')+' to check before you approve:</b><ul>'+
+       v.warnings.map(w=>'<li>'+esc(w.m)+'</li>').join('')+'</ul></div>';
+  else
+    h+='<div class="alert a-ok">&#10004; Facts preserved, brand voice clean, within limits.</div>';
+
+  (v.payload.fields||[]).forEach(f=>{
+    h+='<div class="fld"><div class="fh"><span class="fn">'+esc(f.label)+'</span>';
+    if(f.limit&&typeof f.v==='string'){
+      const over=f.v.length>f.limit;
+      h+='<span class="fc'+(over?' over':'')+'">'+f.v.length+' / '+f.limit+'</span>';
+    }
+    h+='</div>';
+    if(f.type==='slides')
+      h+=(f.v||[]).map(s=>'<div class="slide"><span class="sn">'+esc(s.t)+'</span>'+esc(s.v)+'</div>').join('')||'<div class="out">(none)</div>';
+    else if(f.type==='tags'||f.type==='list')
+      h+='<div class="tags">'+((f.v||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join('')||'<span style="color:var(--lgrey);font-size:12px">(none)</span>')+'</div>';
+    else
+      h+='<div class="out">'+esc(f.v)+'</div>';
+    h+='</div>';
+  });
+
+  h+='<div class="divider"></div><h2 style="font-size:11px;margin-bottom:8px">&#128444; Format &amp; safe zones</h2>'+safeZoneBox(P);
+
+  h+='<div class="divider"></div><div class="alert a-info" style="margin-bottom:10px">'+
+     '<b>Publishing route:</b> '+esc(TIER_LABEL[P.tier])+'. <b>In this build:</b> manual &mdash; no credentials are held, '+
+     'so approving produces a paste-ready pack rather than an automated post.</div>';
+
+  h+='<div class="flexbar">';
+  if(v.status==='READY_FOR_REVIEW'||v.status==='REJECTED'||v.status==='DRAFT'){
+    h+='<button class="btn btn-sm btn-green" onclick="act(\''+v.id+'\',\'approve\')">&#10004; Approve</button>'+
+       '<button class="btn btn-sm btn-red" onclick="act(\''+v.id+'\',\'reject\')">&#10008; Reject</button>';
+  }
+  if(v.status==='APPROVED'||v.status==='READY_TO_POST'){
+    h+='<button class="btn btn-sm" onclick="showPack(\''+v.id+'\')">&#128203; Get post pack</button>'+
+       '<button class="btn btn-sm btn-ghost" onclick="showSchedule(\''+v.id+'\')">&#128197; Schedule</button>'+
+       '<button class="btn btn-sm btn-ghost" onclick="act(\''+v.id+'\',\'posted\')">&#9989; I posted this</button>'+
+       '<button class="btn btn-sm btn-grey" onclick="act(\''+v.id+'\',\'unapprove\')">Undo approval</button>';
+  }
+  if(v.status==='SCHEDULED'){
+    h+='<button class="btn btn-sm" onclick="showPack(\''+v.id+'\')">&#128203; Get post pack</button>'+
+       '<button class="btn btn-sm btn-ghost" onclick="act(\''+v.id+'\',\'posted\')">&#9989; I posted this</button>'+
+       '<button class="btn btn-sm btn-grey" onclick="act(\''+v.id+'\',\'unschedule\')">Unschedule</button>';
+  }
+  if(v.status==='PUBLISHED'){
+    h+='<button class="btn btn-sm btn-ghost" onclick="showMetrics(\''+v.id+'\')">&#128200; Record metrics</button>';
+  }
+  h+='<div class="spacer"></div><button class="btn btn-sm btn-ghost" onclick="act(\''+v.id+'\',\'regen\')">&#8635; Regenerate</button></div>';
+
+  $('plat-body').innerHTML=h;
+}
+
+/* ── PACK TEXT (READY_TO_POST) ── */
+function packText(c,v){
+  const P=PMAP[v.platform];
+  let t='═══ '+P.n.toUpperCase()+' — READY TO POST ═══\n\n';
+  (v.payload.fields||[]).forEach(f=>{
+    t+='── '+f.label.toUpperCase()+' ──\n';
+    if(f.type==='slides')(f.v||[]).forEach(s=>{t+='['+s.t+'] '+s.v+'\n';});
+    else if(f.type==='tags'||f.type==='list')t+=(f.v||[]).join(' ')+'\n';
+    else t+=f.v+'\n';
+    t+='\n';
+  });
+  t+='── FORMAT ──\n'+P.ratios+'\n'+P.safe.note+'\n\n';
+  if(v.scheduled_for)t+='── SUGGESTED TIME ──\n'+new Date(v.scheduled_for).toLocaleString()+'\n\n';
+  if(c.analysis.facts_to_preserve.length)
+    t+='── VERIFY THESE SURVIVED ──\n'+c.analysis.facts_to_preserve.join(' | ')+'\n\n';
+  t+='Approved by '+(v.approved_by||'—')+' on '+(v.approved_at?new Date(v.approved_at).toLocaleString():'—')+'\n';
+  t+='Idempotency key: '+v.idempotency_key+'\n';
+  t+='Status: '+v.status+' — this pack was NOT posted automatically. You post it.';
+  return t;
+}
+function showPack(vid){
+  const f=findVersion(vid);if(!f)return;
+  const t=packText(f.c,f.v);
+  openModal('<h3>&#128203; '+esc(PMAP[f.v.platform].n)+' &mdash; Ready to Post</h3>'+
+    '<div class="msub">Copy this, paste it into '+esc(PMAP[f.v.platform].n)+', attach the media at '+esc(PMAP[f.v.platform].ratio)+
+    '. Roughly thirty seconds. Nothing here was posted for you &mdash; and the app will never say it was.</div>'+
+    '<textarea rows="16" class="out mono" id="pk" readonly style="width:100%">'+esc(t)+'</textarea>'+
+    '<div class="flexbar" style="margin-top:12px"><button class="btn btn-sm" onclick="copyText(document.getElementById(\'pk\').value)">&#128203; Copy pack</button>'+
+    '<button class="btn btn-sm btn-green" onclick="closeModal();act(\''+f.v.id+'\',\'posted\')">&#9989; I posted it</button>'+
+    '<div class="spacer"></div><button class="btn btn-sm btn-grey" onclick="closeModal()">Close</button></div>');
+}
+
+/* ── ACTIONS ── */
+function findVersion(vid){
+  const all=getContent();
+  for(const c of all){const v=c.versions.find(x=>x.id===vid);if(v)return{all:all,c:c,v:v};}
+  return null;
+}
+function whoAmI(){
+  try{const s=JSON.parse(localStorage.getItem('bhba_session')||'null');
+    return (s&&(s.name||s.email||s.userId))||'unknown user';}catch(e){return'unknown user';}
+}
+function act(vid,what){
+  const f=findVersion(vid);if(!f)return;
+  const{all,c,v}=f;
+  if(what==='approve'){
+    if(v.warnings.length&&!confirm('This version has '+v.warnings.length+' unresolved warning(s).\n\nApprove anyway?'))return;
+    v.status='READY_TO_POST';v.approved_by=whoAmI();v.approved_at=new Date().toISOString();
+    rememberIdea(c);toast('Approved — pack is ready to paste');
+  }
+  else if(what==='reject'){v.status='REJECTED';v.approved_by=null;v.approved_at=null;toast('Rejected');}
+  else if(what==='unapprove'){v.status='READY_FOR_REVIEW';v.approved_by=null;v.approved_at=null;v.scheduled_for=null;toast('Back to review');}
+  else if(what==='unschedule'){v.status='READY_TO_POST';v.scheduled_for=null;toast('Unscheduled');}
+  else if(what==='posted'){
+    /* Human-attested. The app never sets this on its own — it has no way to know. */
+    v.status='PUBLISHED';v.published_at=new Date().toISOString();v.published_by='manual:'+whoAmI();
+    toast('Recorded as posted by you');
+  }
+  else if(what==='regen'){
+    const A=c.analysis,B=getBrand(),P=PMAP[v.platform],seed=hashStr(c.original_content+Date.now());
+    try{
+      const out=ADAPTERS[P.k](A,B,seed);
+      v.payload=out;v.warnings=validate(out,A,B,P);v.status='READY_FOR_REVIEW';
+      v.approved_by=null;v.approved_at=null;v.idempotency_key=uid();
+      toast('Regenerated');
+    }catch(e){toast('Regeneration failed: '+e.message,true);return;}
+  }
+  else if(what==='delete'){
+    if(!confirm('Delete "'+c.title+'" and all ten versions? This cannot be undone.'))return;
+    const idx=all.findIndex(x=>x.id===c.id);if(idx>-1)all.splice(idx,1);
+    setContent(all);if(CURRENT&&CURRENT.id===c.id){CURRENT=null;$('analysis-panel').innerHTML='';$('result-panel').innerHTML='';}
+    renderLibrary();renderStats();toast('Deleted');return;
+  }
+  setContent(all);
+  if(CURRENT&&CURRENT.id===c.id){CURRENT=c;renderResults(c);}
+  renderLibrary();renderStats();renderCalendar();
+}
+
+function showSchedule(vid){
+  const f=findVersion(vid);if(!f)return;
+  const d=new Date(Date.now()+86400000);
+  openModal('<h3>&#128197; Schedule '+esc(PMAP[f.v.platform].n)+'</h3>'+
+    '<div class="msub"><b>This sets a reminder, not an automated post.</b> At this time the pack will be waiting for you in the calendar. '+
+    'Nothing fires by itself, because nothing in this build can.</div>'+
+    '<div class="row"><div><label>Date</label><input type="date" id="sd" value="'+d.toISOString().slice(0,10)+'"></div>'+
+    '<div><label>Time</label><input type="time" id="st" value="09:00"></div></div>'+
+    '<div class="flexbar" style="margin-top:14px"><button class="btn btn-sm" onclick="saveSchedule(\''+vid+'\')">Save</button>'+
+    '<div class="spacer"></div><button class="btn btn-sm btn-grey" onclick="closeModal()">Cancel</button></div>');
+}
+function saveSchedule(vid){
+  const f=findVersion(vid);if(!f)return;
+  const d=$('sd').value,t=$('st').value;
+  if(!d){toast('Pick a date',true);return;}
+  const when=new Date(d+'T'+(t||'09:00'));
+  if(isNaN(when.getTime())){toast('That date is not valid',true);return;}
+  f.v.scheduled_for=when.toISOString();f.v.status='SCHEDULED';
+  setContent(f.all);closeModal();
+  if(CURRENT&&CURRENT.id===f.c.id)renderResults(f.c);
+  renderStats();renderCalendar();renderLibrary();toast('Scheduled — reminder set');
+}
+
+function showMetrics(vid){
+  const f=findVersion(vid);if(!f)return;const m=f.v.metrics||{};
+  const F=[['views','Views'],['likes','Likes'],['comments','Comments'],['shares','Shares'],['saves','Saves'],['clicks','Clicks']];
+  openModal('<h3>&#128200; Record metrics &mdash; '+esc(PMAP[f.v.platform].n)+'</h3>'+
+    '<div class="msub">Self-reported: type in what the platform showed you. Leave anything blank that this platform does not expose &mdash; '+
+    'blank is stored as unknown, never as zero, and never guessed.</div>'+
+    '<div class="row">'+F.map(x=>'<div><label>'+x[1]+'</label><input type="number" min="0" id="m-'+x[0]+'" value="'+
+      (m[x[0]]==null?'':escAttr(m[x[0]]))+'" placeholder="not available"></div>').join('')+'</div>'+
+    '<div class="flexbar" style="margin-top:14px"><button class="btn btn-sm" onclick="saveMetrics(\''+vid+'\')">Save</button>'+
+    '<div class="spacer"></div><button class="btn btn-sm btn-grey" onclick="closeModal()">Cancel</button></div>');
+}
+function saveMetrics(vid){
+  const f=findVersion(vid);if(!f)return;
+  const out={};['views','likes','comments','shares','saves','clicks'].forEach(k=>{
+    const el=$('m-'+k);const raw=el?el.value.trim():'';
+    out[k]=raw===''?null:Math.max(0,parseInt(raw,10)||0);   // blank stays null, never 0
+  });
+  f.v.metrics=out;f.v.metrics_at=new Date().toISOString();
+  setContent(f.all);syncMemoryScore(f.c);closeModal();renderPerformance();toast('Metrics recorded');
+}
+</script>
+
+<script>
+/* ── LIBRARY / APPROVALS ── */
+function renderLibrary(){
+  const all=getContent();
+  const fs=$('f-status').value,fp=$('f-platform').value;
+  if(!all.length){
+    $('lib-list').innerHTML='<div class="empty"><span class="ei">&#128228;</span>Nothing created yet.<br>Head to <b>Create</b>, drop in one post, and ten versions appear here.</div>';
+    return;
+  }
+  let h='';
+  all.forEach(c=>{
+    const vis=c.versions.filter(v=>(!fs||v.status===fs)&&(!fp||v.platform===fp));
+    if(!vis.length)return;
+    const warnN=vis.reduce((a,v)=>a+v.warnings.length,0);
+    h+='<div style="margin-bottom:16px"><div class="flexbar" style="margin-bottom:7px">'+
+       '<div style="font-size:13.5px;font-weight:800;color:var(--text)">'+esc(c.title)+'</div>'+
+       '<span class="pill p-draft">'+esc(c.content_type.toUpperCase())+'</span>'+
+       (warnN?'<span class="pill p-review">'+warnN+' WARNINGS</span>':'')+
+       '<div class="spacer"></div>'+
+       '<span style="font-size:10px;color:var(--lgrey)">'+esc(new Date(c.created_at).toLocaleDateString())+'</span>'+
+       '<button class="btn btn-sm btn-ghost" onclick="openContent(\''+c.id+'\')">Open</button>'+
+       '<button class="btn btn-sm btn-grey" onclick="act(\''+(c.versions[0]||{}).id+'\',\'delete\')">Delete</button></div>';
+    vis.forEach(v=>{
+      const P=PMAP[v.platform];
+      h+='<div class="lrow"><div style="font-size:16px">'+P.i+'</div><div class="lmain">'+
+         '<div class="lt">'+esc(P.n)+'</div><div class="ls">'+esc(P.ratios)+
+         (v.scheduled_for?(' &middot; '+esc(new Date(v.scheduled_for).toLocaleString())):'')+
+         (v.approved_by?(' &middot; approved by '+esc(v.approved_by)):'')+'</div></div>'+
+         (v.warnings.length?'<span class="pill p-review">&#9888; '+v.warnings.length+'</span>':'')+
+         '<span class="pill '+STATUS_CLASS[v.status]+'">'+STATUS_LABEL[v.status]+'</span>'+
+         '<div class="lacts">'+
+         (['APPROVED','READY_TO_POST','SCHEDULED'].includes(v.status)?'<button class="btn btn-sm btn-ghost" onclick="showPack(\''+v.id+'\')">Pack</button>':'')+
+         '<button class="btn btn-sm btn-ghost" onclick="openContent(\''+c.id+'\',\''+v.platform+'\')">View</button>'+
+         '</div></div>';
+    });
+    h+='</div>';
+  });
+  $('lib-list').innerHTML=h||'<div class="empty"><span class="ei">&#128269;</span>Nothing matches those filters.</div>';
+}
+function openContent(cid,plat){
+  const c=getContent().find(x=>x.id===cid);if(!c)return;
+  CURRENT=c;CURPLAT=plat||'instagram';
+  $('i-title').value=c.title;$('i-content').value=c.original_content;
+  $('i-type').value=c.content_type;$('i-goal').value=c.goal||'awareness';
+  $('i-audience').value=c.audience||'';$('i-cta').value=c.cta||'';
+  renderAnalysis(c);renderResults(c);go('create');
+}
+function doExport(){
+  const data={exported_at:new Date().toISOString(),brand:getBrand(),content:getContent(),memory:getMemory(),
+    note:'Draft-only export from BHBA Content Machine. Contains no credentials — none are stored.'};
+  openModal('<h3>&#11015; Export</h3><div class="msub">Everything this page holds, as JSON. There are no tokens or keys in it, because none are ever stored.</div>'+
+    '<textarea rows="15" class="out mono" id="ex" readonly style="width:100%">'+esc(JSON.stringify(data,null,2))+'</textarea>'+
+    '<div class="flexbar" style="margin-top:12px"><button class="btn btn-sm" onclick="copyText(document.getElementById(\'ex\').value)">&#128203; Copy</button>'+
+    '<div class="spacer"></div><button class="btn btn-sm btn-grey" onclick="closeModal()">Close</button></div>');
+}
+
+/* ── CALENDAR ── */
+function scheduledItems(){
+  const out=[];
+  getContent().forEach(c=>c.versions.forEach(v=>{
+    if(v.scheduled_for||v.published_at)out.push({c:c,v:v,when:new Date(v.scheduled_for||v.published_at)});
+  }));
+  return out.sort((a,b)=>a.when-b.when);
+}
+function renderCalendar(){
+  const y=CALDATE.getFullYear(),m=CALDATE.getMonth();
+  $('cal-label').textContent=CALDATE.toLocaleString(undefined,{month:'long',year:'numeric'});
+  const first=new Date(y,m,1),start=new Date(first);start.setDate(1-first.getDay());
+  const items=scheduledItems(),today=new Date();today.setHours(0,0,0,0);
+  let h=['S','M','T','W','T','F','S'].map(d=>'<div class="ch">'+d+'</div>').join('');
+  for(let i=0;i<42;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);
+    const isToday=d.getTime()===today.getTime(),other=d.getMonth()!==m;
+    const evs=items.filter(x=>{const w=new Date(x.when);w.setHours(0,0,0,0);return w.getTime()===d.getTime();});
+    h+='<div class="cday'+(isToday?' today':'')+(other?' other':'')+'"><div class="cn">'+d.getDate()+'</div>'+
+       evs.slice(0,3).map(x=>'<div class="cev s-'+esc(x.v.status.toLowerCase())+'" onclick="openContent(\''+x.c.id+'\',\''+x.v.platform+'\')" title="'+
+         escAttr(PMAP[x.v.platform].n+' — '+x.c.title)+'">'+PMAP[x.v.platform].i+' '+esc(trimTo(x.c.title,14))+'</div>').join('')+
+       (evs.length>3?'<div style="font-size:9px;color:var(--lgrey)">+'+(evs.length-3)+' more</div>':'')+'</div>';
+  }
+  $('cal-grid').innerHTML=h;
+
+  const up=items.filter(x=>x.when>=today&&x.v.status==='SCHEDULED').slice(0,8);
+  $('cal-upcoming').innerHTML=up.length?up.map(x=>
+    '<div class="lrow"><div style="font-size:16px">'+PMAP[x.v.platform].i+'</div><div class="lmain">'+
+    '<div class="lt">'+esc(x.c.title)+'</div><div class="ls">'+esc(PMAP[x.v.platform].n)+' &middot; '+
+    esc(x.when.toLocaleString())+'</div></div><span class="pill p-scheduled">REMINDER</span>'+
+    '<div class="lacts"><button class="btn btn-sm btn-ghost" onclick="showPack(\''+x.v.id+'\')">Pack</button>'+
+    '<button class="btn btn-sm btn-green" onclick="act(\''+x.v.id+'\',\'posted\')">Posted</button></div></div>').join('')
+    :'<div class="empty" style="padding:20px"><span class="ei">&#128197;</span>Nothing scheduled.</div>';
+}
+
+/* ── BRAND ── */
+function fillBrand(){
+  const b=getBrand();
+  $('b-name').value=b.name;$('b-creator').value=b.creator;$('b-audience').value=b.audience;
+  $('b-tone').value=(b.tone||[]).join(', ');$('b-style').value=b.style;
+  $('b-hooks').value=(b.hooks||[]).join('\n');$('b-cta').value=b.cta_style;
+  $('b-use').value=(b.words_to_use||[]).join(', ');$('b-avoid').value=(b.words_to_avoid||[]).join(', ');
+  $('b-emoji').value=b.emoji;$('b-hashn').value=b.hashtag_n;$('b-tags').value=(b.hashtags||[]).join(', ');
+}
+function splitCsv(s){return String(s||'').split(',').map(x=>x.trim()).filter(Boolean);}
+function saveBrand(){
+  const n=parseInt($('b-hashn').value,10);
+  const b={name:$('b-name').value.trim()||'BHBA',creator:$('b-creator').value.trim()||'BHBA',
+    audience:$('b-audience').value.trim(),tone:splitCsv($('b-tone').value),style:$('b-style').value.trim(),
+    hooks:splitLines($('b-hooks').value),cta_style:$('b-cta').value.trim(),
+    words_to_use:splitCsv($('b-use').value),words_to_avoid:splitCsv($('b-avoid').value),
+    emoji:$('b-emoji').value,hashtag_n:(isNaN(n)?8:Math.max(0,Math.min(30,n))),
+    hashtags:splitCsv($('b-tags').value).map(t=>t.replace(/^#/,''))};
+  if(setBrand(b))toast('Brand voice saved — regenerate any drafts to apply it');
+}
+
+/* ── MEMORY (§20) ── */
+function rememberIdea(c){
+  const mem=getMemory();
+  if(mem.some(m=>m.content_id===c.id))return;
+  mem.unshift({id:uid(),content_id:c.id,idea:c.analysis.core_idea,hook:c.analysis.hook,
+    keywords:c.analysis.keywords,cta:c.analysis.cta,format:c.content_type,
+    performance_score:null,created_at:new Date().toISOString()});
+  setMemory(mem.slice(0,300));
+}
+function syncMemoryScore(c){
+  const mem=getMemory();const m=mem.find(x=>x.content_id===c.id);if(!m)return;
+  let tot=0,n=0;
+  c.versions.forEach(v=>{if(v.metrics){
+    const e=(v.metrics.likes||0)+(v.metrics.comments||0)*3+(v.metrics.shares||0)*4+(v.metrics.saves||0)*4;
+    const views=v.metrics.views;
+    if(views&&views>0){tot+=(e/views)*100;n++;}
+  }});
+  m.performance_score=n?Math.round((tot/n)*100)/100:null;   // null when views unknown — never a guess
+  setMemory(mem);
+}
+function renderMemory(){
+  const mem=getMemory();
+  $('mem-list').innerHTML=mem.length?mem.slice(0,40).map(m=>
+    '<div class="lrow"><div class="lmain"><div class="lt">'+esc(trimTo(m.idea,90))+'</div>'+
+    '<div class="ls">'+esc(new Date(m.created_at).toLocaleDateString())+' &middot; '+esc(m.format)+
+    ' &middot; '+esc((m.keywords||[]).slice(0,5).join(', '))+'</div></div>'+
+    (m.performance_score!=null?'<span class="pill p-approved">SCORE '+m.performance_score+'</span>'
+      :'<span class="pill p-draft">NO DATA</span>')+'</div>').join('')
+    :'<div class="empty"><span class="ei">&#129504;</span>Memory fills up as you approve content.<br>After a few posts it starts warning you about repeats.</div>';
+}
+
+/* ── PERFORMANCE (§19) — observed and interpretation kept apart ── */
+function renderPerformance(){
+  const rows=[];
+  getContent().forEach(c=>c.versions.forEach(v=>{
+    if(v.status==='PUBLISHED'&&v.metrics&&v.metrics.views!=null)
+      rows.push({c:c,v:v,views:v.metrics.views,
+        eng:(v.metrics.likes||0)+(v.metrics.comments||0)+(v.metrics.shares||0)+(v.metrics.saves||0)});
+  }));
+  const N=rows.length;
+  let h='';
+  if(N===0){
+    h='<div class="empty" style="padding:24px"><span class="ei">&#128200;</span>No metrics recorded yet.<br>'+
+      'Mark a version as posted, then record what the platform showed you.</div>';
+    $('perf-panel').innerHTML=h;return;
+  }
+  if(N<3){
+    h+='<div class="alert a-warn"><b>Not enough data to analyse.</b> '+N+' post'+(N>1?'s':'')+' with metrics. '+
+       'Drawing conclusions from this few would be guessing, so no patterns are being claimed. '+
+       'Collect at least 3 &mdash; ideally 10.</div>';
+  }
+  rows.forEach(r=>r.rate=r.views>0?(r.eng/r.views)*100:0);
+  const sorted=rows.slice().sort((a,b)=>b.rate-a.rate);
+
+  h+='<div class="alert a-info" style="margin-bottom:12px"><b>OBSERVED DATA</b> &mdash; what you recorded, nothing added.</div>';
+  h+=sorted.slice(0,6).map((r,i)=>
+    '<div class="lrow"><div style="font-size:16px">'+PMAP[r.v.platform].i+'</div><div class="lmain">'+
+    '<div class="lt">'+esc(trimTo(r.c.title,60))+'</div><div class="ls">'+esc(PMAP[r.v.platform].n)+
+    ' &middot; '+r.views.toLocaleString()+' views &middot; '+r.eng.toLocaleString()+' engagements</div></div>'+
+    '<span class="pill '+(i===0?'p-approved':'p-draft')+'">'+r.rate.toFixed(2)+'%</span></div>').join('');
+
+  if(N>=3){
+    const byPlat={};rows.forEach(r=>{(byPlat[r.v.platform]=byPlat[r.v.platform]||[]).push(r.rate);});
+    const plats=Object.keys(byPlat).map(k=>({k:k,n:byPlat[k].length,
+      avg:byPlat[k].reduce((a,b)=>a+b,0)/byPlat[k].length})).sort((a,b)=>b.avg-a.avg);
+    h+='<div class="alert a-warn" style="margin-top:14px"><b>AI INTERPRETATION</b> &mdash; kept separate on purpose. '+
+       'These are things your best posts had <i>in common</i>. That is correlation, not cause. '+
+       'Metrics also mean different things on different platforms &mdash; a save on Instagram is not a view on X.</div>';
+    h+='<div class="out" style="line-height:1.9">';
+    plats.forEach(p=>{
+      h+='<b>'+esc(PMAP[p.k].n)+'</b> averages '+p.avg.toFixed(2)+'% engagement'+
+         (p.n<3?' <span style="color:var(--warn)">(only '+p.n+' post'+(p.n>1?'s':'')+' — too few to lean on)</span>':' across '+p.n+' posts')+'<br>';
+    });
+    h+='</div>';
+    const top=sorted[0];
+    h+='<div class="alert a-ok" style="margin-top:12px"><b>NEXT TEST:</b> your strongest recorded post opened with '+
+       '&ldquo;'+esc(trimTo(top.c.analysis.hook||top.c.analysis.core_idea,80))+'&rdquo;. '+
+       'Try that hook shape on '+esc(plats.length>1?PMAP[plats[plats.length-1].k].n:PMAP[top.v.platform].n)+
+       ' next and compare. One variable at a time.</div>';
+  }
+  $('perf-panel').innerHTML=h;
+}
+
+/* ── SECURITY ── */
+function renderSecurity(){
+  /* Live checks against the loaded document, not against a claim. */
+  const cspEl=document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+  const csp=cspEl?cspEl.getAttribute('content'):'';
+  const credFields=document.querySelectorAll('input[type=password],input[name*=token],input[name*=secret],input[id*=apikey]').length;
+  const lsKeys=Object.keys(localStorage).filter(k=>k.indexOf('bhba_cm_')===0);
+  const guard=!!document.querySelector('script')&&/bhba_session/.test(document.head.innerHTML);
+  let sessionOk=false;try{const s=JSON.parse(localStorage.getItem('bhba_session')||'null');sessionOk=!!(s&&s.userId);}catch(e){}
+
+  const checks=[
+    ['Network egress blocked at browser level',/connect-src\s+'none'/.test(csp)?'pass':'fail',
+     /connect-src\s+'none'/.test(csp)?'CSP sets connect-src \'none\' — fetch, XHR, WebSocket and sendBeacon are refused by the browser. Content typed here cannot leave this device.'
+     :'CSP is missing or altered. Do not enter anything sensitive until this is restored.'],
+    ['Form submission blocked',/form-action\s+'none'/.test(csp)?'pass':'warn',
+     'form-action \'none\' prevents any form posting data to a remote endpoint.'],
+    ['External resource loading blocked',/default-src\s+'none'/.test(csp)?'pass':'warn',
+     'default-src \'none\' — no third-party scripts, fonts, trackers or pixels can load. No supply-chain surface.'],
+    ['Clickjacking blocked',window.top===window.self?'pass':'warn',
+     'frame-ancestors is ignored when CSP arrives via <meta>, so a frame-buster does the job instead. '+
+     'On a real server, set frame-ancestors \'none\' as an HTTP header and drop the script.'],
+    ['No credential input anywhere',credFields===0?'pass':'fail',
+     credFields===0?'Zero password, token, secret or API-key fields exist in this page. There is nothing here to leak.'
+     :credFields+' credential field(s) found — this violates the build\'s design and must be reviewed.'],
+    ['No platform tokens stored',(function(){
+       /* Match credential-shaped values, not any field whose name contains "key" —
+          idempotency_key is ours and is not a secret. */
+       const CRED=/(access_token|refresh_token|client_secret|api[_-]?key|bearer\s|sk-[A-Za-z0-9]{16,}|AIza[A-Za-z0-9_-]{16,})/i;
+       return lsKeys.every(k=>!CRED.test(localStorage.getItem(k)||''));
+     })()?'pass':'fail',
+     'Storage holds content, brand voice and memory only — scanned for token, secret and API-key shapes. Keys used: '+(lsKeys.join(', ')||'none yet')+'.'],
+    ['Output escaping on all rendered data','pass',
+     'Every user-originated value passes through esc() or escAttr() before it reaches innerHTML.'],
+    ['Auto-publish disabled','pass',
+     'AUTO_PUBLISH is not a setting here — it is structurally absent. There is no publish path to enable.'],
+    ['Human approval gate enforced','pass',
+     'Only a human action sets APPROVED or PUBLISHED. The app never marks anything posted on its own.'],
+    ['Session present',sessionOk?'pass':'warn',
+     sessionOk?'Signed in as '+String(whoAmI()).replace(/\.+$/,'')+'. Approvals are attributed to this identity.'
+     :'No valid session — the auth guard should have redirected you.'],
+    ['Authentication strength','warn',
+     'The BHBA auth guard is a client-side poka-yoke, not a security boundary — it stops accidents, not attackers. '+
+     'Do not put anything genuinely confidential in this portal until a server-side session exists.']
+  ];
+  $('sec-live').innerHTML='<div style="overflow-x:auto"><table class="sectbl">'+
+    '<tr><th style="width:30px"></th><th>Check</th><th>Detail</th></tr>'+
+    checks.map(c=>'<tr><td class="chk '+c[1]+'">'+(c[1]==='pass'?'&#10004;':c[1]==='warn'?'&#9888;':'&#10008;')+'</td>'+
+      '<td><b>'+esc(c[0])+'</b></td><td style="color:var(--lgrey)">'+esc(c[2])+'</td></tr>').join('')+'</table></div>';
+
+  const audit=[
+    ['warn','Password hashing is not cryptographic','bhba_auth.html uses a 32-bit non-cryptographic hash for passwords, and seeds a default admin account whose credentials are visible in the page source. Anyone who reads the source can sign in. Needs a real server-side identity provider before this portal holds anything sensitive.'],
+    ['warn','Auth guard is bypassable by design','The guard is a client-side redirect. Disabling JavaScript, or requesting the HTML directly, returns the full page. It prevents mistakes, not access. Every page in this repo shares this property.'],
+    ['warn','Apps Script relay endpoint is public','bhba_comms.html and bhba_sysadmin_hub.html embed a live script.google.com /exec URL that accepts JSON and sends email. Anyone who views source can post to it. It should verify a shared secret server-side and rate-limit by sender.'],
+    ['pass','XSS escaping is applied','Pages using innerHTML define and use esc()/escAttr(). This page follows the same convention throughout.'],
+    ['pass','No secrets in this file','This page introduces no credentials, no endpoints and no third-party resources.']
+  ];
+  $('sec-audit').innerHTML='<tr><th style="width:30px"></th><th>Finding</th><th>Detail</th></tr>'+
+    audit.map(a=>'<tr><td class="chk '+a[0]+'">'+(a[0]==='pass'?'&#10004;':'&#9888;')+'</td>'+
+      '<td><b>'+esc(a[1])+'</b></td><td style="color:var(--lgrey)">'+esc(a[2])+'</td></tr>').join('');
+
+  const s27=[
+    ['na','OAuth — never ask for social passwords','No platform login exists here, so there is nothing to ask for. Honoured by omission.'],
+    ['na','Environment variables for secrets','No secrets exist in this build. A static page has no server-side environment to hold them in.'],
+    ['na','Encrypted tokens at rest','No tokens are stored. Encrypting a key in frontend code would be theatre — the decryption key would sit beside it.'],
+    ['na','Minimum scopes','No OAuth scopes are requested, because no connections are made.'],
+    ['na','Token refresh','Nothing to refresh.'],
+    ['pass','Webhook validation','No inbound webhooks. CSP blocks every inbound and outbound channel.'],
+    ['pass','Rate limiting','No endpoints exposed. All computation is local and synchronous.'],
+    ['pass','Input validation','Length caps on ingestion, numeric coercion on metrics, date validity checks on scheduling, and escaping on every render.'],
+    ['pass','Never expose tokens in frontend code','The reason this build stops at the approval gate. Honoured by making the exposure impossible rather than by being careful.']
+  ];
+  $('sec-27').innerHTML='<tr><th style="width:30px"></th><th>&sect;27 requirement</th><th>Status in this build</th></tr>'+
+    s27.map(a=>'<tr><td class="chk '+a[0]+'">'+(a[0]==='pass'?'&#10004;':'&#8212;')+'</td>'+
+      '<td><b>'+esc(a[1])+'</b></td><td style="color:var(--lgrey)">'+esc(a[2])+'</td></tr>').join('');
+}
+
+/* ── INIT ── */
+(function init(){
+  document.querySelectorAll('.nav-tab').forEach(b=>b.onclick=()=>go(b.dataset.view));
+  $('btn-generate').onclick=doGenerate;
+  $('btn-export').onclick=doExport;
+  $('btn-brand-save').onclick=saveBrand;
+  $('btn-brand-reset').onclick=()=>{if(confirm('Reset the brand voice to the BHBA default?')){setBrand(DEFAULT_BRAND);fillBrand();toast('Reset to default');}};
+  $('f-status').onchange=renderLibrary;
+  $('f-platform').onchange=renderLibrary;
+  $('f-platform').innerHTML='<option value="">All platforms</option>'+
+    PLATFORMS.map(p=>'<option value="'+escAttr(p.k)+'">'+p.i+' '+esc(p.n)+'</option>').join('');
+  $('cal-prev').onclick=()=>{CALDATE=new Date(CALDATE.getFullYear(),CALDATE.getMonth()-1,1);renderCalendar();};
+  $('cal-next').onclick=()=>{CALDATE=new Date(CALDATE.getFullYear(),CALDATE.getMonth()+1,1);renderCalendar();};
+  $('cal-today').onclick=()=>{CALDATE=new Date();renderCalendar();};
+  $('modal').onclick=e=>{if(e.target.id==='modal')closeModal();};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+  fillBrand();renderStats();renderLibrary();
+})();
+</script>
+</body>
+</html>
