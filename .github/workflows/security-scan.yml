@@ -1,0 +1,108 @@
+# ==============================================================================
+# BHBA 2027 — Continuous Security Scanning
+# Version: 1.0 | Last Updated: 2026-09-08 | Classification: INTERNAL USE
+#
+# Control mapping:
+#   ISO/IEC 27001:2022 A.8.8   — Management of technical vulnerabilities
+#   ISO/IEC 27001:2022 A.8.12  — Data leakage prevention
+#   NIST SP 800-53 Rev. 5 RA-5 — Vulnerability monitoring and scanning
+#   Jamaica Data Protection Act 2020, Eighth Standard
+# ==============================================================================
+name: Security Scan
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+  schedule:
+    # 06:00 UTC Monday = 01:00 Jamaica (UTC-5, no daylight saving)
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repo-scan:
+    name: Repository security scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run BHBA security scanner
+        id: scan
+        env:
+          NO_COLOR: '1'
+        run: |
+          chmod +x scripts/security-scan.sh
+          set +e
+          ./scripts/security-scan.sh | tee scan-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Publish scan results to job summary
+        if: always()
+        run: |
+          {
+            echo "## BHBA 2027 Security Scan"
+            echo
+            echo "Commit \`${GITHUB_SHA:0:7}\` on \`${GITHUB_REF_NAME}\`"
+            echo
+            echo '```'
+            cat scan-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail on blocking findings
+        if: steps.scan.outputs.exit_code != '0'
+        run: |
+          echo "::error title=Blocking security findings::Critical or High findings detected. See the job summary and docs/security/ for the remediation plan."
+          exit 1
+
+  secret-scan:
+    name: Secret detection (full history)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >-
+            detect
+            --source=.
+            --redact
+            --verbose
+            --no-banner
+            --exit-code=1
+
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: always
