@@ -175,6 +175,7 @@ ENV/
 *.egg-info/
 .Python
 pip-log.txt
+.coverage
 
 # ------------------------------------------------------------------------------
 # 6. LOGS, TEMPORARY AND SCRATCH FILES
