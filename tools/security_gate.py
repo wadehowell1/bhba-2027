@@ -54,12 +54,89 @@ SQL_CONCAT = re.compile(
     r'|f["\'][^"\']*(?:SELECT|INSERT|UPDATE|DELETE))')
 
 DANGEROUS_SINKS = [
-    (r'\.innerHTML\s*=(?!\s*["\'`]\s*["\'`])', "innerHTML assignment — escape or use textContent"),
     (r'document\.write\s*\(', "document.write — XSS sink"),
     (r'\beval\s*\(', "eval()"),
     (r'dangerouslySetInnerHTML', "dangerouslySetInnerHTML"),
     (r'new\s+Function\s*\(', "new Function()"),
 ]
+
+# Helpers that are understood to neutralise a value before it reaches HTML.
+# Extend this list if the project uses a differently named escaper.
+ESCAPERS = r'esc|escape|escapeHtml|sanitize|encodeURIComponent|DOMPurify\.sanitize'
+
+# Interpolations that cannot carry markup: numbers, lengths, comparisons,
+# and values already run through a known escaper or a chip/label helper.
+SAFE_INTERP = re.compile(
+    r'^\s*(?:'
+    r'(?:' + ESCAPERS + r')\s*\('
+    r'|[A-Za-z_$][\w.$\[\]]*\.length\b'
+    r'|[-+]?[\d.]+'
+    r'|(?:String|Number|Math\.\w+|pct|fmtNum|chip|CHIP)\s*[\(\[]'
+    r')')
+
+
+def _statement_after(txt: str, start: int, limit: int = 4000) -> str:
+    """Text of the assignment that begins at `start`, and no further.
+
+    Walks forward tracking template-literal and quote state so the window ends
+    at the statement's own terminator. Without this, one innerHTML inherits the
+    interpolations of every later one and every line looks unsafe.
+    """
+    i, n = start, min(len(txt), start + limit)
+    depth = 0          # nested ${ } inside template literals
+    tmpl = False       # inside a backtick template
+    quote = ""         # inside a '...' or "..."
+    while i < n:
+        c = txt[i]
+        if c == "\\":
+            i += 2
+            continue
+        if quote:
+            if c == quote:
+                quote = ""
+        elif tmpl:
+            if c == "`" and depth == 0:
+                tmpl = False
+            elif c == "$" and i + 1 < n and txt[i + 1] == "{":
+                depth += 1
+                i += 2
+                continue
+            elif c == "}" and depth > 0:
+                depth -= 1
+        else:
+            if c in "'\"":
+                quote = c
+            elif c == "`":
+                tmpl = True
+            elif c == ";" or c == "\n":
+                return txt[start:i]
+        i += 1
+    return txt[start:n]
+
+
+def _unescaped_interps(expr: str) -> list[str]:
+    """Return ${...} interpolations in a template that look unescaped.
+
+    Conservative on purpose: anything whose first token is a known escaper, a
+    numeric, or a .length read is treated as safe. A ternary is judged by its
+    branches, since `cond ? esc(a) : ""` is fine.
+    """
+    out = []
+    for m in re.finditer(r'\$\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}', expr):
+        inner = m.group(1)
+        if SAFE_INTERP.match(inner):
+            continue
+        # Ternary: safe when every branch that yields a value is safe.
+        if "?" in inner:
+            branches = re.split(r'[?:]', inner)[1:]
+            if branches and all(
+                    not b.strip() or SAFE_INTERP.match(b) or re.match(r'^\s*["\'`]', b.strip())
+                    for b in branches):
+                continue
+        if re.search(ESCAPERS, inner):
+            continue
+        out.append(inner.strip()[:60])
+    return out
 
 CLIENT_AUTH_ONLY = [
     (r'(?i)(?:localStorage|sessionStorage)\.(?:get|set)Item\(\s*["\'][^"\']*(?:auth|token|session|user|login|role|admin)',
@@ -186,6 +263,27 @@ def check_xss(root: str) -> list[dict]:
                             "detail": label,
                             "fix": "Escape before insertion, or use textContent. "
                                    "Assume every stored string is hostile."})
+
+        # innerHTML is only a finding when it interpolates something unescaped.
+        # Flagging every assignment trains people to ignore the scanner.
+        for m in re.finditer(r'\.innerHTML\s*=', txt):
+            expr = _statement_after(txt, m.end())
+            bad = _unescaped_interps(expr)
+            # `"<div>" + userInput + "</div>"` never passes through a template,
+            # so the interpolation scan alone would miss it.
+            for cm in re.finditer(r'\+\s*([A-Za-z_$][\w.$\[\]]*)\s*(?:\+|$)', expr):
+                tok = cm.group(1)
+                if not re.match(r'^(?:' + ESCAPERS + r')$', tok) and \
+                   not tok.endswith(".length") and tok not in bad:
+                    bad.append(tok[:60])
+            if bad:
+                out.append({"severity": "HIGH", "check": "Escape user content",
+                            "file": rel(root, path),
+                            "line": txt[:m.start()].count("\n") + 1,
+                            "detail": "innerHTML interpolates unescaped value(s): "
+                                      + ", ".join(bad[:3]),
+                            "fix": "Wrap each in an escaping helper, or build the "
+                                   "node and set textContent."})
     return out
 
 

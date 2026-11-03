@@ -64,11 +64,24 @@ No Content-Security-Policy, X-Frame-Options, Referrer-Policy or HSTS anywhere.
 has to allow them explicitly or the pages break. Do not paste a strict CSP in without
 testing — a broken portal is its own kind of outage.
 
-### 4. `innerHTML` assignments — HIGH, lower priority
+### 4. `innerHTML` interpolation — HIGH, needs an audit pass
 
-Flagged across the portal and the hedge-fund UI. Most render values the user set
-themselves, which limits the risk, but any path that renders *another* user's input
-is a stored-XSS vector. Worth an audit pass; not a launch blocker on its own.
+49 sites across the portal interpolate values into `innerHTML` without an escaping
+helper. I sampled several: most carry configuration-derived values (fee labels,
+certificate options, filter names), which limits the risk.
+
+The concern is the subset that renders text a *user* typed — player names, team
+names, notes, registration fields. Any one of those is a stored-XSS vector: a name
+entered once renders as markup for every admin who later opens that list.
+
+**Fix:** add one `esc()` helper and wrap every interpolation of user-entered text.
+Not a launch blocker on its own, but it should be worked through before the portal
+takes more public input.
+
+*Note on the scanner:* an earlier version flagged every `innerHTML` assignment and
+produced 140 findings, most of them noise. It now parses the statement and only
+reports interpolations that are genuinely unescaped. A gate nobody trusts is a gate
+nobody runs.
 
 ---
 
