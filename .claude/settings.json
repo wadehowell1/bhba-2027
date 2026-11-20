@@ -1,19 +1,30 @@
 {
   "enabledPlugins": {
-    "watch@claude-video": true,
-    "claude-code-self-improving-skills@self-improving-skills": true
+    "claude-mem@thedotmack": true,
+    "headroom@headroom-marketplace": true,
+    "claude-code-setup@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
-    "claude-video": {
+    "thedotmack": {
       "source": {
         "source": "github",
-        "repo": "bradautomates/claude-video"
+        "repo": "thedotmack/claude-mem"
       }
     },
-    "self-improving-skills": {
+    "headroom-marketplace": {
       "source": {
         "source": "github",
-        "repo": "UniM0cha/self-improving-skills"
+        "repo": "headroomlabs-ai/headroom"
+      }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official",
+        "sparsePaths": [
+          ".claude-plugin",
+          "plugins/claude-code-setup"
+        ]
       }
     }
   }
