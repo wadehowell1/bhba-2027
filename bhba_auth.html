@@ -541,15 +541,6 @@ body{
   content:'';flex:1;height:1px;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
 }
-.demo-hint{
-  margin-top:20px;
-  padding:10px 16px;border-radius:10px;
-  background:rgba(245,166,35,0.06);
-  border:1px solid rgba(245,166,35,0.15);
-  font-size:11px;color:var(--lgrey);
-  display:inline-block;
-}
-.demo-hint em{color:var(--gold);font-style:normal;font-weight:600}
 
 /* ─────────────────────────────────────────
    SEARCH INPUT (members)
@@ -671,9 +662,6 @@ body{
       📋 &nbsp;Create Account
     </button>
 
-    <div class="demo-hint">
-      Demo access: <em>admin@bhba.jm</em> / <em>Admin1234!</em>
-    </div>
   </div>
 </div>
 
@@ -851,17 +839,40 @@ function saveRequests(r){localStorage.setItem('bhba_role_requests',JSON.stringif
 function getSession(){return JSON.parse(localStorage.getItem('bhba_session')||'null');}
 function saveSession(s){localStorage.setItem('bhba_session',JSON.stringify(s));}
 
-// Seed admin account on first load
+// Seeded administrator account - removed (SEC-02b)
+//
+// This file used to seed admin@bhba.jm with a password literal held
+// in its own source, and print that credential on the sign-in screen.
+// The credential is burned: it is in this repository's git history and
+// was shown to every visitor, so replacing the literal would only
+// publish a different password.
+//
+// Nothing is seeded now. An administrator is created through the normal
+// Create Account flow, choosing a password that never appears in source.
+//
+// The block below also removes the compromised account from browsers
+// that seeded it on an earlier visit. Without that, deleting the literal
+// would change nothing for anyone who had already loaded the page: the
+// account lives in each visitor's own localStorage, not on a server.
+//
+// The seeded account is identified by its system-approved role marker.
+// No other code path writes approvedBy:'system' - registration writes
+// 'self' and an approval writes the approver's id - so a password the
+// administrator has since changed is still purged, which is correct:
+// the account is burned by its history whatever its current password.
 (function(){
-  const u=getUsers();
-  if(!u['admin@bhba.jm']){
-    u['admin@bhba.jm']={
-      name:'BHBA Administrator',email:'admin@bhba.jm',phone:'',org:'BHBA',
-      passHash:simpleHash('Admin1234!'),
-      roles:[{role:'bhba_president',status:'approved',team:'',approvedBy:'system',approvedAt:new Date().toISOString()}],
-      createdAt:new Date().toISOString()
-    };
-    saveUsers(u);
+  const SEEDED_EMAIL='admin@bhba.jm';
+  const users=getUsers();
+  const account=users[SEEDED_EMAIL];
+  if(!account)return;
+  const wasSystemSeeded=Array.isArray(account.roles)
+    &&account.roles.some(r=>r&&r.approvedBy==='system');
+  if(!wasSystemSeeded)return;
+  delete users[SEEDED_EMAIL];
+  saveUsers(users);
+  const session=getSession();
+  if(session&&session.userId===SEEDED_EMAIL){
+    localStorage.removeItem('bhba_session');
   }
 })();
 
